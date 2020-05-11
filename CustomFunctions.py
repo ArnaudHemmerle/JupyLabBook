@@ -11,7 +11,7 @@ import lmfit as L
 from scipy.special import erf
 
 
-__version__ = '0.1'
+__version__ = '0.2'
 
 """
 Here are defined the custom functions used for analysis of data in the JupyLabBook.
@@ -460,7 +460,7 @@ def Extract_channel_Qc(nxs_filename='SIRIUS_test.nxs', working_dir='', recording
             sys.stdout.flush()
             
         # Create Graph
-        # The graph has to be splitted into for good rendering in PDF
+        # The graph has to be splitted into two parts for good rendering in PDF
         fig=plt.figure(1, figsize=(12,5))
         fig.subplots_adjust(hspace=0.4, wspace=0.4, bottom=0.16)
         ax1=fig.add_subplot(121)
@@ -995,7 +995,8 @@ def Plot_isotherm(nxs_filename='SIRIUS_test.nxs', recording_dir='', show_data_st
 def Plot_1D(nxs_filename='SIRIUS_test.nxs', recording_dir='',
             xLabel='zs', yLabel='alphax'):
     """
-    Simple 1D plot. When called by FrontendFunctions, will plot the current selection in the interactive 1D plot.
+    Simple 1D plot. When called by FrontendFunctions by clicking on Treat Scan, 
+    it will plot the current selection in the interactive 1D plot.
     It is necessary to call this function to have the plot in the pdf.
     """
     nexus = PN.PyNexusFile(recording_dir+nxs_filename, fast=True)
@@ -1008,6 +1009,6 @@ def Plot_1D(nxs_filename='SIRIUS_test.nxs', recording_dir='',
     fig=plt.figure()
     ax=fig.add_subplot(111)
     ax.plot(data0D[xArg], data0D[yArg], 'o-')
-    ax.set_xlabel(stamps0D[xArg][1], fontsize=16)
-    ax.set_ylabel(stamps0D[yArg][1], fontsize=16)
+    ax.set_xlabel(xLabel, fontsize=16)
+    ax.set_ylabel(yLabel, fontsize=16)
     plt.show()

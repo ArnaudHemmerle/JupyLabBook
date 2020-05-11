@@ -9,8 +9,9 @@ from IPython.display import clear_output, Javascript, display, HTML
 import time
 import subprocess
 import sys
+import nbformat as nbf
 
-__version__ = '0.1'
+__version__ = '0.2'
 
 """
 -Here are defined all the functions relevant to the front end of JupyLabBook,
@@ -33,14 +34,14 @@ def Define_scan_identifiers(scan, expt):
     Create a series of identifiers for the current scan.
     """
     # For example:
-    # scan.nxs = 'SIRIUS_Fluo_2017_12_11_08042.nxs'
-    # scan.path = '/Users/arnaudhemmerle/recording/SIRIUS_Fluo_2017_12_11_08042.nxs'
-    # scan.id = '2017_12_11_08042'
+    # scan.nxs = 'SIRIUS_2017_12_11_08042.nxs'
+    # scan.path = '/Users/arnaudhemmerle/recording/SIRIUS_2017_12_11_08042.nxs'
+    # scan.id = 'SIRIUS_2017_12_11_08042'
     # scan.number = 8042
     
     scan.path = expt.recording_dir+scan.nxs
+    scan.id = scan.nxs[:-4]
     split_name = scan.nxs.split('.')[0].split('_')
-    scan.id = '_'.join(split_name[-4:])
     scan.number = int(scan.nxs.split('.')[0].split('_')[-1])
 
 
@@ -51,15 +52,9 @@ def Find_command_in_logs(scan, expt):
     command_found = False
     scan.command = 'No command found'
     
-    list_all_logs = expt.list_logs_langmuir_files + expt.list_logs_files
 
-    for log_file in list_all_logs:
-        if 'langmuir' in log_file:
-            path = expt.logs_langmuir_dir+log_file
-        else:
-            path = expt.logs_dir+log_file
-        
-        with open(path) as f:
+    for log_file in expt.list_logs_files:
+        with open(expt.logs_dir+log_file) as f:
             for line in f:
                 if "#" not in line: temp = line
                 if scan.id in line:
@@ -85,18 +80,9 @@ def Choose_action(expt):
     if expt.list_nxs_files == []:
         print(PN._RED+'There is no nexus file in the recording folder.'+PN._RESET)
         print(PN._RED+'Recording folder: %s'%expt.recording_dir+PN._RESET)
-        expt.list_nxs_files = ['SIRIUS_NoFile_00_00_00.nxs']
+        expt.list_nxs_files = ['SIRIUS_NoFileFound_00_00_00.nxs']
     
     expt.list_logs_files = [file for file in sorted(os.listdir(expt.logs_dir)) if 'log' in file][::-1]
-    
-    # Check if there is a folder for the langmuir logs
-    # If yes, create the list of log files
-    try:
-        expt.list_logs_langmuir_files = [file for file in sorted(os.listdir(expt.logs_langmuir_dir))
-                                   if 'langmuir' in file and 'log' in file ][::-1]
-    except:
-        expt.list_logs_langmuir_files = []
-
     
     def selection_scan(nxs_file = expt.list_nxs_files):
         """
@@ -124,7 +110,7 @@ def Choose_action(expt):
         Create_cell(code='FF.Choose_treatment(scan, expt)',
                     position ='below', celltype='code', is_print=False)
 
-        Create_cell(code='## '+scan.id+': '+scan.command,
+        Create_cell(code='### '+scan.id+': '+scan.command,
                     position ='below', celltype='markdown', is_print=True)
         
        
@@ -176,39 +162,71 @@ def Choose_action(expt):
         
         
     def on_button_form_clicked(b):
+        """
+        Create a form.
+        """
         clear_output(wait=False)
         Create_cell(code='FF.Create_form()',position ='below', celltype='code', is_print=False)
         Create_cell(code='scan = FF.Choose_action(expt)', position ='at_bottom', celltype='code', is_print=False)        
      
-    
+            
     def on_button_export_clicked(b):
-        # Save the current state of the notebook (including the widgets)
-        # Export the notebook to pdf using a command line through the OS
-        print('Export in progress...')
-        display(HTML('<script>Jupyter.menubar.actions._actions["widgets:save-with-widgets"].handler()</script>') )
-        t0 = time.time()
-        rc = 1
-        while rc>0:
-            if (time.time()-t0) > 100:
-                export_fail = True
-                break
-            else:
-                time.sleep(3)
-                command = 'jupyter nbconvert '
-                command+= expt.notebook_name
-                command+= ' --to pdf '
-                command+= ' --TagRemovePreprocessor.remove_cell_tags=\"[\'notPrint\']\" ' # Remove the widgets from the PDF
-                command+= ' --no-input ' # Remove the code cells
-                command+= '--template latex_template.tplx' # Custom template
-                rc = subprocess.call(command,shell=True)
-                if rc==0: export_fail = False
- 
-        if export_fail:
-            print("There was something wrong with the export to pdf. Please try again.")
-        else:
-            print('Notebook exported to %s.pdf'%expt.notebook_name.split('.')[0])
-
+        """
+        Export the notebook to PDF.
+        """
         
+        print('Export in progress...')
+        
+        export_done = Export_nb_to_pdf(expt.notebook_name)
+        
+        if export_done:
+            print('Notebook exported to %s.pdf'%expt.notebook_name.split('.')[0])
+        else:
+            print("There was something wrong with the export to pdf. Please try again.")
+            
+
+            
+    def on_button_HR_export_clicked(b):
+        """
+        Export the notebook to PDF in high-resolution.
+        """
+
+        print('Export in progress (it may take a long time)...')
+        
+        # Do first an export to low resolution PDF.
+        export_LR_done = Export_nb_to_pdf(expt.notebook_name)
+                   
+        # Dupplicate the notebook with an extra cell at the beginning setting the 
+        # images to pdf (High Resolution)
+        nb = nbf.read(expt.notebook_name, as_version=4)
+        code='is_HR = True'
+        new_cell = nbf.v4.new_code_cell(code)
+        nb['cells'].insert(0, new_cell)              
+        nbf.write(nb, expt.notebook_name[:-6]+'_HR.ipynb')
+        
+        # Execute all the cells in the HR notebook
+        command = 'jupyter nbconvert --to notebook --inplace --execute --allow-errors --ExecutePreprocessor.timeout=-1 '
+        command+= expt.notebook_name[:-6]+'_HR.ipynb'
+        rc = subprocess.call(command,shell=True)
+        if rc>1:
+            export_ipynb_done = False
+        else:
+            export_ipynb_done = True
+        
+        # Export the HR ipynb to PDF
+        export_HR_done = Export_nb_to_pdf(expt.notebook_name[:-6]+'_HR.ipynb')
+        
+        # Remove the HR ipynb
+        os.remove(expt.notebook_name[:-6]+'_HR.ipynb')
+        
+        if export_LR_done:
+            print('Notebook exported in low resolution to %s.pdf'%expt.notebook_name.split('.')[0])
+            
+        if (export_LR_done and export_ipynb_done and export_HR_done) :
+            print('Notebook exported in high resolution to %s_HR.pdf'%expt.notebook_name.split('.')[0])
+        else:
+            print("There was something wrong with the export to pdf. Please try again.")
+            
     
     # Display the widgets
    
@@ -235,11 +253,15 @@ def Choose_action(expt):
     # Click to export to pdf
     button_export = widgets.Button(description="Export to PDF")
     button_export.on_click(on_button_export_clicked)
+    
+    # Click to export to pdf in high resolution
+    button_HR_export = widgets.Button(description="Export to PDF in HR")
+    button_HR_export.on_click(on_button_HR_export_clicked)
 
     buttons0 = widgets.HBox([button_form, button_calibthetaz])
     display(buttons0)
     
-    buttons1 = widgets.HBox([button_export])
+    buttons1 = widgets.HBox([button_export, button_HR_export])
     display(buttons1)
     
     # Select a single scan and print the corresponding command
@@ -258,16 +280,6 @@ def Choose_list_scans(expt):
     Allow to choose multiple scans obtained in the same conditions.
     Take an object from the class Experiment.
     """
-    #expt.list_nxs_files = [file for file in sorted(os.listdir(expt.recording_dir)) if 'nxs' in file][::-1]
-    #expt.list_logs_files = [file for file in sorted(os.listdir(expt.logs_dir)) if 'log' in file][::-1]
-    
-    # Check if there is a folder for the langmuir logs
-    # If yes, create the list of log files
-    #try:
-    #    expt.list_logs_langmuir_files = [file for file in sorted(os.listdir(expt.logs_langmuir_dir))
-    #                               if 'langmuir' in file and 'log' in file ][::-1]
-    #except:
-    #    expt.list_logs_langmuir_files = []
 
        
     scan_list = widgets.SelectMultiple(
@@ -302,7 +314,7 @@ def Choose_list_scans(expt):
                         'show_data_stamps=False, show_saved_data=False, plot_true_GIXD=False)',
                         position='below', celltype='code', is_print = True)
             
-            Create_cell(code='## '+scan.id+': '+scan.command,
+            Create_cell(code='### '+scan.id+': '+scan.command,
                     position ='below', celltype='markdown', is_print=True)
             
             
@@ -328,7 +340,7 @@ def Choose_list_scans(expt):
                         'show_data_stamps=False, show_saved_data=False, plot_true_GIXD=True)',
                         position='below', celltype='code', is_print = True)
             
-            Create_cell(code='## '+scan.id+': '+scan.command,
+            Create_cell(code='### '+scan.id+': '+scan.command,
                     position ='below', celltype='markdown', is_print=True)
             
             
@@ -348,7 +360,7 @@ def Choose_list_scans(expt):
                         'show_data_stamps=False)',
                         position='below', celltype='code', is_print = True)
             
-            Create_cell(code='## '+scan.id+': '+scan.command,
+            Create_cell(code='### '+scan.id+': '+scan.command,
                     position ='below', celltype='markdown', is_print=True)
         
         
@@ -373,6 +385,34 @@ def Choose_list_scans(expt):
     buttons0 = widgets.HBox([button_GIXD, button_true_GIXD, button_plot_isotherm, button_next])
     display(buttons0)
    
+
+def Export_nb_to_pdf(nb_name):
+    """
+    Save the current state of the notebook (including the widgets).
+    Export the notebook to pdf using a command line through the OS.
+    Return a boolean which is True if the export suceeded without error/warning.
+    """
+    display(HTML('<script>Jupyter.menubar.actions._actions["widgets:save-with-widgets"].handler()</script>') )
+    t0 = time.time()
+    rc = 1
+    while rc>0:
+        if (time.time()-t0) > 100:
+            # Timeout before PDF export is considered as failed
+            export_done = False
+            break
+        else:
+            time.sleep(3)
+            command = 'jupyter nbconvert '
+            command+= nb_name
+            command+= ' --to pdf '
+            command+= ' --TagRemovePreprocessor.remove_cell_tags=\"[\'notPrint\']\" ' # Remove the widgets from the PDF
+            command+= ' --no-input ' # Remove the code cells
+            command+= '--template latex_template.tplx' # Custom template
+            rc = subprocess.call(command,shell=True)
+            if rc==0: export_done = True
+                
+    return export_done
+
 
 
 def Create_cell(code='', position='below', celltype='markdown', is_print = False):
@@ -428,8 +468,8 @@ def Set_interactive_1D(scan):
         fig=plt.figure()
         ax=fig.add_subplot(111)
         ax.plot(data0D[xArg], data0D[yArg], 'o-')
-        ax.set_xlabel(stamps0D[xArg][1], fontsize=16)
-        ax.set_ylabel(stamps0D[yArg][1], fontsize=16)
+        ax.set_xlabel(xLabel, fontsize=16)
+        ax.set_ylabel(yLabel, fontsize=16)
         plt.show()
 
         scan.xLabel = xLabel
@@ -452,7 +492,7 @@ def Choose_treatment(scan, expt):
     # DEFINE HERE A FUNCTION TO CREATE A CELL CALLING YOUR CUSTOM FUNCTION
     def on_button_1D_clicked(b):
         Create_cell(code='CF.Plot_1D(nxs_filename=\''+scan.nxs+'\', recording_dir=expt.recording_dir,'+
-                    'xLabel=scan.xLabel, yLabel=scan.yLabel)',
+                    'xLabel=\''+scan.xLabel+'\', yLabel=\''+scan.yLabel+'\')',
                     position='below', celltype='code', is_print = True)
 
     def on_button_GIXD_clicked(b):
@@ -482,12 +522,12 @@ def Choose_treatment(scan, expt):
 
     def on_button_fit_erf_clicked(b):
         Create_cell(code='CF.GaussianRepartition_fit(nxs_filename=\''+scan.nxs+'\', recording_dir = expt.recording_dir,'+
-                        'xLabel=scan.xLabel, yLabel=scan.yLabel)',
+                        'xLabel=\''+scan.xLabel+'\', yLabel=\''+scan.yLabel+'\')',
                     position='below', celltype='code', is_print = True)  
         
     def on_button_fit_gau_clicked(b):
         Create_cell(code='CF.Gaussian_fit(nxs_filename=\''+scan.nxs+'\', recording_dir = expt.recording_dir,'+
-                        'xLabel=scan.xLabel, yLabel=scan.yLabel)',
+                        'xLabel=\''+scan.xLabel+'\', yLabel=\''+scan.yLabel+'\')',
                     position='below', celltype='code', is_print = True)   
         
     def on_button_vineyard_clicked(b):
