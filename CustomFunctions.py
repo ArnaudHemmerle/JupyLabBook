@@ -436,7 +436,7 @@ def Extract_channel_Qc(nxs_filename='SIRIUS_test.nxs', working_dir='', recording
         mat=[]
         
         for i in range(istart, istop, 1):
-            sys.stdout.write('Treat image %d/%d                                                                 \r'%(i, nbpts))
+            sys.stdout.write('Treat image %d/%d                                                                 \r'%(i+1, nbpts))
             sys.stdout.flush()
             image=images[0][i]
             # dead pixels
@@ -669,7 +669,7 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
         mat=[]
 
         for i in range(istart, istop, 1):
-            sys.stdout.write('Treat image %d/%d                                                                 \r'%(i, nbpts))
+            sys.stdout.write('Treat image %d/%d                                                                 \r'%(i+1, nbpts))
             sys.stdout.flush()
             image=images[0][i]
             # dead pixels
