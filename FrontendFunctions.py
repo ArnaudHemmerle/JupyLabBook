@@ -397,7 +397,7 @@ def Choose_list_scans(expt):
             
             Create_cell(code='### '+scan.id+': '+scan.command,
                     position ='below', celltype='markdown', is_print=True)
-        
+
         
     def on_button_next_clicked(b):
         clear_output(wait=False)
