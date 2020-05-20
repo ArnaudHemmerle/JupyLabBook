@@ -292,18 +292,18 @@ def Choose_action(expt):
     button_HR_export = widgets.Button(description="Export to PDF in HR")
     button_HR_export.on_click(on_button_HR_export_clicked)
 
-    buttons0 = widgets.HBox([button_form, button_calibthetaz])
+    buttons0 = widgets.HBox([button_treat, button_refresh])
     display(buttons0)
-    
-    buttons1 = widgets.HBox([button_export, button_HR_export])
-    display(buttons1)
-    
+      
     # Select a single scan and print the corresponding command
     w_print_scan = widgets.interact(selection_scan)
     w_print_scan.widget.children[0].description = 'Next scan:'
     w_print_scan.widget.children[0].layout = {'width': '400px'}
     
-    buttons2 = widgets.HBox([button_treat, button_list, button_refresh])
+    buttons1 = widgets.HBox([button_form, button_calibthetaz])
+    display(buttons1)
+
+    buttons2 = widgets.HBox([button_list,button_export, button_HR_export])
     display(buttons2)
     
     return scan

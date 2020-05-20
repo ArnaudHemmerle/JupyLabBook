@@ -11,7 +11,7 @@ import lmfit as L
 from scipy.special import erf
 
 
-__version__ = '0.2'
+__version__ = '0.3'
 
 """
 Here are defined the custom functions used for analysis of data in the JupyLabBook.
