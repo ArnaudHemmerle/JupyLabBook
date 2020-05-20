@@ -10,8 +10,9 @@ import time
 import subprocess
 import sys
 import nbformat as nbf
+import CustomFunctions as CF
 
-__version__ = '0.2'
+__version__ = '0.3'
 
 """
 -Here are defined all the functions relevant to the front end of JupyLabBook,
@@ -27,6 +28,38 @@ class Scan:
     def __init__(self):
         pass
 
+
+def Print_version():
+    print("Versions of modules used:")
+    print("CustomFunctions: %s"%CF.__version__)
+    print("FrontendFunctions: %s"%__version__)
+    print("PyNexus: %s"%PN.__version__)
+    print("Check that you are using the last versions of the modules and read the manual on: \n%s"%"https://github.com/ArnaudHemmerle/JupyLabBook"+'\n')
+
+def Check_files(expt):
+
+    Print_version()
+    
+    if not os.path.exists(expt.working_dir):
+        print(PN._RED+"The following folder does not exist and should be created:"+PN._RESET)
+        print(expt.working_dir)
+        print("Data analysis will be saved in this folder.")
+        print("")
+    if not os.path.exists(expt.recording_dir):
+        print(PN._RED+"The following folder does not exist:"+PN._RESET)
+        print(expt.recording_dir)
+        print("This folder should contain the nexus files.")
+        print("")
+    if not os.path.exists(expt.notebook_name):
+        print(PN._RED+"The following file does not exist:"+PN._RESET)
+        print(expt.notebook_name)
+        print("Check that you have assigned the correct notebook name to expt.notebook_name")
+        print("")
+    if not os.path.exists('latex_template.tplx'):
+        print(PN._RED+"The following file does not exist:"+PN._RESET)
+        print('latex_template.tplx')
+        print("This file contains the template for generating PDF and should be placed in the same folder as the notebook.")
+        print("") 
 
 
 def Define_scan_identifiers(scan, expt):
