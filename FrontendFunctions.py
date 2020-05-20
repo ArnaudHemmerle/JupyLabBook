@@ -326,6 +326,7 @@ def Choose_list_scans(expt):
     
     display(scan_list)
     
+    
     def on_button_GIXD_clicked(b):     
    
         for nxs_file in scan_list.value:
@@ -404,10 +405,10 @@ def Choose_list_scans(expt):
                     position ='at_bottom', celltype='code', is_print=False)
         
     
-    button_GIXD = widgets.Button(description="GIXD")
+    button_GIXD = widgets.Button(description="Plot GIXD")
     button_GIXD.on_click(on_button_GIXD_clicked)
     
-    button_true_GIXD = widgets.Button(description="True GIXD")
+    button_true_GIXD = widgets.Button(description="Plot True GIXD")
     button_true_GIXD.on_click(on_button_true_GIXD_clicked)
     
     button_plot_isotherm = widgets.Button(description="Plot isotherm")
@@ -518,6 +519,7 @@ def Set_interactive_1D(scan):
         scan.yLabel = yLabel
 
     widgets.interact(plot_interactive_1D, xLabel=sensor_list, yLabel=sensor_list)
+    
 
 
 def Choose_treatment(scan, expt):
@@ -527,8 +529,6 @@ def Choose_treatment(scan, expt):
     2) Display the buttons for choosing the next action.
     """
     
-    # Set up an interactive 1D plot
-    Set_interactive_1D(scan)
     
     # Define the function called when clicking the button
     # DEFINE HERE A FUNCTION TO CREATE A CELL CALLING YOUR CUSTOM FUNCTION
@@ -601,10 +601,10 @@ def Choose_treatment(scan, expt):
     button_1D = widgets.Button(description="Add plot to report")
     button_1D.on_click(on_button_1D_clicked)
     
-    button_GIXD = widgets.Button(description="GIXD")
+    button_GIXD = widgets.Button(description="Plot GIXD")
     button_GIXD.on_click(on_button_GIXD_clicked)
     
-    button_true_GIXD = widgets.Button(description="True GIXD")
+    button_true_GIXD = widgets.Button(description="Plot True GIXD")
     button_true_GIXD.on_click(on_button_true_GIXD_clicked)
     
     button_plot_isotherm = widgets.Button(description="Plot isotherm")
@@ -613,13 +613,18 @@ def Choose_treatment(scan, expt):
     button_next = widgets.Button(description="Next action")
     button_next.on_click(on_button_next_clicked)
    
-    buttons0 = widgets.HBox([button_fit_gau, button_fit_erf, button_vineyard])
+    buttons0 = widgets.HBox([button_fit_gau, button_fit_erf, button_1D])
     display(buttons0)
+    
+        
+    # Set up an interactive 1D plot
+    Set_interactive_1D(scan)
+    
     
     buttons1 = widgets.HBox([button_GIXD, button_true_GIXD, button_plot_isotherm])
     display(buttons1)
 
-    buttons2 = widgets.HBox([button_1D, button_next])
+    buttons2 = widgets.HBox([button_vineyard, button_next])
     display(buttons2)
 
 def Create_form():
