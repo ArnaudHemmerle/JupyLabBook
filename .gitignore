@@ -3,3 +3,5 @@
 logs/
 recording/
 working/
+.ipynb_checkpoints/
+__pycache__/

@@ -107,6 +107,7 @@ def Choose_action(expt):
         Generate and execute cells corresponding to the chosen scan.
         """
         clear_output(wait=False)
+        
         Create_cell(code='FF.Choose_treatment(scan, expt)',
                     position ='below', celltype='code', is_print=False)
 
@@ -413,7 +414,15 @@ def Export_nb_to_pdf(nb_name):
                 
     return export_done
 
-
+def Delete_current_cell():
+    """Delete the cell which called this function in the IPython Notebook."""
+    
+    display(Javascript(
+        """
+        var index = IPython.notebook.get_selected_cells_indices();
+        IPython.notebook.delete_cell(index);
+        """
+    ))
 
 def Create_cell(code='', position='below', celltype='markdown', is_print = False):
     """Create a cell in the IPython Notebook.
@@ -516,7 +525,10 @@ def Choose_treatment(scan, expt):
                     position='below', celltype='code', is_print = True)
 
     def on_button_next_clicked(b):
-        clear_output(wait=False)
+        #clear_output(wait=False)
+        
+        Delete_current_cell()
+        
         Create_cell(code='scan = FF.Choose_action(expt)',
                     position ='at_bottom', celltype='code', is_print=False)
 
