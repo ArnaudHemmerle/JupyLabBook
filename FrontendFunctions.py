@@ -12,7 +12,7 @@ import sys
 import nbformat as nbf
 import CustomFunctions as CF
 
-__version__ = '0.3'
+__version__ = '0.4'
 
 """
 -Here are defined all the functions relevant to the front end of JupyLabBook,
@@ -447,7 +447,7 @@ def Choose_treatment(scan, expt):
     def on_button_pilatus_clicked(b):
         Create_cell(code='CF.Extract_pilatus_sum(nxs_filename=\''+scan.nxs+'\','+ 
                    'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
-                   'logz=True, show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+')',
+                   'logz=True, show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+', cmap=expt.cmap)',
                     position='below', celltype='code', is_print = True)
         
     def on_button_GIXS_angles_clicked(b):
@@ -455,7 +455,8 @@ def Choose_treatment(scan, expt):
                    'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
                    'logz=True, wavelength=expt.wavelength, thetai=expt.thetai, distance=expt.distance, '+
                    'pixel_PONI_x=expt.pixel_PONI_x, pixel_PONI_y=expt.pixel_PONI_y, '+
-                   'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+', plot_twotheta_alphaf=True)',
+                   'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+' ,cmap=expt.cmap, '+
+                    'plot_twotheta_alphaf=True)',
                     position='below', celltype='code', is_print = True)
                
     def on_button_GIXS_qxy_qz_clicked(b):
@@ -463,7 +464,8 @@ def Choose_treatment(scan, expt):
                    'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
                    'logz=True, wavelength=expt.wavelength, thetai=expt.thetai, distance=expt.distance, '+
                    'pixel_PONI_x=expt.pixel_PONI_x, pixel_PONI_y=expt.pixel_PONI_y,  '+
-                   'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+', plot_qxy_qz=True)',
+                   'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+' ,cmap=expt.cmap, '+
+                   'plot_qxy_qz=True)',
                     position='below', celltype='code', is_print = True)
         
     def on_button_GIXS_qxy_q_clicked(b):
@@ -471,8 +473,16 @@ def Choose_treatment(scan, expt):
                    'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
                    'logz=True, wavelength=expt.wavelength, thetai=expt.thetai, distance=expt.distance, '+
                    'pixel_PONI_x=expt.pixel_PONI_x, pixel_PONI_y=expt.pixel_PONI_y, '+
-                   'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+', plot_qxy_q=True)',
+                   'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+' ,cmap=expt.cmap, '+
+                   'plot_qxy_q=True)',
                     position='below', celltype='code', is_print = True)
+
+    def on_button_fluo_clicked(b):
+        Create_cell(code='CF.Extract_fluo_sum(nxs_filename=\''+scan.nxs+'\','+ 
+                   'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
+                   'logz=True, list_elems=expt.list_elems, first_channel=expt.first_channel, last_channel=expt.last_channel, '+
+                   'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+')',
+                    position='below', celltype='code', is_print = True)        
         
     def on_button_isotherm_clicked(b):
         Create_cell(code='CF.Plot_isotherm(nxs_filename=\''+scan.nxs+'\', recording_dir=expt.recording_dir, '+
@@ -528,6 +538,9 @@ def Choose_treatment(scan, expt):
     button_true_GIXD = widgets.Button(description="Plot true GIXD")
     button_true_GIXD.on_click(on_button_true_GIXD_clicked)
     
+    button_fluo = widgets.Button(description="Plot fluo")
+    button_fluo.on_click(on_button_fluo_clicked)
+    
     button_isotherm = widgets.Button(description="Plot isotherm")
     button_isotherm.on_click(on_button_isotherm_clicked)
     
@@ -565,7 +578,7 @@ def Choose_treatment(scan, expt):
     display(widgets.HBox([w_stamps, w_verbose]))
     
     # Buttons for specific treatment
-    buttons1 = widgets.HBox([button_GIXD, button_true_GIXD, button_isotherm])
+    buttons1 = widgets.HBox([button_GIXD, button_true_GIXD, button_fluo, button_isotherm])
     display(buttons1)
     
     buttons2 = widgets.HBox([button_pilatus, button_GIXS_angles, button_GIXS_qxy_qz, button_GIXS_qxy_q])
@@ -660,11 +673,34 @@ def Choose_list_scans(expt):
             
             Create_cell(code='CF.Extract_pilatus_sum(nxs_filename=\''+scan.nxs+'\','+ 
                        'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
-                       'logz=True, show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+')',
+                       'logz=True, show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+', cmap=expt.cmap)',
                         position='below', celltype='code', is_print = True)
             
             Create_cell(code='### '+scan.id+': '+scan.command,
                     position ='below', celltype='markdown', is_print=True)     
+
+    def on_button_fluo_clicked(b):
+
+        for nxs_file in scan_list.value:
+            
+            scan = Scan()
+
+            # Generate several identifiers for the scan
+            scan.nxs = nxs_file
+            Define_scan_identifiers(scan, expt)
+
+            # Find the scan in the log files and extract/display the corresponding command
+            Find_command_in_logs(scan, expt)
+                    
+            Create_cell(code='CF.Extract_fluo_sum(nxs_filename=\''+scan.nxs+'\','+ 
+                       'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
+                       'logz=True, list_elems=expt.list_elems, first_channel=expt.first_channel, '+
+                       'last_channel=expt.last_channel, '+
+                       'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+')',
+                        position='below', celltype='code', is_print = True)  
+            
+            Create_cell(code='### '+scan.id+': '+scan.command,
+                    position ='below', celltype='markdown', is_print=True)             
             
     def on_button_isotherm_clicked(b):
 
@@ -703,7 +739,8 @@ def Choose_list_scans(expt):
                        'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
                        'logz=True, wavelength=expt.wavelength, thetai=expt.thetai, distance=expt.distance, '+
                        'pixel_PONI_x=expt.pixel_PONI_x, pixel_PONI_y=expt.pixel_PONI_y, '+
-                       'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+', plot_twotheta_alphaf=True)',
+                       'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+' ,cmap=expt.cmap, '+
+                        'plot_twotheta_alphaf=True)',
                         position='below', celltype='code', is_print = True)
 
             Create_cell(code='### '+scan.id+': '+scan.command,
@@ -726,7 +763,8 @@ def Choose_list_scans(expt):
                        'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
                        'logz=True, wavelength=expt.wavelength, thetai=expt.thetai, distance=expt.distance, '+
                        'pixel_PONI_x=expt.pixel_PONI_x, pixel_PONI_y=expt.pixel_PONI_y,  '+
-                       'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+', plot_qxy_qz=True)',
+                       'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+' ,cmap=expt.cmap, '+
+                        'plot_qxy_qz=True)',
                         position='below', celltype='code', is_print = True)
             
             Create_cell(code='### '+scan.id+': '+scan.command,
@@ -749,7 +787,8 @@ def Choose_list_scans(expt):
                    'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
                    'logz=True, wavelength=expt.wavelength, thetai=expt.thetai, distance=expt.distance, '+
                    'pixel_PONI_x=expt.pixel_PONI_x, pixel_PONI_y=expt.pixel_PONI_y, '+
-                   'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+', plot_qxy_q=True)',
+                   'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+' ,cmap=expt.cmap, '+
+                   'plot_qxy_q=True)',
                         position='below', celltype='code', is_print = True)
             
             Create_cell(code='### '+scan.id+': '+scan.command,
@@ -766,6 +805,9 @@ def Choose_list_scans(expt):
     
     button_true_GIXD = widgets.Button(description="Plot true GIXD")
     button_true_GIXD.on_click(on_button_true_GIXD_clicked)
+    
+    button_fluo = widgets.Button(description="Plot fluo")
+    button_fluo.on_click(on_button_fluo_clicked)
     
     button_isotherm = widgets.Button(description="Plot isotherm")
     button_isotherm.on_click(on_button_isotherm_clicked)
@@ -796,7 +838,7 @@ def Choose_list_scans(expt):
     
     display(widgets.HBox([w_stamps, w_verbose]))
     
-    buttons0 = widgets.HBox([button_GIXD, button_true_GIXD, button_isotherm, button_pilatus])
+    buttons0 = widgets.HBox([button_GIXD, button_true_GIXD, button_fluo, button_isotherm, button_pilatus])
     display(buttons0)
     
     buttons1 = widgets.HBox([button_GIXS_angles, button_GIXS_qxy_qz, button_GIXS_qxy_q, button_next])

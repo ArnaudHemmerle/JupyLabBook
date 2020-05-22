@@ -12,8 +12,9 @@ import sys
 import lmfit as L
 from scipy.special import erf
 from PIL import Image
+from psutil import virtual_memory as vm
 
-__version__ = '0.3'
+__version__ = '0.4'
 
 """
 Here are defined the custom functions used for analysis of data in the JupyLabBook.
@@ -579,7 +580,13 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
         if verbose: print(PN._BLUE+" - Open Nexus Data File :"+ PN._RESET)
         if verbose: print('\t'+nxs_path)
         try:
-            nexus=PN.PyNexusFile(nxs_path)
+            # Check available memory
+            mem = vm()
+            if mem.free*0.9 < os.path.getsize(nxs_path):
+                fast = False
+            else:
+                fast = True
+            nexus=PN.PyNexusFile(nxs_path, fast=fast)
         except:
             print(PN._RED,'\t Nexus file seems not to exist or is not correct',PN._RESET)
             return
@@ -917,7 +924,13 @@ def Plot_isotherm(nxs_filename='SIRIUS_test.nxs', recording_dir='', show_data_st
         if verbose: print(PN._BLUE+" - Open Nexus Data File :"+ PN._RESET)
         if verbose: print('\t'+nxs_path)
         try:
-            nexus=PN.PyNexusFile(nxs_path)
+            # Check available memory
+            mem = vm()
+            if mem.free*0.9 < os.path.getsize(nxs_path):
+                fast = False
+            else:
+                fast = True
+            nexus=PN.PyNexusFile(nxs_path, fast=fast)
         except:
             print(PN._RED,'\t Nexus file seems not to exist or is not correct',PN._RESET)
             return
@@ -1000,7 +1013,7 @@ def Plot_isotherm(nxs_filename='SIRIUS_test.nxs', recording_dir='', show_data_st
 def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='',
                  logz=True, wavelength=0.155, thetai=0.002, distance=2722,
                  pixel_PONI_x=490, pixel_PONI_y=975, pixel_size=0.172,
-                 show_data_stamps=False, verbose=False,
+                 show_data_stamps=False, verbose=False, cmap='viridis',
                  plot_twotheta_alphaf=False, plot_qxy_qz=False, plot_qxy_q=False):
     
     """
@@ -1017,7 +1030,13 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
         if verbose: print(PN._BLUE+" - Open Nexus Data File :"+ PN._RESET)
         if verbose: print('\t'+nxs_path)
         try:
-            nexus=PN.PyNexusFile(nxs_path)
+            # Check available memory
+            mem = vm()
+            if mem.free*0.9 < os.path.getsize(nxs_path):
+                fast = False
+            else:
+                fast = True
+            nexus=PN.PyNexusFile(nxs_path, fast=fast)
         except:
             print(PN._RED,'\t Nexus file seems not to exist or is not correct',PN._RESET)
             return
@@ -1053,8 +1072,8 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
             stamp, image = nexus.extract_one_data_point(stamps[i_pilatus][0], i, verbose = False)
 
             #Remove the dead pixels
-            for i,j in dead_pixels:
-                image[i,j]=0.0   
+            for ii,jj in dead_pixels:
+                image[ii,jj]=0.0   
 
             images[i,:] = image    
             
@@ -1129,10 +1148,6 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
 
         
         #Plot the image with horizontal/vertical pixels whatever the other choice is
-
-        #Choose the colormap
-        cmap = expt.cmap
-
         fig = plt.figure(figsize=(14.4,6))
         fig.subplots_adjust(hspace=0.4, wspace=0.4, top=0.93, bottom=0.16)
         fig.suptitle(nxs_filename.split('\\')[-1], fontsize='x-large')
@@ -1190,7 +1205,106 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
             print('\t. Tiff saved in:')
             print("\t", savename+'.tiff')
             print(" ")            
-            
+  
+##########################################################################################
+###################################### FLUO ##############################################
+##########################################################################################
+
+def Extract_fluo_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='',  
+                     logz=False, list_elems=[0,1,2,3], first_channel=0, last_channel=2048,
+                     show_data_stamps=False, verbose=False):
+    """
+    Extract, correct with ICR/ORCR, and plot the summed fluo spectrum. 
+    """
+    
+    nxs_path = recording_dir+nxs_filename
+
+    if not os.path.isfile(nxs_path):
+        print(PN._RED+'Scan %s seems not to exist in recording directory'%(nxs_filename)+PN._RESET)
+        print(('\t\t recording directory : '+recording_dir))
+    else:
+        if verbose: print(PN._BLUE+" - Open Nexus Data File :"+ PN._RESET)
+        if verbose: print('\t'+nxs_path)
+        try:            
+            # Check available memory
+            mem = vm()
+            if mem.free*0.9 < os.path.getsize(nxs_path):
+                fast = False
+            else:
+                fast = True
+            nexus=PN.PyNexusFile(nxs_path, fast=fast)
+        except:
+            print(PN._RED,'\t Nexus file seems not to exist or is not correct',PN._RESET)
+            return
+        nbpts=np.int(nexus.get_nbpts())
+        if verbose: print("\t. Number of data points: ", nbpts)
+        # Get stamps
+        stamps, data= nexus.extractData()
+        if show_data_stamps : print("\t. Available Counters:")
+        for i in range(len(stamps)):
+            if stamps[i][1] is not None:
+                if show_data_stamps : print("\t\t", i, ' -------> ', stamps[i][1])
+                if stamps[i][1].lower()=='pilatus':
+                    columnz=i
+            else:
+                if show_data_stamps : print("\t\t",i, ' -------> ', stamps[i][0])
+         
+    def extract_and_correct(ind_spectrum):
+        """Extract the requested fluospectrum from the nexus file and correct it with ICR/OCR"""
+        for i in range(len(stamps)):
+            if (stamps[i][1] != None and stamps[i][1].lower() == "fluoicr0"+ind_spectrum):
+                fluoicr = data[i]
+            if (stamps[i][1] != None and stamps[i][1].lower() == "fluoocr0"+ind_spectrum):
+                fluoocr = data[i]
+            if (stamps[i][1] != None and stamps[i][1].lower() == "fluospectrum0"+ind_spectrum):
+                fluospectrum = data[i]
+        ICR = fluoicr
+        OCR = fluoocr
+        ratio = np.array([ICR[n]/OCR[n] if (~np.isclose(OCR[n],0.) & ~np.isnan(OCR[n]) & ~np.isnan(ICR[n]))
+                          else 0. for n in range(len(ICR))])
+        spectrums_corr = np.array([fluospectrum[n]*ratio[n] for n in range(len(ratio))])
+        return spectrums_corr
+
+    # Correct each chosen fluospectrum with ICR/OCR and sum them
+    allspectrums_corr = np.zeros((nbpts, 2048))
+
+    for i in list_elems:
+        allspectrums_corr  += extract_and_correct(str(i))
+    
+    nexus.close()
+    
+    ind_non_zero_spectrums = np.where(np.sum(allspectrums_corr, axis = 1)>10.)[0]
+    list_ranges = np.split(ind_non_zero_spectrums, np.where(np.diff(ind_non_zero_spectrums) != 1)[0]+1)
+    last_non_zero_spectrum = ind_non_zero_spectrums[-1]
+
+    channels = np.arange(first_channel, last_channel)
+    spectrums = allspectrums_corr[0:last_non_zero_spectrum,
+                                  first_channel:last_channel]
+
+    fig = plt.figure(figsize=(12,4.6))
+    ax1 = fig.add_subplot(111)
+    ax1.set_title(nxs_filename.split('\\')[-1], fontsize='x-large')
+    ax1.set_xlabel('spectrum index', fontsize='large')
+    ax1.set_ylabel('channel', fontsize='large')
+    ax1.set_xlim(left = 0, right = last_non_zero_spectrum)
+    if logz:
+        im1 = ax1.imshow(allspectrums_corr.transpose(), cmap = 'viridis', aspect = 'auto', norm=colors.LogNorm())
+    else:
+        im1 = ax1.imshow(allspectrums_corr.transpose(), cmap = 'viridis', aspect = 'auto')
+    plt.show()
+
+    #Plot the selected channel range
+    fig = plt.figure(figsize=(12,4.5))
+    ax1 = fig.add_subplot(111)
+    ax1.set_xlabel('channel', fontsize='large')
+    ax1.set_ylabel('counts', fontsize='large')
+    ax1.plot(channels, spectrums[0], 'b.-', label='First spectrum')
+    ax1.plot(channels, spectrums[-1], 'r.-', label='Last spectrum')
+    ax1.legend(fontsize='large')
+    if logz: ax1.set_yscale('log')
+    plt.show()
+
+
 ##########################################################################################
 ###################################### GENERAL ###########################################
 ##########################################################################################
@@ -1218,7 +1332,7 @@ def Plot_1D(nxs_filename='SIRIUS_test.nxs', recording_dir='',
 
     
 def Extract_pilatus_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='', logz=True,
-                        show_data_stamps=False, verbose=False):
+                        show_data_stamps=False, verbose=False, cmap='viridis'):
     
     """
     Extract, plot, and save the sum of all the pilatus images in a scan. 
@@ -1234,7 +1348,13 @@ def Extract_pilatus_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recordin
         if verbose: print(PN._BLUE+" - Open Nexus Data File :"+ PN._RESET)
         if verbose: print('\t'+nxs_path)
         try:
-            nexus=PN.PyNexusFile(nxs_path)
+            # Check available memory
+            mem = vm()
+            if mem.free*0.9 < os.path.getsize(nxs_path):
+                fast = False
+            else:
+                fast = True
+            nexus=PN.PyNexusFile(nxs_path, fast=fast)
         except:
             print(PN._RED,'\t Nexus file seems not to exist or is not correct',PN._RESET)
             return
@@ -1270,8 +1390,8 @@ def Extract_pilatus_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recordin
             stamp, image = nexus.extract_one_data_point(stamps[i_pilatus][0], i, verbose = False)
 
             #Remove the dead pixels
-            for i,j in dead_pixels:
-                image[i,j]=0.0   
+            for ii,jj in dead_pixels:
+                image[ii,jj]=0.0   
 
             images[i,:] = image    
             
@@ -1284,11 +1404,6 @@ def Extract_pilatus_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recordin
         #Replace the dead zone (spacing between chips) on the detector with -2. 
         images_sum = np.where(images_sum>0, images_sum, -2.)
 
-        #Plot the image to be saved
-
-        #Choose the colormap
-        cmap = expt.cmap
-        
         pixels_x = np.arange(0,np.shape(images_sum)[1],1)
         pixels_y = np.arange(0,np.shape(images_sum)[0],1)
 
