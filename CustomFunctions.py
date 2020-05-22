@@ -25,6 +25,16 @@ To access the nexus file construct the path within the function (for ex. nxs_pat
 (The reason is that the scan_index may interfere with the day, the month or the year).
 """
 
+# Enter here the values of the dead pixels on the pilatus
+dead_pixels = [
+(877,528),
+(1018,881),
+(922,847),
+(382,432),
+(640,859),
+(640,860) 
+]
+
 ##########################################################################################
 ###################################### ALIGNMENT #########################################
 ##########################################################################################
@@ -442,12 +452,8 @@ def Extract_channel_Qc(nxs_filename='SIRIUS_test.nxs', working_dir='', recording
             sys.stdout.flush()
             image=images[0][i]
             # dead pixels
-            image[877,528]=0.0
-            image[922,847]=0.0
-            image[1018,881]=0.0
-            image[382,432]=0.0
-            image[640,859]=0.0
-            image[640,860]=0.0
+            for i,j in dead_pixels:
+                image[i,j]=0.0           
             # Keep only the ROI
             ROI=[510, 350, 130, 692]
             image=image[ROI[1]:ROI[1]+ROI[3], ROI[0]:ROI[0]+ROI[2]]
@@ -675,12 +681,8 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
             sys.stdout.flush()
             image=images[0][i]
             # dead pixels
-            image[877,528]=0.0
-            image[922,847]=0.0
-            image[1018,881]=0.0
-            image[382,432]=0.0
-            image[640,859]=0.0
-            image[640,860]=0.0
+            for i,j in dead_pixels:
+                image[i,j]=0.0 
             # Keep only the ROI
             ROI=[510, 350, 130, 692]
             image=image[ROI[1]:ROI[1]+ROI[3], ROI[0]:ROI[0]+ROI[2]]
@@ -1051,13 +1053,8 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
             stamp, image = nexus.extract_one_data_point(stamps[i_pilatus][0], i, verbose = False)
 
             #Remove the dead pixels
-
-            image[877,528]=0.0
-            image[922,847]=0.0
-            image[1018,881]=0.0
-            image[382,432]=0.0
-            image[640,859]=0.0
-            image[640,860]=0.0
+            for i,j in dead_pixels:
+                image[i,j]=0.0   
 
             images[i,:] = image    
             
@@ -1134,8 +1131,7 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
         #Plot the image with horizontal/vertical pixels whatever the other choice is
 
         #Choose the colormap
-        #cmap = 'Greys'
-        cmap = 'viridis'
+        cmap = expt.cmap
 
         fig = plt.figure(figsize=(14.4,6))
         fig.subplots_adjust(hspace=0.4, wspace=0.4, top=0.93, bottom=0.16)
@@ -1274,13 +1270,8 @@ def Extract_pilatus_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recordin
             stamp, image = nexus.extract_one_data_point(stamps[i_pilatus][0], i, verbose = False)
 
             #Remove the dead pixels
-
-            image[877,528]=0.0
-            image[922,847]=0.0
-            image[1018,881]=0.0
-            image[382,432]=0.0
-            image[640,859]=0.0
-            image[640,860]=0.0
+            for i,j in dead_pixels:
+                image[i,j]=0.0   
 
             images[i,:] = image    
             
@@ -1296,8 +1287,7 @@ def Extract_pilatus_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recordin
         #Plot the image to be saved
 
         #Choose the colormap
-        #cmap = 'Greys'
-        cmap = 'viridis'
+        cmap = expt.cmap
         
         pixels_x = np.arange(0,np.shape(images_sum)[1],1)
         pixels_y = np.arange(0,np.shape(images_sum)[0],1)
