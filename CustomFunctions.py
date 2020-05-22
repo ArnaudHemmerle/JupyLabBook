@@ -3,13 +3,15 @@ import numpy as np
 import glob
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import matplotlib.colors as colors
+import matplotlib.gridspec as gridspec
 import os
 import time
 import subprocess
 import sys
 import lmfit as L
 from scipy.special import erf
-
+from PIL import Image
 
 __version__ = '0.3'
 
@@ -550,7 +552,7 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
                  logx=False, logy=False, logz=False,
                  channel0=600, thetazfactor=0.01, wavelength=0.155, thetac=0.0028, thetai=0.002,
                  binsize=10, computeqz=True, nblevels=50, moytocreate=(10, 20, 40),
-                 show_data_stamps=False, show_saved_data=False, plot_true_GIXD=False):
+                 show_data_stamps=False, verbose=False, plot_true_GIXD=False):
     
     """
     Extract, plot, and save the GIXD scan. 
@@ -568,15 +570,15 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
         column_pi=None
         column_area=None
         column_gamma=None
-        print(PN._BLUE+" - Open Nexus Data File :"+ PN._RESET)
-        print('\t'+nxs_path)
+        if verbose: print(PN._BLUE+" - Open Nexus Data File :"+ PN._RESET)
+        if verbose: print('\t'+nxs_path)
         try:
             nexus=PN.PyNexusFile(nxs_path)
         except:
             print(PN._RED,'\t Nexus file seems not to exist or is not correct',PN._RESET)
             return
         nbpts=np.int(nexus.get_nbpts())
-        print("\t. Number of data points: ", nbpts)
+        if verbose: print("\t. Number of data points: ", nbpts)
         # Get stamps
         stamps=nexus.extractStamps()
         if show_data_stamps : print("\t. Available Counters:")
@@ -609,7 +611,7 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
 
         # Check that Pilatus data are present (images)
         if columnz is not None:
-            print('\t. Pilatus data found, (column %d, alias %s)'%(columnz, stamps[columnz][1]))
+            if verbose: print('\t. Pilatus data found, (column %d, alias %s)'%(columnz, stamps[columnz][1]))
         else:
             print(PN._RED,'\t. No pilatus data found', PN._RESET)
             nexus.close()
@@ -621,10 +623,10 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
                 return
             else:
                 columnx=column_delta
-                print('\t. delta data found, (column %d, alias %s)'%(columnx, stamps[columnx][1]))
+                if verbose: print('\t. delta data found, (column %d, alias %s)'%(columnx, stamps[columnx][1]))
         else:
             columnx=column_qxy
-            print('\t. qxy data found, (column %d, alias %s)'%(columnx, stamps[columnx][1]))
+            if verbose: print('\t. qxy data found, (column %d, alias %s)'%(columnx, stamps[columnx][1]))
 
         # Find start and stop without Nan
         istart=0
@@ -639,22 +641,22 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
             i=i-1
         istop=istop-1
 
-        print('\t. Valuable data between points %d and %d'%(istart, istop))
+        if verbose: print('\t. Valid data between points %d and %d'%(istart, istop))
 
         # Compute and print mean values
         if column_pi is not None:
             mean_pi=data[column_pi][istart:istop-1].mean()
-            print('\t. Surface pressure data found, mean value %3.4g ± %3.4g mN/m'%(mean_pi,data[column_pi][istart:istop-1].std() ))
+            if verbose: print('\t. Surface pressure data found, mean value %3.4g ± %3.4g mN/m'%(mean_pi,data[column_pi][istart:istop-1].std() ))
         else:
             print('\t. No surface pressure data found')
         if column_area is not None:
             mean_area=data[column_area][istart:istop-1].mean()
-            print('\t. Area per molecule data found, mean value %3.4g ± %3.4g nm2 per molecule'%(mean_area, data[column_area][istart:istop-1].std()))
+            if verbose: print('\t. Area per molecule data found, mean value %3.4g ± %3.4g nm2 per molecule'%(mean_area, data[column_area][istart:istop-1].std()))
         else:
             print('\t. No area per molecule data found')
         if column_gamma is not None:
             mean_gamma=data[column_gamma][istart:istop-1].mean()
-            print('\t. Gamma motor data found, mean value %3.4g deg'%(mean_gamma))
+            if verbose: print('\t. Gamma motor data found, mean value %3.4g deg'%(mean_gamma))
         else:
             print('\t. No gamma motor data found')
 
@@ -815,17 +817,18 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
                          fontsize='large', color='red', horizontalalignment='right')
 
 
-            print('\t. For more details on the geometry, see:')
-            print('\t \t -Fig.2 in doi:10.1107/S0909049512022017')
-            print('\t \t -Slide 4 in http://gisaxs.com/files/Strzalka.pdf')
+            if verbose:
+                print('\t. For more details on the geometry, see:')
+                print('\t \t -Fig.2 in doi:10.1107/S0909049512022017')
+                print('\t \t -Slide 4 in http://gisaxs.com/files/Strzalka.pdf')
 
         # Create Save Name
         savename=working_dir+nxs_filename[:nxs_filename.rfind('.nxs')]+'_1D'
 
         # Save the original matrix
         np.savetxt(savename+'.mat', original_mat)
-        if show_saved_data: print('\t. Original, non binned matrix saved in:')
-        if show_saved_data: print("\t\t", savename+'.mat')
+        if verbose: print('\t. Original, non binned matrix saved in:')
+        if verbose: print("\t", savename+'.mat')
 
         # Take care of scalar data
         tosave=np.zeros((daty.shape[0], 4), float)
@@ -854,8 +857,8 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
                 s=s+str(new_data[i,j])+'\t'
             f.write(s+'\n')
         f.close()
-        if show_saved_data: print('\t. Scalar data saved in:')
-        if show_saved_data: print("\t\t", savename+'.dat')
+        if verbose: print('\t. Scalar data saved in:')
+        if verbose: print("\t", savename+'.dat')
 
         # Save as moy
         for binsize in moytocreate:
@@ -886,21 +889,19 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
             # Save the Qz
             if computeqz:
                 np.savetxt(savename+'_qz'+str(binsize)+'.dat'+str(binsize), qz)
-                if show_saved_data: print('\t. Qz values saved in:')
-                if show_saved_data: print('\t\t'+savename+'_qz'+str(binsize)+'.dat')
-            if show_saved_data:
+                if verbose: print('\t. Qz values saved in:')
+                if verbose: print('\t'+savename+'_qz'+str(binsize)+'.dat')
+            if verbose:
                 print('\t. Binned matrix saved in:')
-                print("\t\t", savename+'.mat'+str(binsize))
+                print("\t", savename+'.mat'+str(binsize))
 
                 print('\t. XYZ    data saved in:')
-                print("\t\t", savename+'.moy'+str(binsize))
-        if not show_saved_data:
-            print('\t. Data saved in text format')
+                print("\t", savename+'.moy'+str(binsize))
             
         plt.show()
         
         
-def Plot_isotherm(nxs_filename='SIRIUS_test.nxs', recording_dir='', show_data_stamps=False):
+def Plot_isotherm(nxs_filename='SIRIUS_test.nxs', recording_dir='', show_data_stamps=False, verbose=False):
     
     nxs_path = recording_dir+nxs_filename
 
@@ -911,17 +912,18 @@ def Plot_isotherm(nxs_filename='SIRIUS_test.nxs', recording_dir='', show_data_st
         column_pi=None
         column_area=None
         column_time=None
-        print(PN._BLUE+" - Open Nexus Data File :"+ PN._RESET)
-        print('\t'+nxs_path)
+        if verbose: print(PN._BLUE+" - Open Nexus Data File :"+ PN._RESET)
+        if verbose: print('\t'+nxs_path)
         try:
             nexus=PN.PyNexusFile(nxs_path)
         except:
             print(PN._RED,'\t Nexus file seems not to exist or is not correct',PN._RESET)
             return
         nbpts=np.int(nexus.get_nbpts())
-        print("\t. Number of data points: ", nbpts)
+        if verbose: print("\t. Number of data points: ", nbpts)
         # Get stamps and Data
         stamps, data=nexus.extractData('0D')
+        
         # Explore stamps
         if show_data_stamps : print("\t. Available Counters:")
         for i in range(len(stamps)):
@@ -945,9 +947,9 @@ def Plot_isotherm(nxs_filename='SIRIUS_test.nxs', recording_dir='', show_data_st
                 if column_pi is not None:
                     cont=True
         if cont:
-            print('\t. Area per molecule found column %d'%(column_area))
-            print('\t. Surface pressure per molecule found column %d'%(column_pi))
-            print('\t. Time per molecule found column %d'%(column_time))
+            if verbose: print('\t. Area per molecule found column %d'%(column_area))
+            if verbose: print('\t. Surface pressure per molecule found column %d'%(column_pi))
+            if verbose: print('\t. Time per molecule found column %d'%(column_time))
             # find start and stop without Nan
             istart=0
             istop=nbpts
@@ -961,7 +963,7 @@ def Plot_isotherm(nxs_filename='SIRIUS_test.nxs', recording_dir='', show_data_st
                 i=i-1
             istop=istop-1
 
-            print('\t. Valuable data between points %d and %d'%(istart, istop))
+            if verbose: print('\t. Valid data between points %d and %d'%(istart, istop))
 
             # Create Graph
 
@@ -987,7 +989,212 @@ def Plot_isotherm(nxs_filename='SIRIUS_test.nxs', recording_dir='', show_data_st
             ax2.set_ylabel('Area per Molecule (nm$\mathregular{^2}$)', fontsize=14)
             ax3.set_ylabel('Surface pressure (mN/m)', fontsize=14, color='b')
 
+            
+##########################################################################################
+####################################### GIXS #############################################
+##########################################################################################
 
+            
+def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='',
+                 logz=True, wavelength=0.155, thetai=0.002, distance=2722,
+                 pixel_PONI_x=490, pixel_PONI_y=975, pixel_size=0.172,
+                 show_data_stamps=False, verbose=False,
+                 plot_twotheta_alphaf=False, plot_qxy_qz=False, plot_qxy_q=False):
+    
+    """
+    Extract, plot, and save the GIXS scan. 
+    """
+    
+    nxs_path = recording_dir+nxs_filename
+
+    if not os.path.isfile(nxs_path):
+        print(PN._RED+'Scan %s seems not to exist in recording directory'%(nxs_filename)+PN._RESET)
+        print(('\t\t recording directory : '+recording_dir))
+    else:
+        i_pilatus=None
+        if verbose: print(PN._BLUE+" - Open Nexus Data File :"+ PN._RESET)
+        if verbose: print('\t'+nxs_path)
+        try:
+            nexus=PN.PyNexusFile(nxs_path)
+        except:
+            print(PN._RED,'\t Nexus file seems not to exist or is not correct',PN._RESET)
+            return
+        nbpts=np.int(nexus.get_nbpts())
+        if verbose: print("\t. Number of data points: ", nbpts)
+        # Get stamps
+        stamps=nexus.extractStamps()
+        if show_data_stamps : print("\t. Available Counters:")
+        for i in range(len(stamps)):
+            if stamps[i][1] is not None:
+                if show_data_stamps : print("\t\t", i, ' -------> ', stamps[i][1])
+                if stamps[i][1].lower()=='pilatus':
+                    i_pilatus=i
+            else:
+                if show_data_stamps : print("\t\t",i, ' -------> ', stamps[i][0])
+        
+        
+        # Check that Pilatus data are present (images)
+        if i_pilatus is not None:
+            if verbose: print('\t. Pilatus data found, (column %d, alias %s)'%(i_pilatus, stamps[i_pilatus][1]))
+        else:
+            print(PN._RED,'\t. No pilatus data found', PN._RESET)
+            nexus.close()
+            return
+
+        images = np.zeros([nbpts, 1043, 981])
+
+        for i in range(nbpts):
+            sys.stdout.write('Treat image %d/%d                                                                 \r'%(i+1, nbpts))
+            sys.stdout.flush()
+
+            #Extract the images from the nexus file
+            stamp, image = nexus.extract_one_data_point(stamps[i_pilatus][0], i, verbose = False)
+
+            #Remove the dead pixels
+
+            image[877,528]=0.0
+            image[922,847]=0.0
+            image[1018,881]=0.0
+            image[382,432]=0.0
+            image[640,859]=0.0
+            image[640,860]=0.0
+
+            images[i,:] = image    
+            
+            sys.stdout.write('                                                                                  \r')
+            sys.stdout.flush()
+
+            
+        images_sum = images.sum(axis=0)
+
+        #Replace the dead zone (spacing between chips) on the detector with -2. 
+        images_sum = np.where(images_sum>0, images_sum, -2.)
+        
+        #Extract the values of each elements of the nxs
+        s, data = nexus.extractData('0D')   
+
+        i_gamma = None
+        i_delta = None
+        for i in range(len(stamps)):
+            if (stamps[i][1] != None and stamps[i][1].lower()=='delta'):
+                i_delta = i
+            if (stamps[i][1] != None and stamps[i][1].lower()=='gamma'):
+                i_gamma = i    
+
+        if i_gamma != None:
+            gamma = np.mean(data[i_gamma])
+            if verbose: print('\t. Gamma motor data found, mean value %3.4g deg'%(gamma))
+        else:
+            print(PN._RED,'\t. No gamma found!', PN._RESET)
+            gamma = float(input('Enter gamma:') or 0.)
+            print(PN._RED,'\t. gamma = %g'%gamma, PN._RESET)
+            print(" ")
+        if i_delta != None:
+            delta = np.mean(data[i_delta])
+            if verbose: print('\t. Delta motor data found, mean value %3.4g deg'%(delta))
+        else:
+            print(PN._RED,'\t. No delta found!', PN._RESET)
+            delta = float(input('Enter delta:') or 0.)
+            print(PN._RED,'\t. delta = %g'%delta, PN._RESET)
+            print(" ")
+
+
+        if verbose: 
+            print('\t. For more details on the geometry, see:')
+            print('\t \t -Fig.2 in doi:10.1107/S0909049512022017')
+            print('\t \t -Slide 4 in http://gisaxs.com/files/Strzalka.pdf')
+
+        pixels_x = np.arange(0,np.shape(images_sum)[1],1)
+        pixels_y = np.arange(0,np.shape(images_sum)[0],1)
+
+        xx, yy = np.meshgrid(pixels_x, pixels_y)
+
+        # alphai (incident angle)
+        alphai = thetai    
+
+        pixel_direct_x = pixel_PONI_x+distance/pixel_size*np.tan(delta*np.pi/180.)
+        pixel_direct_y = pixel_PONI_y+distance/pixel_size*np.tan(gamma*np.pi/180.)
+
+        # 2*theta in rad
+        twotheta = np.arctan(pixel_size*(xx-pixel_direct_x)/distance)
+
+        # alpha_f in rad
+        deltay0 = distance*np.tan(alphai*np.pi/180.)
+        alphaf = np.arctan( (pixel_size*(pixel_direct_y-yy)-deltay0)/distance)
+        
+        # True qx, qy, qz in nm^-1
+        k0 = 2*np.pi/wavelength
+        qx = k0*(np.cos(alphaf)*np.cos(twotheta)-np.cos(alphai))
+        qy = k0*np.cos(alphaf)*np.sin(twotheta)
+        qz = k0*(np.sin(alphaf)+np.sin(alphai))
+        qxy = np.sqrt(np.square(qx)+np.square(qy))
+        q = np.sqrt(np.square(qxy)+np.square(qz))
+
+        
+        #Plot the image with horizontal/vertical pixels whatever the other choice is
+
+        #Choose the colormap
+        #cmap = 'Greys'
+        cmap = 'viridis'
+
+        fig = plt.figure(figsize=(14.4,6))
+        fig.subplots_adjust(hspace=0.4, wspace=0.4, top=0.93, bottom=0.16)
+        fig.suptitle(nxs_filename.split('\\')[-1], fontsize='x-large')
+        ax0 = fig.add_subplot(121)
+        if logz:
+            ax0.pcolormesh(xx, yy, images_sum, cmap = cmap, norm = colors.LogNorm())
+        else:
+            ax0.pcolormesh(xx, yy, images_sum, cmap = cmap)
+        ax0.invert_yaxis()
+        ax0.set_xlabel('Horizontal pixels (x)', fontsize='large')
+        ax0.set_ylabel('Vertical pixels (y)', fontsize='large')
+
+        
+        if plot_twotheta_alphaf:
+        
+            ax1 = fig.add_subplot(122)
+            ax1.pcolormesh(twotheta*180./np.pi, alphaf*180./np.pi, images_sum, cmap = cmap, norm = colors.LogNorm())
+            ax1.set_xlabel('2 theta (deg)', fontsize='large')
+            ax1.set_ylabel('alpha_f (deg)', fontsize='large')
+
+            plt.show()
+            plt.close()
+
+        if plot_qxy_qz:
+
+            ax1 = fig.add_subplot(122)
+            ax1.pcolormesh(qxy, qz, images_sum, cmap = cmap, norm = colors.LogNorm())
+            ax1.set_xlabel('qxy (nm^-1)', fontsize='large')
+            ax1.set_ylabel('qz (nm^-1)', fontsize='large')
+            plt.show()
+            plt.close()
+            
+        if plot_qxy_q:
+
+            ax1 = fig.add_subplot(122)
+            ax1.pcolormesh(qxy, q, images_sum, cmap = cmap, norm = colors.LogNorm())
+            ax1.set_xlabel('qxy (nm^-1)', fontsize='large')
+            ax1.set_ylabel('q (nm^-1)', fontsize='large')
+            plt.show()
+            plt.close()
+            
+            
+        # Create Save Name
+        savename=working_dir+nxs_filename[:nxs_filename.rfind('.nxs')]
+            
+        np.savetxt(savename+'_pilatus_sum.mat', images_sum)
+
+        im = Image.fromarray(images_sum)
+        im.save(savename+'_pilatus_sum.tiff')
+
+        if verbose: 
+            print('\t. Original matrix saved in:')
+            print("\t", savename+'.mat')
+            print(" ")
+            print('\t. Tiff saved in:')
+            print("\t", savename+'.tiff')
+            print(" ")            
+            
 ##########################################################################################
 ###################################### GENERAL ###########################################
 ##########################################################################################
@@ -1012,3 +1219,145 @@ def Plot_1D(nxs_filename='SIRIUS_test.nxs', recording_dir='',
     ax.set_xlabel(xLabel, fontsize=16)
     ax.set_ylabel(yLabel, fontsize=16)
     plt.show()
+
+    
+def Extract_pilatus_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='', logz=True,
+                        show_data_stamps=False, verbose=False):
+    
+    """
+    Extract, plot, and save the sum of all the pilatus images in a scan. 
+    """
+    
+    nxs_path = recording_dir+nxs_filename
+
+    if not os.path.isfile(nxs_path):
+        print(PN._RED+'Scan %s seems not to exist in recording directory'%(nxs_filename)+PN._RESET)
+        print(('\t\t recording directory : '+recording_dir))
+    else:
+        i_pilatus=None
+        if verbose: print(PN._BLUE+" - Open Nexus Data File :"+ PN._RESET)
+        if verbose: print('\t'+nxs_path)
+        try:
+            nexus=PN.PyNexusFile(nxs_path)
+        except:
+            print(PN._RED,'\t Nexus file seems not to exist or is not correct',PN._RESET)
+            return
+        nbpts=np.int(nexus.get_nbpts())
+        if verbose: print("\t. Number of data points: ", nbpts)
+        # Get stamps
+        stamps=nexus.extractStamps()
+        if show_data_stamps : print("\t. Available Counters:")
+        for i in range(len(stamps)):
+            if stamps[i][1] is not None:
+                if show_data_stamps : print("\t\t", i, ' -------> ', stamps[i][1])
+                if stamps[i][1].lower()=='pilatus':
+                    i_pilatus=i
+            else:
+                if show_data_stamps : print("\t\t",i, ' -------> ', stamps[i][0])
+        
+        
+        # Check that Pilatus data are present (images)
+        if i_pilatus is not None:
+            if verbose: print('\t. Pilatus data found, (column %d, alias %s)'%(i_pilatus, stamps[i_pilatus][1]))
+        else:
+            print(PN._RED,'\t. No pilatus data found', PN._RESET)
+            nexus.close()
+            return
+
+        images = np.zeros([nbpts, 1043, 981])
+
+        for i in range(nbpts):
+            sys.stdout.write('Treat image %d/%d                                                                 \r'%(i+1, nbpts))
+            sys.stdout.flush()
+
+            #Extract the images from the nexus file
+            stamp, image = nexus.extract_one_data_point(stamps[i_pilatus][0], i, verbose = False)
+
+            #Remove the dead pixels
+
+            image[877,528]=0.0
+            image[922,847]=0.0
+            image[1018,881]=0.0
+            image[382,432]=0.0
+            image[640,859]=0.0
+            image[640,860]=0.0
+
+            images[i,:] = image    
+            
+            sys.stdout.write('                                                                                  \r')
+            sys.stdout.flush()
+
+            
+        images_sum = images.sum(axis=0)
+
+        #Replace the dead zone (spacing between chips) on the detector with -2. 
+        images_sum = np.where(images_sum>0, images_sum, -2.)
+
+        #Plot the image to be saved
+
+        #Choose the colormap
+        #cmap = 'Greys'
+        cmap = 'viridis'
+        
+        pixels_x = np.arange(0,np.shape(images_sum)[1],1)
+        pixels_y = np.arange(0,np.shape(images_sum)[0],1)
+
+        xx, yy = np.meshgrid(pixels_x, pixels_y)
+
+              
+        fig = plt.figure(figsize=(15,15))
+
+        #Divide the grid in 2x2
+        outer = gridspec.GridSpec(2, 2, wspace=0.2)
+
+        #Divide the left row in 2x1
+        inner = gridspec.GridSpecFromSubplotSpec(2, 1,
+                        subplot_spec=outer[0], hspace=0.5)
+
+        #Plot a profile along y (integrated over x)
+        ax1 = fig.add_subplot(inner[0])
+        profile_y = images_sum.sum(axis=1)
+        ax1.set_yscale('log')
+        ax1.set(xlabel = 'vertical pixel (y)', ylabel = 'integration along x')
+        ax1.plot(profile_y)
+
+        #Plot a profile along x (integrated over y)
+        ax2 = fig.add_subplot(inner[1])
+        profile_x = images_sum.sum(axis=0)
+        ax2.set_yscale('log')
+        ax2.set(xlabel = 'horizontal pixel (x)', ylabel = 'integration along y')
+        ax2.plot(profile_x)
+
+        #Divide the right row in 1x1
+        inner = gridspec.GridSpecFromSubplotSpec(1, 1,
+                        subplot_spec=outer[1], wspace=0.1, hspace=0.1)
+
+        #Show the full image integrated over the scan
+        ax0 = fig.add_subplot(inner[0])
+        if logz:
+            ax0.pcolormesh(xx, yy, images_sum, cmap = cmap, norm = colors.LogNorm())
+        else:
+            ax0.pcolormesh(xx, yy, images_sum, cmap = cmap)
+        ax0.set(xlabel = 'horizontal pixel (x)', ylabel ='vertical pixel (y)')
+        ax0.invert_yaxis()
+        fig.subplots_adjust(top=0.95)
+        fig.suptitle(nxs_filename.split('\\')[-1], fontsize=16)
+        plt.show()
+        plt.close()
+
+        # Create Save Name
+        savename=working_dir+nxs_filename[:nxs_filename.rfind('.nxs')]
+            
+        np.savetxt(savename+'_pilatus_sum.mat', images_sum)
+
+        im = Image.fromarray(images_sum)
+        im.save(savename+'_pilatus_sum.tiff')
+
+        if verbose: 
+            print('\t. Original matrix saved in:')
+            print("\t", savename+'.mat')
+            print(" ")
+            print('\t. Tiff saved in:')
+            print("\t", savename+'.tiff')
+            print(" ")
+        

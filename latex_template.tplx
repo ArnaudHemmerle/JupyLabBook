@@ -17,7 +17,7 @@
 ((* block figure scoped *))
     { \vspace*{-0.3cm} }
     \begin{center}
-    \adjustimage{max size={1.\linewidth}{0.25\paperheight}}{((( filename )))}
+    \adjustimage{max size={1.\linewidth}{0.27\paperheight}}{((( filename )))}
     \end{center}
     { \hspace*{\fill}}
     { \vspace*{-0.3cm} }

@@ -309,118 +309,6 @@ def Choose_action(expt):
     return scan
 
 
-def Choose_list_scans(expt):
-    """
-    Allow to choose multiple scans obtained in the same conditions.
-    Take an object from the class Experiment.
-    """
-
-       
-    scan_list = widgets.SelectMultiple(
-    options=expt.list_nxs_files,
-    rows=10,
-    layout= {'width': '800px'},
-    style={'description_width': 'initial'},
-    description='Select scans (hold shift or ctrl):'
-    )
-    
-    display(scan_list)
-    
-    
-    def on_button_GIXD_clicked(b):     
-   
-        for nxs_file in scan_list.value:
-            
-            scan = Scan()
-            
-            # Generate several identifiers for the scan
-            scan.nxs = nxs_file
-            Define_scan_identifiers(scan, expt)
-
-            # Find the scan in the log files and extract/display the corresponding command
-            Find_command_in_logs(scan, expt)
-            
-            Create_cell(code='CF.Extract_GIXD(nxs_filename=\''+scan.nxs+'\','+
-                        'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
-                        'logx=False, logy=False, logz=False, '+
-                        'channel0=expt.channel0, thetazfactor=expt.thetazfactor, '+
-                        'wavelength=expt.wavelength, thetac=expt.thetac, thetai=expt.thetai, '+
-                        'binsize=expt.binsize, computeqz=True, nblevels=expt.nblevels, moytocreate=expt.moytocreate, '+
-                        'show_data_stamps=False, show_saved_data=False, plot_true_GIXD=False)',
-                        position='below', celltype='code', is_print = True)
-            
-            Create_cell(code='### '+scan.id+': '+scan.command,
-                    position ='below', celltype='markdown', is_print=True)
-            
-            
-    def on_button_true_GIXD_clicked(b):
-
-        for nxs_file in scan_list.value:
-
-            scan = Scan()
-
-            # Generate several identifiers for the scan
-            scan.nxs = nxs_file
-            Define_scan_identifiers(scan, expt)
-
-            # Find the scan in the log files and extract/display the corresponding command
-            Find_command_in_logs(scan, expt)
-        
-            Create_cell(code='CF.Extract_GIXD(nxs_filename=\''+scan.nxs+'\','+
-                        'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
-                        'logx=False, logy=False, logz=False, '+
-                        'channel0=expt.channel0, thetazfactor=expt.thetazfactor, '+
-                        'wavelength=expt.wavelength, thetac=expt.thetac, thetai=expt.thetai, '+
-                        'binsize=expt.binsize, computeqz=True, nblevels=expt.nblevels, moytocreate=expt.moytocreate, '+
-                        'show_data_stamps=False, show_saved_data=False, plot_true_GIXD=True)',
-                        position='below', celltype='code', is_print = True)
-            
-            Create_cell(code='### '+scan.id+': '+scan.command,
-                    position ='below', celltype='markdown', is_print=True)
-            
-            
-    def on_button_plot_isotherm_clicked(b):
-
-        for nxs_file in scan_list.value:
-            
-            scan = Scan()
-
-            # Generate several identifiers for the scan
-            scan.nxs = nxs_file
-            Define_scan_identifiers(scan, expt)
-
-            # Find the scan in the log files and extract/display the corresponding command
-            Find_command_in_logs(scan, expt)
-            Create_cell(code='CF.Plot_isotherm(nxs_filename=\''+scan.nxs+'\', recording_dir=expt.recording_dir,'+
-                        'show_data_stamps=False)',
-                        position='below', celltype='code', is_print = True)
-            
-            Create_cell(code='### '+scan.id+': '+scan.command,
-                    position ='below', celltype='markdown', is_print=True)
-
-        
-    def on_button_next_clicked(b):
-        clear_output(wait=False)
-        Create_cell(code='scan = FF.Choose_action(expt)',
-                    position ='at_bottom', celltype='code', is_print=False)
-        
-    
-    button_GIXD = widgets.Button(description="Plot GIXD")
-    button_GIXD.on_click(on_button_GIXD_clicked)
-    
-    button_true_GIXD = widgets.Button(description="Plot True GIXD")
-    button_true_GIXD.on_click(on_button_true_GIXD_clicked)
-    
-    button_plot_isotherm = widgets.Button(description="Plot isotherm")
-    button_plot_isotherm.on_click(on_button_plot_isotherm_clicked)
-    
-    button_next = widgets.Button(description="Next action")
-    button_next.on_click(on_button_next_clicked)
-
-    buttons0 = widgets.HBox([button_GIXD, button_true_GIXD, button_plot_isotherm, button_next])
-    display(buttons0)
-   
-
 def Export_nb_to_pdf(nb_name):
     """
     Save the current state of the notebook (including the widgets).
@@ -529,7 +417,6 @@ def Choose_treatment(scan, expt):
     2) Display the buttons for choosing the next action.
     """
     
-    
     # Define the function called when clicking the button
     # DEFINE HERE A FUNCTION TO CREATE A CELL CALLING YOUR CUSTOM FUNCTION
     def on_button_1D_clicked(b):
@@ -544,7 +431,7 @@ def Choose_treatment(scan, expt):
                     'channel0=expt.channel0, thetazfactor=expt.thetazfactor, '+
                     'wavelength=expt.wavelength, thetac=expt.thetac, thetai=expt.thetai, '+
                     'binsize=expt.binsize, computeqz=True, nblevels=expt.nblevels, moytocreate=expt.moytocreate, '+
-                    'show_data_stamps=False, show_saved_data=False, plot_true_GIXD=False)',
+                    'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+', plot_true_GIXD=False)',
                     position='below', celltype='code', is_print = True)
 
     def on_button_true_GIXD_clicked(b):
@@ -554,11 +441,50 @@ def Choose_treatment(scan, expt):
                     'channel0=expt.channel0, thetazfactor=expt.thetazfactor, '+
                     'wavelength=expt.wavelength, thetac=expt.thetac, thetai=expt.thetai, '+
                     'binsize=expt.binsize, computeqz=True, nblevels=expt.nblevels, moytocreate=expt.moytocreate, '+
-                    'show_data_stamps=False, show_saved_data=False, plot_true_GIXD=True)',
+                    'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+', plot_true_GIXD=True)',
                     position='below', celltype='code', is_print = True)
 
+    def on_button_pilatus_clicked(b):
+        Create_cell(code='CF.Extract_pilatus_sum(nxs_filename=\''+scan.nxs+'\','+ 
+                   'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
+                   'logz=True, show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+')',
+                    position='below', celltype='code', is_print = True)
+        
+    def on_button_GIXS_angles_clicked(b):
+        Create_cell(code='CF.Extract_GIXS(nxs_filename=\''+scan.nxs+'\','+ 
+                   'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
+                   'logz=True, wavelength=expt.wavelength, thetai=expt.thetai, distance=expt.distance, '+
+                   'pixel_PONI_x=expt.pixel_PONI_x, pixel_PONI_y=expt.pixel_PONI_y, '+
+                   'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+', plot_twotheta_alphaf=True)',
+                    position='below', celltype='code', is_print = True)
+               
+    def on_button_GIXS_qxy_qz_clicked(b):
+        Create_cell(code='CF.Extract_GIXS(nxs_filename=\''+scan.nxs+'\','+ 
+                   'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
+                   'logz=True, wavelength=expt.wavelength, thetai=expt.thetai, distance=expt.distance, '+
+                   'pixel_PONI_x=expt.pixel_PONI_x, pixel_PONI_y=expt.pixel_PONI_y,  '+
+                   'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+', plot_qxy_qz=True)',
+                    position='below', celltype='code', is_print = True)
+        
+    def on_button_GIXS_qxy_q_clicked(b):
+        Create_cell(code='CF.Extract_GIXS(nxs_filename=\''+scan.nxs+'\','+ 
+                   'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
+                   'logz=True, wavelength=expt.wavelength, thetai=expt.thetai, distance=expt.distance, '+
+                   'pixel_PONI_x=expt.pixel_PONI_x, pixel_PONI_y=expt.pixel_PONI_y, '+
+                   'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+', plot_qxy_q=True)',
+                    position='below', celltype='code', is_print = True)
+        
+    def on_button_isotherm_clicked(b):
+        Create_cell(code='CF.Plot_isotherm(nxs_filename=\''+scan.nxs+'\', recording_dir=expt.recording_dir, '+
+                   'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+')',
+                    position='below', celltype='code', is_print = True)
+        
     def on_button_next_clicked(b):
         #clear_output(wait=False)
+        
+        # Save the default value of booleans
+        expt.show_stamps = w_stamps.value
+        expt.verbose = w_verbose.value
         
         Delete_current_cell()
         
@@ -580,11 +506,7 @@ def Choose_treatment(scan, expt):
                     'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
                     'logx=False, logy=False, logz=False)',
                     position='below', celltype='code', is_print = True)
-        
-    def on_button_plot_isotherm_clicked(b):
-        Create_cell(code='CF.Plot_isotherm(nxs_filename=\''+scan.nxs+'\', recording_dir=expt.recording_dir,'+
-                    'show_data_stamps=False)',
-                    position='below', celltype='code', is_print = True)
+       
 
     # Display the widgets    
     # ADD HERE A CALL TO YOUR BUTTON
@@ -594,7 +516,6 @@ def Choose_treatment(scan, expt):
     button_fit_erf = widgets.Button(description="Fit with erf")
     button_fit_erf.on_click(on_button_fit_erf_clicked)
     
-    # Click to extract the Vineyard
     button_vineyard = widgets.Button(description="Extract Vineyard")
     button_vineyard.on_click(on_button_vineyard_clicked)
     
@@ -604,29 +525,285 @@ def Choose_treatment(scan, expt):
     button_GIXD = widgets.Button(description="Plot GIXD")
     button_GIXD.on_click(on_button_GIXD_clicked)
     
-    button_true_GIXD = widgets.Button(description="Plot True GIXD")
+    button_true_GIXD = widgets.Button(description="Plot true GIXD")
     button_true_GIXD.on_click(on_button_true_GIXD_clicked)
     
-    button_plot_isotherm = widgets.Button(description="Plot isotherm")
-    button_plot_isotherm.on_click(on_button_plot_isotherm_clicked)
+    button_isotherm = widgets.Button(description="Plot isotherm")
+    button_isotherm.on_click(on_button_isotherm_clicked)
     
+    button_pilatus = widgets.Button(description="Plot pilatus")
+    button_pilatus.on_click(on_button_pilatus_clicked)
+
+    button_GIXS_angles = widgets.Button(description="Plot GIXS angles")
+    button_GIXS_angles.on_click(on_button_GIXS_angles_clicked)
+    
+    button_GIXS_qxy_qz = widgets.Button(description="Plot GIXS qxy/qz")
+    button_GIXS_qxy_qz.on_click(on_button_GIXS_qxy_qz_clicked)
+    
+    button_GIXS_qxy_q = widgets.Button(description="Plot GIXS qxy/q")
+    button_GIXS_qxy_q.on_click(on_button_GIXS_qxy_q_clicked)
+        
     button_next = widgets.Button(description="Next action")
     button_next.on_click(on_button_next_clicked)
    
+    # Buttons for general treatment
     buttons0 = widgets.HBox([button_fit_gau, button_fit_erf, button_1D])
     display(buttons0)
     
-        
     # Set up an interactive 1D plot
     Set_interactive_1D(scan)
     
+    # Checkboxes for verbose
+    try: value = expt.show_stamps
+    except: value = False
+    w_stamps = widgets.Checkbox(value=value, description='Print sensors?')
     
-    buttons1 = widgets.HBox([button_GIXD, button_true_GIXD, button_plot_isotherm])
+    try: value = expt.verbose
+    except: value = False
+    w_verbose = widgets.Checkbox(value=value, description='Print scan info?')
+    
+    display(widgets.HBox([w_stamps, w_verbose]))
+    
+    # Buttons for specific treatment
+    buttons1 = widgets.HBox([button_GIXD, button_true_GIXD, button_isotherm])
     display(buttons1)
-
-    buttons2 = widgets.HBox([button_vineyard, button_next])
+    
+    buttons2 = widgets.HBox([button_pilatus, button_GIXS_angles, button_GIXS_qxy_qz, button_GIXS_qxy_q])
     display(buttons2)
 
+    buttons3 = widgets.HBox([button_vineyard, button_next])
+    display(buttons3)
+
+    
+
+def Choose_list_scans(expt):
+    """
+    Allow to choose multiple scans obtained in the same conditions.
+    Take an object from the class Experiment.
+    """
+
+       
+    scan_list = widgets.SelectMultiple(
+    options=expt.list_nxs_files,
+    rows=10,
+    layout= {'width': '800px'},
+    style={'description_width': 'initial'},
+    description='Select scans (hold shift or ctrl):'
+    )
+    
+    display(scan_list)
+    
+    
+    def on_button_GIXD_clicked(b):     
+   
+        for nxs_file in scan_list.value:
+            
+            scan = Scan()
+            
+            # Generate several identifiers for the scan
+            scan.nxs = nxs_file
+            Define_scan_identifiers(scan, expt)
+
+            # Find the scan in the log files and extract/display the corresponding command
+            Find_command_in_logs(scan, expt)
+            
+            Create_cell(code='CF.Extract_GIXD(nxs_filename=\''+scan.nxs+'\','+
+                        'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
+                        'logx=False, logy=False, logz=False, '+
+                        'channel0=expt.channel0, thetazfactor=expt.thetazfactor, '+
+                        'wavelength=expt.wavelength, thetac=expt.thetac, thetai=expt.thetai, '+
+                        'binsize=expt.binsize, computeqz=True, nblevels=expt.nblevels, moytocreate=expt.moytocreate, '+
+                        'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+', plot_true_GIXD=False)',
+                        position='below', celltype='code', is_print = True)
+            
+            Create_cell(code='### '+scan.id+': '+scan.command,
+                    position ='below', celltype='markdown', is_print=True)
+            
+            
+    def on_button_true_GIXD_clicked(b):
+
+        for nxs_file in scan_list.value:
+
+            scan = Scan()
+
+            # Generate several identifiers for the scan
+            scan.nxs = nxs_file
+            Define_scan_identifiers(scan, expt)
+
+            # Find the scan in the log files and extract/display the corresponding command
+            Find_command_in_logs(scan, expt)
+        
+            Create_cell(code='CF.Extract_GIXD(nxs_filename=\''+scan.nxs+'\','+
+                        'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
+                        'logx=False, logy=False, logz=False, '+
+                        'channel0=expt.channel0, thetazfactor=expt.thetazfactor, '+
+                        'wavelength=expt.wavelength, thetac=expt.thetac, thetai=expt.thetai, '+
+                        'binsize=expt.binsize, computeqz=True, nblevels=expt.nblevels, moytocreate=expt.moytocreate, '+
+                        'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+', plot_true_GIXD=True)',
+                        position='below', celltype='code', is_print = True)
+            
+            Create_cell(code='### '+scan.id+': '+scan.command,
+                    position ='below', celltype='markdown', is_print=True)
+            
+    def on_button_pilatus_clicked(b):
+
+        for nxs_file in scan_list.value:
+            
+            scan = Scan()
+
+            # Generate several identifiers for the scan
+            scan.nxs = nxs_file
+            Define_scan_identifiers(scan, expt)
+
+            # Find the scan in the log files and extract/display the corresponding command
+            Find_command_in_logs(scan, expt)
+            
+            Create_cell(code='CF.Extract_pilatus_sum(nxs_filename=\''+scan.nxs+'\','+ 
+                       'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
+                       'logz=True, show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+')',
+                        position='below', celltype='code', is_print = True)
+            
+            Create_cell(code='### '+scan.id+': '+scan.command,
+                    position ='below', celltype='markdown', is_print=True)     
+            
+    def on_button_isotherm_clicked(b):
+
+        for nxs_file in scan_list.value:
+            
+            scan = Scan()
+
+            # Generate several identifiers for the scan
+            scan.nxs = nxs_file
+            Define_scan_identifiers(scan, expt)
+
+            # Find the scan in the log files and extract/display the corresponding command
+            Find_command_in_logs(scan, expt)
+            Create_cell(code='CF.Plot_isotherm(nxs_filename=\''+scan.nxs+'\', recording_dir=expt.recording_dir, '+
+                       'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+')',
+                        position='below', celltype='code', is_print = True)
+            
+            Create_cell(code='### '+scan.id+': '+scan.command,
+                    position ='below', celltype='markdown', is_print=True)
+
+
+    def on_button_GIXS_angles_clicked(b):
+        
+        for nxs_file in scan_list.value:
+            
+            scan = Scan()
+
+            # Generate several identifiers for the scan
+            scan.nxs = nxs_file
+            Define_scan_identifiers(scan, expt)
+
+            # Find the scan in the log files and extract/display the corresponding command
+            Find_command_in_logs(scan, expt)
+        
+            Create_cell(code='CF.Extract_GIXS(nxs_filename=\''+scan.nxs+'\','+ 
+                       'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
+                       'logz=True, wavelength=expt.wavelength, thetai=expt.thetai, distance=expt.distance, '+
+                       'pixel_PONI_x=expt.pixel_PONI_x, pixel_PONI_y=expt.pixel_PONI_y, '+
+                       'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+', plot_twotheta_alphaf=True)',
+                        position='below', celltype='code', is_print = True)
+
+            Create_cell(code='### '+scan.id+': '+scan.command,
+                    position ='below', celltype='markdown', is_print=True)
+        
+    def on_button_GIXS_qxy_qz_clicked(b):
+       
+        for nxs_file in scan_list.value:
+            
+            scan = Scan()
+
+            # Generate several identifiers for the scan
+            scan.nxs = nxs_file
+            Define_scan_identifiers(scan, expt)
+
+            # Find the scan in the log files and extract/display the corresponding command
+            Find_command_in_logs(scan, expt)
+                   
+            Create_cell(code='CF.Extract_GIXS(nxs_filename=\''+scan.nxs+'\','+ 
+                       'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
+                       'logz=True, wavelength=expt.wavelength, thetai=expt.thetai, distance=expt.distance, '+
+                       'pixel_PONI_x=expt.pixel_PONI_x, pixel_PONI_y=expt.pixel_PONI_y,  '+
+                       'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+', plot_qxy_qz=True)',
+                        position='below', celltype='code', is_print = True)
+            
+            Create_cell(code='### '+scan.id+': '+scan.command,
+                        position ='below', celltype='markdown', is_print=True)
+
+    def on_button_GIXS_qxy_q_clicked(b):
+        
+        for nxs_file in scan_list.value:
+            
+            scan = Scan()
+
+            # Generate several identifiers for the scan
+            scan.nxs = nxs_file
+            Define_scan_identifiers(scan, expt)
+
+            # Find the scan in the log files and extract/display the corresponding command
+            Find_command_in_logs(scan, expt)
+            
+            Create_cell(code='CF.Extract_GIXS(nxs_filename=\''+scan.nxs+'\','+ 
+                   'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
+                   'logz=True, wavelength=expt.wavelength, thetai=expt.thetai, distance=expt.distance, '+
+                   'pixel_PONI_x=expt.pixel_PONI_x, pixel_PONI_y=expt.pixel_PONI_y, '+
+                   'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+', plot_qxy_q=True)',
+                        position='below', celltype='code', is_print = True)
+            
+            Create_cell(code='### '+scan.id+': '+scan.command,
+                        position ='below', celltype='markdown', is_print=True)            
+
+    def on_button_next_clicked(b):
+        clear_output(wait=False)
+        Create_cell(code='scan = FF.Choose_action(expt)',
+                    position ='at_bottom', celltype='code', is_print=False)
+        
+    
+    button_GIXD = widgets.Button(description="Plot GIXD")
+    button_GIXD.on_click(on_button_GIXD_clicked)
+    
+    button_true_GIXD = widgets.Button(description="Plot true GIXD")
+    button_true_GIXD.on_click(on_button_true_GIXD_clicked)
+    
+    button_isotherm = widgets.Button(description="Plot isotherm")
+    button_isotherm.on_click(on_button_isotherm_clicked)
+    
+    button_pilatus = widgets.Button(description="Plot pilatus")
+    button_pilatus.on_click(on_button_pilatus_clicked)
+    
+    button_next = widgets.Button(description="Next action")
+    button_next.on_click(on_button_next_clicked)
+    
+    button_GIXS_angles = widgets.Button(description="Plot GIXS angles")
+    button_GIXS_angles.on_click(on_button_GIXS_angles_clicked)
+    
+    button_GIXS_qxy_qz = widgets.Button(description="Plot GIXS qxy/qz")
+    button_GIXS_qxy_qz.on_click(on_button_GIXS_qxy_qz_clicked)
+    
+    button_GIXS_qxy_q = widgets.Button(description="Plot GIXS qxy/q")
+    button_GIXS_qxy_q.on_click(on_button_GIXS_qxy_q_clicked)
+
+    # Checkboxes for verbose
+    try: value = expt.show_stamps
+    except: value = False
+    w_stamps = widgets.Checkbox(value=value, description='Print sensors?')
+    
+    try: value = expt.verbose
+    except: value = False
+    w_verbose = widgets.Checkbox(value=value, description='Print scan info?')
+    
+    display(widgets.HBox([w_stamps, w_verbose]))
+    
+    buttons0 = widgets.HBox([button_GIXD, button_true_GIXD, button_isotherm, button_pilatus])
+    display(buttons0)
+    
+    buttons1 = widgets.HBox([button_GIXS_angles, button_GIXS_qxy_qz, button_GIXS_qxy_q, button_next])
+    display(buttons1)
+       
+    
+    
 def Create_form():
 
     short_layout = widgets.Layout(width='200px', height='40px')
