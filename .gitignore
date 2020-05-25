@@ -5,3 +5,4 @@ recording/
 working/
 .ipynb_checkpoints/
 __pycache__/
+*_HR.pdf
