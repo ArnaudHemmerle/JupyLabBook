@@ -14,7 +14,7 @@ from scipy.special import erf
 from PIL import Image
 from psutil import virtual_memory as vm
 
-__version__ = '0.4'
+__version__ = '0.5'
 
 """
 Here are defined the custom functions used for analysis of data in the JupyLabBook.
@@ -1128,8 +1128,8 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
         # alphai (incident angle)
         alphai = thetai    
 
-        pixel_direct_x = pixel_PONI_x+distance/pixel_size*np.tan(delta*np.pi/180.)
-        pixel_direct_y = pixel_PONI_y+distance/pixel_size*np.tan(gamma*np.pi/180.)
+        pixel_direct_x = pixel_PONI_x-distance/pixel_size*np.tan(delta*np.pi/180.)
+        pixel_direct_y = pixel_PONI_y-distance/pixel_size*np.tan(gamma*np.pi/180.)
 
         # 2*theta in rad
         twotheta = np.arctan(pixel_size*(xx-pixel_direct_x)/distance)
