@@ -807,13 +807,13 @@ def Create_form():
 
     horizontal_foc = widgets.Checkbox(
                      value=True,
-                     description='Horizontal focalisation',
+                     description='Horizontal focalisation:',
                      layout=long_layout,
                      style=style)
 
     vertical_foc = widgets.Checkbox(
                    value=True,
-                   description='Vertical focalisation',
+                   description='Vertical focalisation:',
                    layout=long_layout,
                    style=style)
 
@@ -929,7 +929,8 @@ def Create_form():
                     +'\t * %s %s'%(phase.description,phase.value)+'\n'
                     +'\t * %s %s'%(horizontal_foc.description,horizontal_foc.value)+'\n'
                     +'\t * %s %s'%(vertical_foc.description,vertical_foc.value)+'\n'
-                    +'\t * %s %s'%(horizontal_size.description,vertical_size.value))
+                    +'\t * %s %s'%(horizontal_size.description,horizontal_size.value)+'\n'
+                    +'\t * %s %s'%(vertical_size.description,vertical_size.value))
 
         txt.append('* Monitors and XBPM:'+'\n'
                     +'\t * %s %s'%(mon1.description,mon1.value)+'\n'
