@@ -27,6 +27,14 @@ JupyLabBook is not made of paper: it can crash, it can be corrupted, it can be d
   - Press 'b', it will insert a cell below the last selected cell.  
   - Press 'm', to turn the new cell into a text cell.  
   - Click in the cell to enter text. Press "Shift+Enter" to validate the text (or click on "Execute cell")
+ 
+# Installation notes
+Recommandations for installation on Windows 10:
+1) Install Anaconda Python >= 3.7 (conda -version >= 4.8.3)  
+2) Install MikTex >= 2.9.7. Restart after installation.
+3) Install the package lmfit by typing in the conda prompt:  
+```conda install -c conda-forge lmfit```
 
- 4) In the current state of JupyLabBook, do not attempt to generate a PDF in High-resolution if you have GIXS data. It would take hours and generate a very large pdf.
+
+
  
