@@ -31,7 +31,7 @@ JupyLabBook is not made of paper: it can crash, it can be corrupted, it can be d
 # Installation notes
 Recommandations for installation on Windows 10:
 1) Install Anaconda Python >= 3.7 (conda -version >= 4.8.3)  
-2) Install MikTex >= 2.9.7. Restart after installation.
+2) Install MikTex >= 2.9.7. Restart after installation.  
 3) Install the package lmfit by typing in the conda prompt:  
 ```conda install -c conda-forge lmfit```
 
