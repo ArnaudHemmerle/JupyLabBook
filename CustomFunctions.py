@@ -1277,9 +1277,9 @@ def Extract_fluo_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_d
     list_ranges = np.split(ind_non_zero_spectrums, np.where(np.diff(ind_non_zero_spectrums) != 1)[0]+1)
     last_non_zero_spectrum = ind_non_zero_spectrums[-1]
 
-    channels = np.arange(first_channel, last_channel)
-    spectrums = allspectrums_corr[0:last_non_zero_spectrum,
-                                  first_channel:last_channel]
+    channels = np.arange(int(first_channel), int(last_channel+1))
+    spectrums = allspectrums_corr[0:last_non_zero_spectrum+1,
+                                  int(first_channel):int(last_channel+1)]
 
     fig = plt.figure(figsize=(12,4.6))
     ax1 = fig.add_subplot(111)
