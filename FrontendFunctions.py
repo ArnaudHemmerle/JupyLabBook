@@ -12,7 +12,7 @@ import sys
 import nbformat as nbf
 import CustomFunctions as CF
 
-__version__ = '0.5'
+__version__ = '0.6'
 
 """
 -Here are defined all the functions relevant to the front end of JupyLabBook,
@@ -220,50 +220,6 @@ def Choose_action(expt):
             print('Notebook exported to %s.pdf'%expt.notebook_name.split('.')[0])
         else:
             print("There was something wrong with the export to pdf. Please try again.")
-            
-
-            
-    def on_button_HR_export_clicked(b):
-        """
-        Export the notebook to PDF in high-resolution.
-        """
-
-        print('Export in progress (it may take a long time)...')
-        
-        # Do first an export to low resolution PDF.
-        export_LR_done = Export_nb_to_pdf(expt.notebook_name)
-                   
-        # Dupplicate the notebook with an extra cell at the beginning setting the 
-        # images to pdf (High Resolution)
-        nb = nbf.read(expt.notebook_name, as_version=4)
-        code='is_HR = True'
-        new_cell = nbf.v4.new_code_cell(code)
-        nb['cells'].insert(0, new_cell)              
-        nbf.write(nb, expt.notebook_name[:-6]+'_HR.ipynb')
-        
-        # Execute all the cells in the HR notebook
-        command = 'jupyter nbconvert --to notebook --inplace --execute --allow-errors --ExecutePreprocessor.timeout=-1 '
-        command+= expt.notebook_name[:-6]+'_HR.ipynb'
-        rc = subprocess.call(command,shell=True)
-        if rc>1:
-            export_ipynb_done = False
-        else:
-            export_ipynb_done = True
-        
-        # Export the HR ipynb to PDF
-        export_HR_done = Export_nb_to_pdf(expt.notebook_name[:-6]+'_HR.ipynb')
-        
-        # Remove the HR ipynb
-        os.remove(expt.notebook_name[:-6]+'_HR.ipynb')
-        
-        if export_LR_done:
-            print('Notebook exported in low resolution to %s.pdf'%expt.notebook_name.split('.')[0])
-            
-        if (export_LR_done and export_ipynb_done and export_HR_done) :
-            print('Notebook exported in high resolution to %s_HR.pdf'%expt.notebook_name.split('.')[0])
-        else:
-            print("There was something wrong with the export to pdf. Please try again.")
-            
     
     # Display the widgets
    
@@ -286,10 +242,6 @@ def Choose_action(expt):
     # Click to export to pdf
     button_export = widgets.Button(description="Export to PDF")
     button_export.on_click(on_button_export_clicked)
-    
-    # Click to export to pdf in high resolution
-    button_HR_export = widgets.Button(description="Export to PDF in HR")
-    button_HR_export.on_click(on_button_HR_export_clicked)
 
     buttons0 = widgets.HBox([button_treat, button_refresh])
     display(buttons0)
@@ -302,7 +254,7 @@ def Choose_action(expt):
     buttons1 = widgets.HBox([button_form, button_calibthetaz])
     display(buttons1)
 
-    buttons2 = widgets.HBox([button_export, button_HR_export])
+    buttons2 = widgets.HBox([button_export])
     display(buttons2)
     
 

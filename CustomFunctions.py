@@ -14,7 +14,7 @@ from scipy.special import erf
 from PIL import Image
 from psutil import virtual_memory as vm
 
-__version__ = '0.5'
+__version__ = '0.6'
 
 """
 Here are defined the custom functions used for analysis of data in the JupyLabBook.
@@ -808,12 +808,12 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
             fig=plt.figure(figsize=(12,5))
             fig.subplots_adjust(hspace=0.4, wspace=0.4, bottom=0.16)
             ax1=fig.add_subplot(121)
-            ax1.pcolormesh(twotheta*180./np.pi, alphaf*180./np.pi, mat.transpose(), cmap = 'jet')
+            ax1.pcolormesh(twotheta*180./np.pi, alphaf*180./np.pi, mat.transpose(), cmap = 'jet', rasterized=True)
             ax1.set_xlabel('2 theta (deg)', fontsize='large')
             ax1.set_ylabel('alpha_f (deg)', fontsize='large')
 
             ax2=fig.add_subplot(122)
-            ax2.pcolormesh(qxy, qz, mat.transpose(), cmap = 'jet')
+            ax2.pcolormesh(qxy, qz, mat.transpose(), cmap = 'jet', rasterized=True)
             ax2.set_xlabel('qxy (nm^-1)', fontsize='large')
             ax2.set_ylabel('qz (nm^-1)', fontsize='large')
             fig.suptitle('True GIXD', fontsize='x-large')
@@ -1153,9 +1153,9 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
         fig.suptitle(nxs_filename.split('\\')[-1], fontsize='x-large')
         ax0 = fig.add_subplot(121)
         if logz:
-            ax0.pcolormesh(xx, yy, images_sum, cmap = cmap, norm = colors.LogNorm())
+            ax0.pcolormesh(xx, yy, images_sum, cmap = cmap, norm = colors.LogNorm(), rasterized=True)
         else:
-            ax0.pcolormesh(xx, yy, images_sum, cmap = cmap)
+            ax0.pcolormesh(xx, yy, images_sum, cmap = cmap, rasterized=True)
         ax0.invert_yaxis()
         ax0.set_xlabel('Horizontal pixels (x)', fontsize='large')
         ax0.set_ylabel('Vertical pixels (y)', fontsize='large')
@@ -1164,7 +1164,8 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
         if plot_twotheta_alphaf:
         
             ax1 = fig.add_subplot(122)
-            ax1.pcolormesh(twotheta*180./np.pi, alphaf*180./np.pi, images_sum, cmap = cmap, norm = colors.LogNorm())
+            ax1.pcolormesh(twotheta*180./np.pi, alphaf*180./np.pi, images_sum, cmap = cmap,
+                           norm = colors.LogNorm(), rasterized=True)
             ax1.set_xlabel('2 theta (deg)', fontsize='large')
             ax1.set_ylabel('alpha_f (deg)', fontsize='large')
 
@@ -1174,7 +1175,7 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
         if plot_qxy_qz:
 
             ax1 = fig.add_subplot(122)
-            ax1.pcolormesh(qxy, qz, images_sum, cmap = cmap, norm = colors.LogNorm())
+            ax1.pcolormesh(qxy, qz, images_sum, cmap = cmap, norm = colors.LogNorm(), rasterized=True)
             ax1.set_xlabel('qxy (nm^-1)', fontsize='large')
             ax1.set_ylabel('qz (nm^-1)', fontsize='large')
             plt.show()
@@ -1183,7 +1184,7 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
         if plot_qxy_q:
 
             ax1 = fig.add_subplot(122)
-            ax1.pcolormesh(qxy, q, images_sum, cmap = cmap, norm = colors.LogNorm())
+            ax1.pcolormesh(qxy, q, images_sum, cmap = cmap, norm = colors.LogNorm(), rasterized=True)
             ax1.set_xlabel('qxy (nm^-1)', fontsize='large')
             ax1.set_ylabel('q (nm^-1)', fontsize='large')
             plt.show()
@@ -1440,9 +1441,9 @@ def Extract_pilatus_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recordin
         #Show the full image integrated over the scan
         ax0 = fig.add_subplot(inner[0])
         if logz:
-            ax0.pcolormesh(xx, yy, images_sum, cmap = cmap, norm = colors.LogNorm())
+            ax0.pcolormesh(xx, yy, images_sum, cmap = cmap, norm = colors.LogNorm(), rasterized=True)
         else:
-            ax0.pcolormesh(xx, yy, images_sum, cmap = cmap)
+            ax0.pcolormesh(xx, yy, images_sum, cmap = cmap, rasterized=True)
         ax0.set(xlabel = 'horizontal pixel (x)', ylabel ='vertical pixel (y)')
         ax0.invert_yaxis()
         fig.subplots_adjust(top=0.95)
