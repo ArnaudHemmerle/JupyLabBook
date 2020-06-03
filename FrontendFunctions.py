@@ -12,7 +12,7 @@ import sys
 import nbformat as nbf
 import CustomFunctions as CF
 
-__version__ = '0.6'
+__version__ = '0.7'
 
 """
 -Here are defined all the functions relevant to the front end of JupyLabBook,
@@ -50,6 +50,11 @@ def Check_files(expt):
         print(expt.recording_dir)
         print("This folder should contain the nexus files.")
         print("")
+    if not os.path.exists(expt.logs_dir):
+        print(PN._RED+"The following folder does not exist:"+PN._RESET)
+        print(expt.logs_dir)
+        print("This folder should contain the log files.")
+        print("")        
     if not os.path.exists(expt.notebook_name):
         print(PN._RED+"The following file does not exist:"+PN._RESET)
         print(expt.notebook_name)
