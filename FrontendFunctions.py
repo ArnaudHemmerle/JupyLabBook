@@ -165,7 +165,7 @@ def Choose_action(expt):
         
     def on_button_refresh_clicked(b):
         """
-        Re-execute the cell to have the list of files updated.
+        Re-execute the cell to update it.
         """
         # Create a unique id based on epoch time
         display_id = int(time.time()*1e9)
@@ -234,6 +234,57 @@ def Choose_action(expt):
         Create_cell(code='**Insert your comment (double-click here and replace current text).**',
                     position ='above', celltype='markdown', is_print=True)
     
+                    
+    def on_button_script_clicked(b):
+        """
+        Insert a script as a markdown cell.
+        """ 
+
+        # Check if there is already a path for scripts directories
+        # If not, use the recording directory
+        try:
+            path_to_dir_default = expt.path_to_dir
+        except:
+            path_to_dir_default = expt.recording_dir
+
+        path_to_dir = widgets.Text(
+                value=path_to_dir_default,
+                description='Scripts directory:',
+                layout=widgets.Layout(width='900px', height='40px'),
+                style={'description_width': 'initial'})
+        display(path_to_dir)
+
+        script_name = widgets.Text(
+                placeholder='script_name.ipy',
+                description='Script name:',
+                layout=widgets.Layout(width='400px', height='40px'),
+                style={'description_width': 'initial'})
+        display(script_name)
+
+        def on_button_display_clicked(b):
+            """
+            Display a script in a markdown cell.
+            """ 
+            
+            on_button_refresh_clicked(b)
+            
+            # Pass the current value of the directory to the default one
+            expt.path_to_dir = path_to_dir.value
+
+            text_file = open(path_to_dir.value+script_name.value)
+            file_content = text_file.read()
+            text_file.close()
+            code = '```python'+file_content+'```'
+
+            Create_cell(code='### '+ script_name.value, position ='above', celltype='markdown', is_print=True)
+            Create_cell(code=code, position ='above', celltype='markdown', is_print=True)
+            
+
+        button_display = widgets.Button(description="Add script to report")
+        button_display.on_click(on_button_display_clicked)
+
+        display(button_display)
+    
     # Display the widgets
    
     # Click to treat a single scan
@@ -259,6 +310,10 @@ def Choose_action(expt):
     # Click to insert a markdown cell
     button_markdown = widgets.Button(description="Insert comment")
     button_markdown.on_click(on_button_markdown_clicked)
+    
+    # Click to insert a script
+    button_script = widgets.Button(description="Insert script")
+    button_script.on_click(on_button_script_clicked)
 
     buttons0 = widgets.HBox([button_treat, button_refresh])
     display(buttons0)
@@ -271,7 +326,7 @@ def Choose_action(expt):
     buttons1 = widgets.HBox([button_form, button_calibthetaz])
     display(buttons1)
 
-    buttons2 = widgets.HBox([button_markdown, button_export])
+    buttons2 = widgets.HBox([button_markdown, button_script, button_export])
     display(buttons2)
     
 
