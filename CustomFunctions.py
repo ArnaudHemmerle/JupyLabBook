@@ -14,7 +14,7 @@ from scipy.special import erf
 from PIL import Image
 from psutil import virtual_memory as vm
 
-__version__ = '0.6'
+__version__ = '0.7'
 
 """
 Here are defined the custom functions used for analysis of data in the JupyLabBook.
@@ -401,6 +401,7 @@ def Extract_channel_Qc(nxs_filename='SIRIUS_test.nxs', working_dir='', recording
         if column_qxy is None:
             if column_delta is None:
                 print(PN._RED,'\t. No usual actuator for GIXD found, stop there', PN._RESET)
+                nexus.close()
                 return
             else:
                 columnx=column_delta
@@ -440,7 +441,8 @@ def Extract_channel_Qc(nxs_filename='SIRIUS_test.nxs', working_dir='', recording
         
         # Load images
         stamps, images=nexus.extractData('2D')
-
+        nexus.close()
+        
         # Create the Qxy Qz map from images
         daty=[]
         datytop=[]
@@ -536,6 +538,7 @@ def Extract_channel_Qc(nxs_filename='SIRIUS_test.nxs', working_dir='', recording
         
         print('Data not saved. To save data, run a GIXD on the scan.')
         print('Channel0: %g'%i_max)
+       
         
     return i_max
 
@@ -938,6 +941,7 @@ def Plot_isotherm(nxs_filename='SIRIUS_test.nxs', recording_dir='', show_data_st
         if verbose: print("\t. Number of data points: ", nbpts)
         # Get stamps and Data
         stamps, data=nexus.extractData('0D')
+        nexus.close()
         
         # Explore stamps
         if show_data_stamps : print("\t. Available Counters:")
@@ -1003,6 +1007,8 @@ def Plot_isotherm(nxs_filename='SIRIUS_test.nxs', recording_dir='', show_data_st
             ax2.set_xlabel('Time (sec)', fontsize=14)
             ax2.set_ylabel('Area per Molecule (nm$\mathregular{^2}$)', fontsize=14)
             ax3.set_ylabel('Surface pressure (mN/m)', fontsize=14, color='b')
+        
+        
 
             
 ##########################################################################################
@@ -1087,7 +1093,8 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
         images_sum = np.where(images_sum>0, images_sum, -2.)
         
         #Extract the values of each elements of the nxs
-        s, data = nexus.extractData('0D')   
+        s, data = nexus.extractData('0D')
+        nexus.close()
 
         i_gamma = None
         i_delta = None
@@ -1205,7 +1212,9 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
             print(" ")
             print('\t. Tiff saved in:')
             print("\t", savename+'.tiff')
-            print(" ")            
+            print(" ")
+            
+       
   
 ##########################################################################################
 ###################################### FLUO ##############################################
@@ -1241,6 +1250,7 @@ def Extract_fluo_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_d
         if verbose: print("\t. Number of data points: ", nbpts)
         # Get stamps
         stamps, data= nexus.extractData()
+        nexus.close()
         if show_data_stamps : print("\t. Available Counters:")
         for i in range(len(stamps)):
             if stamps[i][1] is not None:
@@ -1251,7 +1261,7 @@ def Extract_fluo_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_d
                 if show_data_stamps : print("\t\t",i, ' -------> ', stamps[i][0])
          
     def extract_and_correct(ind_spectrum):
-        """Extract the requested fluospectrum from the nexus file and correct it with ICR/OCR"""
+        """Extract the requested fluospectrum from the data and correct it with ICR/OCR"""
         for i in range(len(stamps)):
             if (stamps[i][1] != None and stamps[i][1].lower() == "fluoicr0"+ind_spectrum):
                 fluoicr = data[i]
@@ -1271,8 +1281,6 @@ def Extract_fluo_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_d
 
     for i in list_elems:
         allspectrums_corr  += extract_and_correct(str(i))
-    
-    nexus.close()
     
     ind_non_zero_spectrums = np.where(np.sum(allspectrums_corr, axis = 1)>10.)[0]
     list_ranges = np.split(ind_non_zero_spectrums, np.where(np.diff(ind_non_zero_spectrums) != 1)[0]+1)
@@ -1319,6 +1327,7 @@ def Plot_1D(nxs_filename='SIRIUS_test.nxs', recording_dir='',
     """
     nexus = PN.PyNexusFile(recording_dir+nxs_filename, fast=True)
     stamps0D, data0D = nexus.extractData('0D')
+    nexus.close()
     sensor_list = [stamps0D[i][0] if stamps0D[i][1]== None else stamps0D[i][1] for i in range(len(stamps0D))]
 
     xArg = sensor_list.index(xLabel)
@@ -1399,7 +1408,8 @@ def Extract_pilatus_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recordin
             sys.stdout.write('                                                                                  \r')
             sys.stdout.flush()
 
-            
+        nexus.close()  
+        
         images_sum = images.sum(axis=0)
 
         #Replace the dead zone (spacing between chips) on the detector with -2. 

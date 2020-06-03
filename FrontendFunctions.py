@@ -343,6 +343,7 @@ def Set_interactive_1D(scan):
 
     nexus = PN.PyNexusFile(scan.path, fast=True)
     stamps0D, data0D = nexus.extractData('0D')
+    nexus.close()
     sensor_list = [stamps0D[i][0] if stamps0D[i][1]== None else stamps0D[i][1] for i in range(len(stamps0D))]
 
 
