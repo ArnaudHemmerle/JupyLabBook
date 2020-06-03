@@ -532,19 +532,104 @@ def Choose_treatment(expt):
                             position ='below', celltype='markdown', is_print=True)    
 
     def on_button_fluo_clicked(b):
-        for scan in expt.scans:
-            
-            Create_cell(code='CF.Extract_fluo_sum(nxs_filename=\''+scan.nxs+'\','+ 
-                       'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
-                       'logz=True, list_elems=expt.list_elems, first_channel=expt.first_channel, '+
-                       'last_channel=expt.last_channel, '+
-                       'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+')',
-                        position='below', celltype='code', is_print = True)  
-            
-            if len(expt.scans)>1:
-                Create_cell(code='### '+scan.id+': '+scan.command,
-                        position ='below', celltype='markdown', is_print=True)         
         
+        # Checkboxes for plot options
+        
+        style = {'description_width': 'initial'}
+        short_layout = widgets.Layout(width='200px', height='40px')
+    
+        # show_data_stamps
+        try: value = expt.show_data_stamps
+        except: value = False
+        w_stamps = widgets.Checkbox(value=value, style=style, layout = short_layout, description='Print sensors')
+
+        # verbose
+        try: value = expt.verbose
+        except: value = False
+        w_verbose = widgets.Checkbox(value=value, style=style, layout = short_layout, description='Print scan info')
+  
+        # plot_spectrogram
+        try: value = expt.is_plot_spectrogram
+        except: value = True
+        w_spectrogram = widgets.Checkbox(value=value, style=style, layout = short_layout, description='Plot spectrogram')
+        
+        # plot_first_last
+        try: value = expt.is_plot_first_last
+        except: value = True
+        w_first_last = widgets.Checkbox(value=value, style=style, layout = short_layout, description='Plot first&last spectrum')
+        
+        # plot_sum
+        try: value = expt.is_plot_sum
+        except: value = True
+        w_sum = widgets.Checkbox(value=value, style=style, layout = short_layout, description='Plot sum of spectrums')
+        
+        # logz
+        try: value = expt.is_XRF_logz
+        except: value = True
+        w_XRF_logz = widgets.Checkbox(value=value, style=style, layout = short_layout, description='log z')
+        
+        # list_elems
+        try: value = expt.elems_str
+        except: value = '0, 1, 2, 3'
+        w_elems = widgets.Text(value=value, description='Elements', style=style, layout = short_layout)
+
+        # first_channel
+        try: value = expt.first_channel
+        except: value = 0
+        w_first_channel = widgets.IntText(value=value, description='First channel', style=style, layout = short_layout)
+        
+        # last_channel
+        try: value = expt.last_channel
+        except: value = 2047
+        w_last_channel = widgets.IntText(value=value, description='Last channel', style=style, layout = short_layout)
+
+        
+        display(widgets.HBox([w_stamps, w_verbose]))
+        display(widgets.HBox([w_spectrogram, w_first_last, w_sum]))
+        display(widgets.HBox([w_XRF_logz, w_elems, w_first_channel, w_last_channel]))
+            
+        def on_button_plot_clicked(b):
+
+            # Pass current values as default values
+            expt.is_plot_spectrogram = w_spectrogram.value
+            expt.is_plot_first_last = w_first_last.value
+            expt.is_plot_sum = w_sum.value
+            expt.is_XRF_logz = w_XRF_logz.value
+            expt.elems_str = w_elems.value
+            expt.first_channel = w_first_channel.value
+            expt.last_channel = w_last_channel.value
+            expt.show_data_stamps = w_stamps.value
+            expt.verbose = w_verbose.value
+            
+            # Convert elems_str into a list
+            list_elems = [int(expt.elems_str.split(',')[i]) for i in range(len(expt.elems_str.split(',')))]
+            
+            for scan in expt.scans:
+
+                Create_cell(code='CF.Extract_fluo('+
+                           'nxs_filename=\''+scan.nxs+'\','+ 
+                           'working_dir=expt.working_dir,recording_dir=expt.recording_dir,'+
+                           'logz='+str(w_XRF_logz.value)+','+
+                           'list_elems='+str(list_elems)+','+
+                           'first_channel='+str(w_first_channel.value)+','+
+                           'last_channel='+str(w_last_channel.value)+','+
+                           'show_data_stamps='+str(w_stamps.value)+','+
+                           'verbose='+str(w_verbose.value)+','+
+                           'plot_spectrogram='+str(w_spectrogram.value)+','+
+                           'plot_first_last='+str(w_first_last.value)+','+
+                           'plot_sum='+str(w_sum.value)+
+                           ')',
+                           position='below', celltype='code', is_print = True)  
+
+                if len(expt.scans)>1:
+                    Create_cell(code='### '+scan.id+': '+scan.command,
+                            position ='below', celltype='markdown', is_print=True)  
+                    
+        button_plot = widgets.Button(description="Plot")
+        button_plot.on_click(on_button_plot_clicked)
+        
+        display(button_plot)
+
     def on_button_isotherm_clicked(b):
         for scan in expt.scans:
             
@@ -587,8 +672,6 @@ def Choose_treatment(expt):
         #clear_output(wait=False)
         
         # Save the default value of booleans
-        expt.show_stamps = w_stamps.value
-        expt.verbose = w_verbose.value
         
         Delete_current_cell()
         
@@ -662,17 +745,6 @@ def Choose_treatment(expt):
         for scan in expt.scans:
               print('%s: %s'%(scan.nxs,scan.command))
         
-    # Checkboxes for verbose
-    try: value = expt.show_stamps
-    except: value = False
-    w_stamps = widgets.Checkbox(value=value, description='Print sensors?')
-    
-    try: value = expt.verbose
-    except: value = False
-    w_verbose = widgets.Checkbox(value=value, description='Print scan info?')
-    
-    display(widgets.HBox([w_stamps, w_verbose]))
-    
     # Buttons for specific treatment
     buttons1 = widgets.HBox([button_GIXD, button_true_GIXD, button_fluo, button_isotherm])
     display(buttons1)

@@ -1220,11 +1220,12 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
 ###################################### FLUO ##############################################
 ##########################################################################################
 
-def Extract_fluo_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='',  
+def Extract_fluo(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='',  
                      logz=False, list_elems=[0,1,2,3], first_channel=0, last_channel=2048,
-                     show_data_stamps=False, verbose=False):
+                     show_data_stamps=False, verbose=False,
+                     plot_spectrogram=False, plot_first_last=False, plot_sum=False):
     """
-    Extract, correct with ICR/ORCR, and plot the summed fluo spectrum. 
+    Extract, correct with ICR/OCR, and plot the fluo spectrum. 
     """
     
     nxs_path = recording_dir+nxs_filename
@@ -1276,7 +1277,7 @@ def Extract_fluo_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_d
         spectrums_corr = np.array([fluospectrum[n]*ratio[n] for n in range(len(ratio))])
         return spectrums_corr
 
-    # Correct each chosen fluospectrum with ICR/OCR and sum them
+    # Correct each chosen element with ICR/OCR and sum them
     allspectrums_corr = np.zeros((nbpts, 2048))
 
     for i in list_elems:
@@ -1290,28 +1291,40 @@ def Extract_fluo_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_d
     spectrums = allspectrums_corr[0:last_non_zero_spectrum+1,
                                   int(first_channel):int(last_channel+1)]
 
-    fig = plt.figure(figsize=(12,4.6))
-    ax1 = fig.add_subplot(111)
-    ax1.set_title(nxs_filename.split('\\')[-1], fontsize='x-large')
-    ax1.set_xlabel('spectrum index', fontsize='large')
-    ax1.set_ylabel('channel', fontsize='large')
-    ax1.set_xlim(left = 0, right = last_non_zero_spectrum)
-    if logz:
-        im1 = ax1.imshow(allspectrums_corr.transpose(), cmap = 'viridis', aspect = 'auto', norm=colors.LogNorm())
-    else:
-        im1 = ax1.imshow(allspectrums_corr.transpose(), cmap = 'viridis', aspect = 'auto')
-    plt.show()
+    if plot_spectrogram:
+        fig = plt.figure(figsize=(12,4.6))
+        ax1 = fig.add_subplot(111)
+        ax1.set_title(nxs_filename.split('\\')[-1], fontsize='x-large')
+        ax1.set_xlabel('spectrum index', fontsize='large')
+        ax1.set_ylabel('channel', fontsize='large')
+        ax1.set_xlim(left = 0, right = last_non_zero_spectrum)
+        if logz:
+            im1 = ax1.imshow(allspectrums_corr.transpose(), cmap = 'viridis', aspect = 'auto', norm=colors.LogNorm())
+        else:
+            im1 = ax1.imshow(allspectrums_corr.transpose(), cmap = 'viridis', aspect = 'auto')
+        plt.show()
+        
+    if plot_sum:
+        fig = plt.figure(figsize=(12,4.5))
+        ax1 = fig.add_subplot(111)
+        ax1.set_xlabel('channel', fontsize='large')
+        ax1.set_ylabel('counts', fontsize='large')
+        ax1.plot(channels, np.sum(spectrums, axis = 0), 'b.-', label='Sum of spectrums')
+        ax1.legend(fontsize='large')
+        if logz: ax1.set_yscale('log')
+        plt.show()
 
-    #Plot the selected channel range
-    fig = plt.figure(figsize=(12,4.5))
-    ax1 = fig.add_subplot(111)
-    ax1.set_xlabel('channel', fontsize='large')
-    ax1.set_ylabel('counts', fontsize='large')
-    ax1.plot(channels, spectrums[0], 'b.-', label='First spectrum')
-    ax1.plot(channels, spectrums[-1], 'r.-', label='Last spectrum')
-    ax1.legend(fontsize='large')
-    if logz: ax1.set_yscale('log')
-    plt.show()
+    if plot_first_last:    
+        #Plot the selected channel range
+        fig = plt.figure(figsize=(12,4.5))
+        ax1 = fig.add_subplot(111)
+        ax1.set_xlabel('channel', fontsize='large')
+        ax1.set_ylabel('counts', fontsize='large')
+        ax1.plot(channels, spectrums[0], 'b.-', label='First spectrum')
+        ax1.plot(channels, spectrums[-1], 'r.-', label='Last spectrum')
+        ax1.legend(fontsize='large')
+        if logz: ax1.set_yscale('log')
+        plt.show()
 
 
 ##########################################################################################
