@@ -225,6 +225,14 @@ def Choose_action(expt):
             print('Notebook exported to %s.pdf'%expt.notebook_name.split('.')[0])
         else:
             print("There was something wrong with the export to pdf. Please try again.")
+
+                
+    def on_button_markdown_clicked(b):
+        """
+        Insert a markdown cell above the current cell.
+        """ 
+        Create_cell(code='**Insert your comment (double-click here and replace current text).**',
+                    position ='above', celltype='markdown', is_print=True)
     
     # Display the widgets
    
@@ -247,6 +255,10 @@ def Choose_action(expt):
     # Click to export to pdf
     button_export = widgets.Button(description="Export to PDF")
     button_export.on_click(on_button_export_clicked)
+    
+    # Click to insert a markdown cell
+    button_markdown = widgets.Button(description="Insert comment")
+    button_markdown.on_click(on_button_markdown_clicked)
 
     buttons0 = widgets.HBox([button_treat, button_refresh])
     display(buttons0)
@@ -259,7 +271,7 @@ def Choose_action(expt):
     buttons1 = widgets.HBox([button_form, button_calibthetaz])
     display(buttons1)
 
-    buttons2 = widgets.HBox([button_export])
+    buttons2 = widgets.HBox([button_markdown, button_export])
     display(buttons2)
     
 
@@ -527,7 +539,14 @@ def Choose_treatment(expt):
         
         Create_cell(code='FF.Choose_action(expt)',
                     position ='at_bottom', celltype='code', is_print=False)        
-
+        
+    def on_button_markdown_clicked(b):
+        """
+        Insert a markdown cell above the current cell.
+        """ 
+        Create_cell(code='**Insert your comment (double-click here and replace current text).**',
+                    position ='above', celltype='markdown', is_print=True)
+        
        
     # Display the widgets    
     # ADD HERE A CALL TO YOUR BUTTON
@@ -569,6 +588,9 @@ def Choose_treatment(expt):
         
     button_next = widgets.Button(description="Next action")
     button_next.on_click(on_button_next_clicked)
+    
+    button_markdown = widgets.Button(description="Insert comment")
+    button_markdown.on_click(on_button_markdown_clicked)
       
     if len(expt.scans)==1:
         # Options for single scan analysis only
@@ -603,7 +625,7 @@ def Choose_treatment(expt):
     buttons2 = widgets.HBox([button_pilatus, button_GIXS_angles, button_GIXS_qxy_qz, button_GIXS_qxy_q])
     display(buttons2)
 
-    buttons3 = widgets.HBox([button_vineyard, button_next])
+    buttons3 = widgets.HBox([button_vineyard, button_markdown, button_next])
     display(buttons3)
     
     
