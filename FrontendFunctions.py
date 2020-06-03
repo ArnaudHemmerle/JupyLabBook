@@ -903,7 +903,7 @@ def Create_form():
         for elem in txt:
             Create_cell(code=elem, position ='below', celltype='markdown', is_print=True)
         
-        Create_cell(code='# Form', position ='below', celltype='markdown', is_print=True)
+        Create_cell(code='# Experimental setup', position ='below', celltype='markdown', is_print=True)
         
     button = widgets.Button(description="Print form")
     out = widgets.Output()
