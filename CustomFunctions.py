@@ -1221,10 +1221,10 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
        
   
 ##########################################################################################
-###################################### FLUO ##############################################
+###################################### XRF ###############################################
 ##########################################################################################
 
-def Extract_fluo(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='',  
+def Extract_XRF(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='',  
                      logz=False, list_elems=[0,1,2,3], first_channel=0, last_channel=2048,
                      show_data_stamps=False, verbose=False,
                      plot_spectrogram=False, plot_first_last=False, plot_sum=False):

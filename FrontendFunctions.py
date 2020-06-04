@@ -650,14 +650,14 @@ def Choose_treatment(expt):
         button_plot.on_click(on_button_plot_clicked)
         display(widgets.HBox([w_GIXS_plot_type,button_plot]))
 
-    def on_button_fluo_clicked(b):
+    def on_button_XRF_clicked(b):
         
         # Checkboxes for options       
        
         # show_data_stamps
         try: value = expt.show_data_stamps
         except: value = False
-        w_stamps = widgets.Checkbox(value=value, style=style, layout = short_layout, description='Print sensors')
+        w_show_data_stamps = widgets.Checkbox(value=value, style=style, layout = short_layout, description='Print sensors')
 
         # verbose
         try: value = expt.verbose
@@ -665,29 +665,30 @@ def Choose_treatment(expt):
         w_verbose = widgets.Checkbox(value=value, style=style, layout = short_layout, description='Print scan info')
   
         # plot_spectrogram
-        try: value = expt.is_plot_spectrogram
+        try: value = expt.plot_spectrogram
         except: value = True
-        w_spectrogram = widgets.Checkbox(value=value, style=style, layout = short_layout, description='Plot spectrogram')
+        w_plot_spectrogram = widgets.Checkbox(value=value, style=style, layout = short_layout, description='Plot spectrogram')
         
         # plot_first_last
-        try: value = expt.is_plot_first_last
+        try: value = expt.plot_first_last
         except: value = True
-        w_first_last = widgets.Checkbox(value=value, style=style, layout = short_layout, description='Plot first&last spectrum')
+        w_plot_first_last = widgets.Checkbox(value=value, style=style,
+                                             layout = short_layout, description='Plot first&last spectrum')
         
         # plot_sum
-        try: value = expt.is_plot_sum
+        try: value = expt.plot_sum
         except: value = True
-        w_sum = widgets.Checkbox(value=value, style=style, layout = short_layout, description='Plot sum of spectrums')
+        w_plot_sum = widgets.Checkbox(value=value, style=style, layout = short_layout, description='Plot sum of spectrums')
         
         # logz
-        try: value = expt.is_XRF_logz
+        try: value = expt.XRF_logz
         except: value = True
         w_XRF_logz = widgets.Checkbox(value=value, style=style, layout = short_layout, description='log z')
         
         # list_elems
         try: value = expt.elems_str
         except: value = '0, 1, 2, 3'
-        w_elems = widgets.Text(value=value, description='Elements', style=style, layout = short_layout)
+        w_elems_str = widgets.Text(value=value, description='Elements', style=style, layout = short_layout)
 
         # first_channel
         try: value = expt.first_channel
@@ -700,40 +701,40 @@ def Choose_treatment(expt):
         w_last_channel = widgets.IntText(value=value, description='Last channel', style=style, layout = short_layout)
 
         
-        display(widgets.HBox([w_stamps, w_verbose]))
-        display(widgets.HBox([w_spectrogram, w_first_last, w_sum]))
-        display(widgets.HBox([w_XRF_logz, w_elems, w_first_channel, w_last_channel]))
+        display(widgets.HBox([w_show_data_stamps, w_verbose]))
+        display(widgets.HBox([w_plot_spectrogram, w_plot_first_last, w_plot_sum]))
+        display(widgets.HBox([w_XRF_logz, w_elems_str, w_first_channel, w_last_channel]))
             
         def on_button_plot_clicked(b):
 
             # Pass current values as default values
-            expt.is_plot_spectrogram = w_spectrogram.value
-            expt.is_plot_first_last = w_first_last.value
-            expt.is_plot_sum = w_sum.value
-            expt.is_XRF_logz = w_XRF_logz.value
-            expt.elems_str = w_elems.value
+            expt.XRF_logz = w_XRF_logz.value
+            expt.elems_str = w_elems_str.value
             expt.first_channel = w_first_channel.value
             expt.last_channel = w_last_channel.value
-            expt.show_data_stamps = w_stamps.value
+            expt.show_data_stamps = w_show_data_stamps.value
             expt.verbose = w_verbose.value
-            
+            expt.plot_spectrogram = w_plot_spectrogram.value
+            expt.plot_first_last = w_plot_first_last.value
+            expt.plot_sum = w_plot_sum.value
+           
             # Convert elems_str into a list
             list_elems = [int(expt.elems_str.split(',')[i]) for i in range(len(expt.elems_str.split(',')))]
             
             for scan in expt.scans:
 
-                Create_cell(code='CF.Extract_fluo('+
+                Create_cell(code='CF.Extract_XRF('+
                            'nxs_filename=\''+scan.nxs+'\','+ 
                            'working_dir=expt.working_dir,recording_dir=expt.recording_dir,'+
-                           'logz='+str(w_XRF_logz.value)+','+
+                           'logz='+str(expt.XRF_logz)+','+
                            'list_elems='+str(list_elems)+','+
-                           'first_channel='+str(w_first_channel.value)+','+
-                           'last_channel='+str(w_last_channel.value)+','+
-                           'show_data_stamps='+str(w_stamps.value)+','+
-                           'verbose='+str(w_verbose.value)+','+
-                           'plot_spectrogram='+str(w_spectrogram.value)+','+
-                           'plot_first_last='+str(w_first_last.value)+','+
-                           'plot_sum='+str(w_sum.value)+
+                           'first_channel='+str(expt.first_channel)+','+
+                           'last_channel='+str(expt.last_channel)+','+
+                           'show_data_stamps='+str(expt.show_data_stamps)+','+
+                           'verbose='+str(expt.verbose)+','+
+                           'plot_spectrogram='+str(expt.plot_spectrogram)+','+
+                           'plot_first_last='+str(expt.plot_first_last)+','+
+                           'plot_sum='+str(expt.plot_sum)+
                            ')',
                            position='below', celltype='code', is_print = True)  
 
@@ -822,8 +823,8 @@ def Choose_treatment(expt):
     button_true_GIXD = widgets.Button(description="Plot true GIXD")
     button_true_GIXD.on_click(on_button_true_GIXD_clicked)
     
-    button_fluo = widgets.Button(description="Plot fluo")
-    button_fluo.on_click(on_button_fluo_clicked)
+    button_XRF = widgets.Button(description="Plot XRF")
+    button_XRF.on_click(on_button_XRF_clicked)
     
     button_isotherm = widgets.Button(description="Plot isotherm")
     button_isotherm.on_click(on_button_isotherm_clicked)
@@ -856,7 +857,7 @@ def Choose_treatment(expt):
               print('%s: %s'%(scan.nxs,scan.command))
         
     # Buttons for specific treatment
-    buttons1 = widgets.HBox([button_GIXD, button_true_GIXD, button_fluo, button_isotherm])
+    buttons1 = widgets.HBox([button_GIXD, button_true_GIXD, button_XRF, button_isotherm])
     display(buttons1)
     
     buttons2 = widgets.HBox([button_pilatus, button_GIXS])
