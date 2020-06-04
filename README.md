@@ -4,8 +4,8 @@ A Jupyter Notebook used as a lab book on the beamline SIRIUS (SOLEIL Synchrotron
 # Current status
 JupyLabBook is presently in development & testing.  
 Last versions of modules:  
-FrontendFunctions.py: 0.7  
-CustomFunctions.py: 0.7
+FrontendFunctions.py: 0.8  
+CustomFunctions.py: 0.8
 
 # What is JupyLabBook?
 JupyLabBook is an interactive lab book to be used on SIRIUS. It is meant to be as close as possible as the paper-like lab book that you would use on the beamline (except for the ruler and the tape).  
@@ -21,12 +21,6 @@ JupyLabBook is not made of paper: it can crash, it can be corrupted, it can be d
 1) Contrary to its name, JupyLabBook cannot be used with Jupyter Lab. It has to be used with Jupyter Notebook. If you are running Jupyter Lab, use the option "Launch Classic Notebook" in the Help menu.  
 
 2) After short introduction by the beamline staff, you should be able to generate the plots by clicking on the right buttons.
-
-3) **To insert text:**
-  - Press 'Escape', to stay outside of any cell.  
-  - Press 'b', it will insert a cell below the last selected cell.  
-  - Press 'm', to turn the new cell into a text cell.  
-  - Click in the cell to enter text. Press "Shift+Enter" to validate the text (or click on "Execute cell")
  
 # Installation notes
 Recommandations for installation on Windows 10:
