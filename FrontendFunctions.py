@@ -435,8 +435,7 @@ def Set_interactive_1D(scan):
 def Choose_treatment(expt):
     """
     Take object from the class Experiment.
-    1) Allow the user to plot sensors from the scan using the interactive widget (if only one scan was selected).
-    2) Display the buttons for choosing the next action.
+    Allow the user to choose the treatment to be applied, via widgets.
     """
     
     # Styling options for widgets
@@ -594,11 +593,14 @@ def Choose_treatment(expt):
                     Create_cell(code='### '+scan.id+': '+scan.command,
                             position ='below', celltype='markdown', is_print=True)
 
-                
+            # Do as if the button next was clicked
+            on_button_next_clicked(b)
+
         button_plot = widgets.Button(description="Plot")
         button_plot.on_click(on_button_plot_clicked)
         display(widgets.HBox([w_GIXD_plot_type,button_plot]))
 
+        
 
     def on_button_pilatus_clicked(b):
         
@@ -647,6 +649,9 @@ def Choose_treatment(expt):
                     Create_cell(code='### '+scan.id+': '+scan.command,
                             position ='below', celltype='markdown', is_print=True)     
 
+            # Do as if the button next was clicked
+            on_button_next_clicked(b)                    
+                    
         button_plot = widgets.Button(description="Plot")
         button_plot.on_click(on_button_plot_clicked)
         display(button_plot)  
@@ -759,6 +764,9 @@ def Choose_treatment(expt):
                 if len(expt.scans)>1:
                     Create_cell(code='### '+scan.id+': '+scan.command,
                                 position ='below', celltype='markdown', is_print=True)            
+
+            # Do as if the button next was clicked
+            on_button_next_clicked(b)
             
         button_plot = widgets.Button(description="Plot")
         button_plot.on_click(on_button_plot_clicked)
@@ -855,6 +863,9 @@ def Choose_treatment(expt):
                 if len(expt.scans)>1:
                     Create_cell(code='### '+scan.id+': '+scan.command,
                             position ='below', celltype='markdown', is_print=True)  
+
+            # Do as if the button next was clicked
+            on_button_next_clicked(b)                    
                     
         button_plot = widgets.Button(description="Plot")
         button_plot.on_click(on_button_plot_clicked)
@@ -891,6 +902,10 @@ def Choose_treatment(expt):
                     Create_cell(code='### '+scan.id+': '+scan.command,
                             position ='below', celltype='markdown', is_print=True)
 
+            # Do as if the button next was clicked
+            on_button_next_clicked(b)                    
+                    
+                    
         button_plot = widgets.Button(description="Plot")
         button_plot.on_click(on_button_plot_clicked)
         
@@ -908,6 +923,9 @@ def Choose_treatment(expt):
         Create_cell(code='CF.GaussianRepartition_fit(nxs_filename=\''+scan.nxs+'\', recording_dir = expt.recording_dir,'+
                         'xLabel=\''+scan.xLabel+'\', yLabel=\''+scan.yLabel+'\')',
                     position='below', celltype='code', is_print = True)  
+
+        # Do as if the button next was clicked
+        on_button_next_clicked(b)        
         
     def on_button_fit_gau_clicked(b):
         scan = expt.scans[0]
@@ -915,18 +933,22 @@ def Choose_treatment(expt):
                         'xLabel=\''+scan.xLabel+'\', yLabel=\''+scan.yLabel+'\')',
                     position='below', celltype='code', is_print = True)   
         
+        # Do as if the button next was clicked
+        on_button_next_clicked(b)  
+        
     def on_button_vineyard_clicked(b):
         scan = expt.scans[0]
         Create_cell(code='expt.channel0 = CF.Extract_channel_Qc(nxs_filename=\''+scan.nxs+'\','+
                     'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
                     'logx=False, logy=False, logz=False)',
                     position='below', celltype='code', is_print = True)
-        
+ 
+        # Do as if the button next was clicked
+        on_button_next_clicked(b)  
+
     # Next action   
     def on_button_next_clicked(b):
         #clear_output(wait=False)
-        
-        # Save the default value of booleans
         
         Delete_current_cell()
         
@@ -980,7 +1002,7 @@ def Choose_treatment(expt):
         # Options for single scan analysis only
         
         # Buttons for general treatment
-        buttons0 = widgets.HBox([button_fit_gau, button_fit_erf, button_1D])
+        buttons0 = widgets.HBox([button_1D, button_markdown, button_next])
         display(buttons0)
 
         # Set up an interactive 1D plot
@@ -992,11 +1014,12 @@ def Choose_treatment(expt):
               print('%s: %s'%(scan.nxs,scan.command))
         
     # Buttons for specific treatment
-    buttons1 = widgets.HBox([button_GIXD, button_XRF, button_isotherm, button_pilatus, button_GIXS])
+    buttons1 = widgets.HBox([button_vineyard, button_fit_gau, button_fit_erf])
     display(buttons1)
-
-    buttons2 = widgets.HBox([button_vineyard, button_markdown, button_next])
+    
+    buttons2 = widgets.HBox([button_GIXD, button_XRF, button_isotherm, button_pilatus, button_GIXS])
     display(buttons2)
+
     
     
 def Create_form():
