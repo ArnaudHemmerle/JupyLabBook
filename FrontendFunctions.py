@@ -12,7 +12,7 @@ import sys
 import nbformat as nbf
 import CustomFunctions as CF
 
-__version__ = '0.7'
+__version__ = '0.8'
 
 """
 -Here are defined all the functions relevant to the front end of JupyLabBook,
@@ -229,10 +229,10 @@ def Choose_action(expt):
                 
     def on_button_markdown_clicked(b):
         """
-        Insert a markdown cell above the current cell.
+        Insert a markdown cell below the current cell.
         """ 
         Create_cell(code='**Insert your comment (double-click here and replace current text).**',
-                    position ='above', celltype='markdown', is_print=True)
+                    position ='below', celltype='markdown', is_print=True)
     
                     
     def on_button_script_clicked(b):
@@ -462,7 +462,7 @@ def Choose_treatment(expt):
         
         # GIXD_logz
         try: value = expt.GIXD_logz
-        except: value = True
+        except: value = False
         w_GIXD_logz = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='log z')
         
         # channel0
@@ -498,7 +498,7 @@ def Choose_treatment(expt):
 
         # computeqz
         try: value = expt.computeqz
-        except: value = False
+        except: value = True
         w_computeqz = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='compute qz')
                
         # nblevels
@@ -524,7 +524,9 @@ def Choose_treatment(expt):
         # GIXD_cmap
         try: value = expt.GIXD_cmap
         except: value = 'jet'
-        w_GIXD_cmap = widgets.Text(value=value, style=style, layout=tiny_layout, description='cmap')
+        w_GIXD_cmap = widgets.Select(value=value, style=style, rows=5, description='cmap',
+                                options=['viridis', 'jet', 'Greys', 'cividis', 'hot'])
+
         
         # plot_GIXD/plot_true_GIXD
         try: value = expt.GIXD_plot_type
@@ -599,18 +601,56 @@ def Choose_treatment(expt):
 
 
     def on_button_pilatus_clicked(b):
-        for scan in expt.scans:
+        
+        # pilatus_logz
+        try: value = expt.pilatus_logz
+        except: value = True
+        w_pilatus_logz = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='log z')
+      
+        # show_data_stamps
+        try: value = expt.show_data_stamps
+        except: value = False
+        w_show_data_stamps = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print sensors')
 
-            Create_cell(code='CF.Extract_pilatus_sum(nxs_filename=\''+scan.nxs+'\','+ 
-                       'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
-                       'logz=True, show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+', cmap=expt.cmap)',
-                        position='below', celltype='code', is_print = True)
-            
-            if len(expt.scans)>1:
-                Create_cell(code='### '+scan.id+': '+scan.command,
-                        position ='below', celltype='markdown', is_print=True)     
-                    
-                
+        # verbose
+        try: value = expt.verbose
+        except: value = False
+        w_verbose = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print scan info')
+          
+        # pilatus_cmap
+        try: value = expt.pilatus_cmap
+        except: value = 'Greys'
+        w_pilatus_cmap = widgets.Select(value=value, style=style, rows=5, description='cmap',
+                                        options=['viridis', 'jet', 'Greys', 'cividis', 'hot'])
+     
+        display(widgets.HBox([w_show_data_stamps, w_verbose, w_pilatus_logz, w_pilatus_cmap]))        
+
+        def on_button_plot_clicked(b):
+
+            # Pass current values as default values
+            expt.pilatus_logz = w_pilatus_logz.value
+            expt.show_data_stamps = w_show_data_stamps.value
+            expt.verbose = w_verbose.value
+            expt.pilatus_cmap = w_pilatus_cmap.value
+
+            for scan in expt.scans:
+
+                Create_cell(code='CF.Extract_pilatus_sum(nxs_filename=\''+scan.nxs+'\','+ 
+                           'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
+                            'logz='+str(expt.pilatus_logz)+','+
+                            'show_data_stamps='+str(expt.show_data_stamps)+','+
+                            'verbose='+str(expt.verbose)+','+
+                            'cmap=\''+str(expt.pilatus_cmap)+'\''+')',
+                            position='below', celltype='code', is_print = True)
+
+                if len(expt.scans)>1:
+                    Create_cell(code='### '+scan.id+': '+scan.command,
+                            position ='below', celltype='markdown', is_print=True)     
+
+        button_plot = widgets.Button(description="Plot")
+        button_plot.on_click(on_button_plot_clicked)
+        display(button_plot)  
+       
     def on_button_GIXS_clicked(b):
         
         # Checkboxes for options       
@@ -663,7 +703,9 @@ def Choose_treatment(expt):
         # GIXS_cmap
         try: value = expt.GIXS_cmap
         except: value = 'viridis'
-        w_GIXS_cmap = widgets.Text(value=value, style=style, layout=tiny_layout, description='cmap')
+        w_GIXS_cmap = widgets.Select(value=value, style=style, rows=5, description='cmap',
+                                options=['viridis', 'jet', 'Greys', 'cividis', 'hot'])
+     
         
         # plot_twotheta_alphaf/plot_qxy_qz/plot_qxy_q
         try: value = expt.GIXS_plot_type
@@ -673,8 +715,6 @@ def Choose_treatment(expt):
             
         display(widgets.HBox([w_show_data_stamps, w_verbose, w_GIXS_logz, w_GIXS_cmap, w_pixel_size]))        
         display(widgets.HBox([w_wavelength, w_distance, w_thetai, w_pixel_PONI_x, w_pixel_PONI_y]))
-        
-
         
         def on_button_plot_clicked(b):
             
@@ -688,7 +728,7 @@ def Choose_treatment(expt):
             expt.pixel_size = w_pixel_size.value
             expt.show_data_stamps = w_show_data_stamps.value
             expt.verbose = w_verbose.value
-            expt.GIXS_cmap = w_GIXS_map.value
+            expt.GIXS_cmap = w_GIXS_cmap.value
             expt.GIXS_plot_type = w_GIXS_plot_type.value
             
             # Pass plot type to params    
@@ -822,16 +862,40 @@ def Choose_treatment(expt):
         display(button_plot)
 
     def on_button_isotherm_clicked(b):
-        for scan in expt.scans:
             
-            Create_cell(code='CF.Plot_isotherm(nxs_filename=\''+scan.nxs+'\', recording_dir=expt.recording_dir, '+
-                       'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+')',
-                        position='below', celltype='code', is_print = True)
-            
-            if len(expt.scans)>1:
-                Create_cell(code='### '+scan.id+': '+scan.command,
-                        position ='below', celltype='markdown', is_print=True)
+        # show_data_stamps
+        try: value = expt.show_data_stamps
+        except: value = False
+        w_show_data_stamps = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print sensors')
 
+        # verbose
+        try: value = expt.verbose
+        except: value = False
+        w_verbose = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print scan info')
+        
+        display(widgets.HBox([w_show_data_stamps, w_verbose]))   
+        
+        def on_button_plot_clicked(b):
+
+            # Pass current values as default values
+            expt.show_data_stamps = w_show_data_stamps.value
+            expt.verbose = w_verbose.value
+
+            for scan in expt.scans:
+
+                Create_cell(code='CF.Plot_isotherm(nxs_filename=\''+scan.nxs+'\', recording_dir=expt.recording_dir, '+
+                           'show_data_stamps='+str(w_show_data_stamps.value)+', verbose='+str(w_verbose.value)+')',
+                            position='below', celltype='code', is_print = True)
+
+                if len(expt.scans)>1:
+                    Create_cell(code='### '+scan.id+': '+scan.command,
+                            position ='below', celltype='markdown', is_print=True)
+
+        button_plot = widgets.Button(description="Plot")
+        button_plot.on_click(on_button_plot_clicked)
+        
+        display(button_plot)                    
+                    
     # Actions relevant for single scan analysis only
     def on_button_1D_clicked(b):
         scan = expt.scans[0]
@@ -871,10 +935,10 @@ def Choose_treatment(expt):
         
     def on_button_markdown_clicked(b):
         """
-        Insert a markdown cell above the current cell.
+        Insert a markdown cell below the current cell.
         """ 
         Create_cell(code='**Insert your comment (double-click here and replace current text).**',
-                    position ='above', celltype='markdown', is_print=True)
+                    position ='below', celltype='markdown', is_print=True)
         
        
     # Display the widgets    
@@ -900,7 +964,7 @@ def Choose_treatment(expt):
     button_isotherm = widgets.Button(description="Plot isotherm")
     button_isotherm.on_click(on_button_isotherm_clicked)
     
-    button_pilatus = widgets.Button(description="Plot pilatus")
+    button_pilatus = widgets.Button(description="Plot Pilatus")
     button_pilatus.on_click(on_button_pilatus_clicked)
 
     button_GIXS = widgets.Button(description="Plot GIXS")
@@ -928,14 +992,11 @@ def Choose_treatment(expt):
               print('%s: %s'%(scan.nxs,scan.command))
         
     # Buttons for specific treatment
-    buttons1 = widgets.HBox([button_GIXD, button_XRF, button_isotherm])
+    buttons1 = widgets.HBox([button_GIXD, button_XRF, button_isotherm, button_pilatus, button_GIXS])
     display(buttons1)
-    
-    buttons2 = widgets.HBox([button_pilatus, button_GIXS])
-    display(buttons2)
 
-    buttons3 = widgets.HBox([button_vineyard, button_markdown, button_next])
-    display(buttons3)
+    buttons2 = widgets.HBox([button_vineyard, button_markdown, button_next])
+    display(buttons2)
     
     
 def Create_form():
