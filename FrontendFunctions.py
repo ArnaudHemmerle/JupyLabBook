@@ -439,6 +439,11 @@ def Choose_treatment(expt):
     2) Display the buttons for choosing the next action.
     """
     
+    # Styling options for widgets
+    style = {'description_width': 'initial'}
+    tiny_layout = widgets.Layout(width='150px', height='40px')
+    short_layout = widgets.Layout(width='200px', height='40px')
+    
     # Define the function called when clicking the button
     # DEFINE HERE A FUNCTION TO CREATE A CELL CALLING YOUR CUSTOM FUNCTION
 
@@ -529,15 +534,126 @@ def Choose_treatment(expt):
             
             if len(expt.scans)>1:
                 Create_cell(code='### '+scan.id+': '+scan.command,
-                            position ='below', celltype='markdown', is_print=True)    
+                            position ='below', celltype='markdown', is_print=True)
+                
+                
+    def on_button_GIXS_clicked(b):
+        
+        # Checkboxes for options       
+
+        # logz
+        try: value = expt.GIXS_logz
+        except: value = True
+        w_GIXS_logz = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='log z')
+        
+        # wavelength
+        try: value = expt.wavelength
+        except: value = 0.155
+        w_wavelength = widgets.FloatText(value=value, style=style, layout=short_layout, description='wavelength (nm)')
+
+        # thetai
+        try: value = expt.thetai
+        except: value = 0.002
+        w_thetai = widgets.FloatText(value=value, style=style, layout=tiny_layout, description='thetai (rad)')
+        
+        # distance 
+        try: value = expt.distance
+        except: value = 1000.
+        w_distance = widgets.FloatText(value=value, style=style, layout=tiny_layout, description='distance (mm)')
+
+        # pixel_PONI_x 
+        try: value = expt.pixel_PONI_x
+        except: value = 0.
+        w_pixel_PONI_x = widgets.FloatText(value=value, style=style, layout=tiny_layout, description='PONIx (pix)')
+        
+        # pixel_PONI_y 
+        try: value = expt.pixel_PONI_y
+        except: value = 0.
+        w_pixel_PONI_y = widgets.FloatText(value=value, style=style, layout=tiny_layout, description='PONIy (pix)')
+        
+        # pixel_size 
+        try: value = expt.pixel_size
+        except: value = 0.172
+        w_pixel_size = widgets.FloatText(value=value, style=style, layout=tiny_layout, description='Pixel size (um)')
+            
+        # show_data_stamps
+        try: value = expt.show_data_stamps
+        except: value = False
+        w_show_data_stamps = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print sensors')
+
+        # verbose
+        try: value = expt.verbose
+        except: value = False
+        w_verbose = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print scan info')
+          
+        # cmap
+        try: value = expt.cmap
+        except: value = 'viridis'
+        w_cmap = widgets.Text(value=value, style=style, layout=tiny_layout, description='cmap')
+        
+        # plot_twotheta_alphaf/plot_qxy_qz/plot_qxy_q
+        try: value = expt.GIXS_plot_type
+        except: value = 'pixels only'
+        w_GIXS_plot_type = widgets.Select(value=value, style=style, rows=4,
+                                          options=['pixels only', 'angles', 'qxy/qz', 'qxy/q'], description='Plot type')
+            
+        display(widgets.HBox([w_show_data_stamps, w_verbose, w_GIXS_logz, w_cmap, w_pixel_size]))        
+        display(widgets.HBox([w_wavelength, w_distance, w_thetai, w_pixel_PONI_x, w_pixel_PONI_y]))
+        
+
+        
+        def on_button_plot_clicked(b):
+            
+            # Pass current values as default values
+            expt.GIXS_logz = w_GIXS_logz.value
+            expt.wavelength = w_wavelength.value
+            expt.thetai = w_thetai.value
+            expt.distance = w_distance.value
+            expt.pixel_PONI_x = w_pixel_PONI_x.value
+            expt.pixel_PONI_y = w_pixel_PONI_y.value
+            expt.pixel_size = w_pixel_size.value
+            expt.show_data_stamps = w_show_data_stamps.value
+            expt.verbose = w_verbose.value
+            expt.cmap = w_cmap.value
+            expt.GIXS_plot_type = w_GIXS_plot_type.value
+            
+            # Pass plot type to params    
+            expt.plot_twotheta_alphaf = True if w_GIXS_plot_type.value == 'angles' else False
+            expt.plot_qxy_qz = True if w_GIXS_plot_type.value == 'qxy/qz' else False
+            expt.plot_qxy_q = True if w_GIXS_plot_type.value == 'qxy/q' else False
+
+            
+            for scan in expt.scans:
+
+                Create_cell(code='CF.Extract_GIXS(nxs_filename=\''+scan.nxs+'\','+ 
+                       'working_dir=expt.working_dir, recording_dir=expt.recording_dir,'+
+                        'logz='+str(expt.GIXS_logz)+','+
+                        'wavelength='+str(expt.wavelength)+','+
+                        'thetai='+str(expt.thetai)+','+
+                        'distance='+str(expt.distance)+','+
+                        'pixel_PONI_x='+str(expt.pixel_PONI_x)+','+
+                        'pixel_PONI_y='+str(expt.pixel_PONI_y)+','+
+                        'pixel_size='+str(expt.pixel_size)+','+  
+                        'show_data_stamps='+str(expt.show_data_stamps)+','+
+                        'verbose='+str(expt.verbose)+','+
+                        'cmap=\''+str(expt.cmap)+'\','+
+                        'plot_twotheta_alphaf='+str(expt.plot_twotheta_alphaf)+','+
+                        'plot_qxy_qz='+str(expt.plot_qxy_qz)+','+
+                        'plot_qxy_q='+str(expt.plot_qxy_q)+')',
+                        position='below', celltype='code', is_print = True)
+
+                if len(expt.scans)>1:
+                    Create_cell(code='### '+scan.id+': '+scan.command,
+                                position ='below', celltype='markdown', is_print=True)            
+            
+        button_plot = widgets.Button(description="Plot")
+        button_plot.on_click(on_button_plot_clicked)
+        display(widgets.HBox([w_GIXS_plot_type,button_plot]))
 
     def on_button_fluo_clicked(b):
         
-        # Checkboxes for plot options
-        
-        style = {'description_width': 'initial'}
-        short_layout = widgets.Layout(width='200px', height='40px')
-    
+        # Checkboxes for options       
+       
         # show_data_stamps
         try: value = expt.show_data_stamps
         except: value = False
@@ -715,14 +831,8 @@ def Choose_treatment(expt):
     button_pilatus = widgets.Button(description="Plot pilatus")
     button_pilatus.on_click(on_button_pilatus_clicked)
 
-    button_GIXS_angles = widgets.Button(description="Plot GIXS angles")
-    button_GIXS_angles.on_click(on_button_GIXS_angles_clicked)
-    
-    button_GIXS_qxy_qz = widgets.Button(description="Plot GIXS qxy/qz")
-    button_GIXS_qxy_qz.on_click(on_button_GIXS_qxy_qz_clicked)
-    
-    button_GIXS_qxy_q = widgets.Button(description="Plot GIXS qxy/q")
-    button_GIXS_qxy_q.on_click(on_button_GIXS_qxy_q_clicked)
+    button_GIXS = widgets.Button(description="Plot GIXS")
+    button_GIXS.on_click(on_button_GIXS_clicked)
         
     button_next = widgets.Button(description="Next action")
     button_next.on_click(on_button_next_clicked)
@@ -749,7 +859,7 @@ def Choose_treatment(expt):
     buttons1 = widgets.HBox([button_GIXD, button_true_GIXD, button_fluo, button_isotherm])
     display(buttons1)
     
-    buttons2 = widgets.HBox([button_pilatus, button_GIXS_angles, button_GIXS_qxy_qz, button_GIXS_qxy_q])
+    buttons2 = widgets.HBox([button_pilatus, button_GIXS])
     display(buttons2)
 
     buttons3 = widgets.HBox([button_vineyard, button_markdown, button_next])

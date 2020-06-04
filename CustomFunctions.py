@@ -1155,10 +1155,19 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
 
         
         #Plot the image with horizontal/vertical pixels whatever the other choice is
-        fig = plt.figure(figsize=(14.4,6))
+        if (plot_twotheta_alphaf or plot_qxy_qz or plot_qxy_q):
+            fig = plt.figure(figsize=(14.4,6))
+        else:
+            fig = plt.figure(figsize=(7.2,6))
+            
         fig.subplots_adjust(hspace=0.4, wspace=0.4, top=0.93, bottom=0.16)
         fig.suptitle(nxs_filename.split('\\')[-1], fontsize='x-large')
-        ax0 = fig.add_subplot(121)
+        
+        if (plot_twotheta_alphaf or plot_qxy_qz or plot_qxy_q):
+            ax0 = fig.add_subplot(121)
+        else:
+            ax0 = fig.add_subplot(111)
+            
         if logz:
             ax0.pcolormesh(xx, yy, images_sum, cmap = cmap, norm = colors.LogNorm(), rasterized=True)
         else:
@@ -1176,17 +1185,12 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
             ax1.set_xlabel('2 theta (deg)', fontsize='large')
             ax1.set_ylabel('alpha_f (deg)', fontsize='large')
 
-            plt.show()
-            plt.close()
-
         if plot_qxy_qz:
 
             ax1 = fig.add_subplot(122)
             ax1.pcolormesh(qxy, qz, images_sum, cmap = cmap, norm = colors.LogNorm(), rasterized=True)
             ax1.set_xlabel('qxy (nm^-1)', fontsize='large')
             ax1.set_ylabel('qz (nm^-1)', fontsize='large')
-            plt.show()
-            plt.close()
             
         if plot_qxy_q:
 
@@ -1194,10 +1198,10 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
             ax1.pcolormesh(qxy, q, images_sum, cmap = cmap, norm = colors.LogNorm(), rasterized=True)
             ax1.set_xlabel('qxy (nm^-1)', fontsize='large')
             ax1.set_ylabel('q (nm^-1)', fontsize='large')
-            plt.show()
-            plt.close()
             
-            
+        plt.show()
+        plt.close()    
+        
         # Create Save Name
         savename=working_dir+nxs_filename[:nxs_filename.rfind('.nxs')]
             
