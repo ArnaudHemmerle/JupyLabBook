@@ -1224,10 +1224,11 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
 ###################################### XRF ###############################################
 ##########################################################################################
 
-def Extract_XRF(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='',  
-                     logz=False, list_elems=[0,1,2,3], first_channel=0, last_channel=2048,
-                     show_data_stamps=False, verbose=False,
-                     plot_spectrogram=False, plot_first_last=False, plot_sum=False):
+def Extract_XRF(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='',
+                logz=False, list_elems=[0,1,2,3], first_channel=0, last_channel=2048,
+                use_eV=False, gain=10., eV0=0.,
+                show_data_stamps=False, verbose=False,
+                plot_spectrogram=False, plot_first_last=False, plot_sum=False):
     """
     Extract, correct with ICR/OCR, and plot the fluo spectrum. 
     """
@@ -1292,42 +1293,61 @@ def Extract_XRF(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir=''
     last_non_zero_spectrum = ind_non_zero_spectrums[-1]
 
     channels = np.arange(int(first_channel), int(last_channel+1))
+    eVs = channels*gain+eV0
     spectrums = allspectrums_corr[0:last_non_zero_spectrum+1,
                                   int(first_channel):int(last_channel+1)]
 
     if plot_spectrogram:
+        
         fig = plt.figure(figsize=(12,4.6))
         ax1 = fig.add_subplot(111)
         ax1.set_title(nxs_filename.split('\\')[-1], fontsize='x-large')
         ax1.set_xlabel('spectrum index', fontsize='large')
-        ax1.set_ylabel('channel', fontsize='large')
         ax1.set_xlim(left = 0, right = last_non_zero_spectrum)
-        if logz:
-            im1 = ax1.imshow(allspectrums_corr.transpose(), cmap = 'viridis', aspect = 'auto', norm=colors.LogNorm())
+        
+        if use_eV:
+            xx, yy = np.meshgrid(np.arange(0,last_non_zero_spectrum+1), eVs)
+            ax1.set_ylabel('eV', fontsize='large')
         else:
-            im1 = ax1.imshow(allspectrums_corr.transpose(), cmap = 'viridis', aspect = 'auto')
+            xx, yy = np.meshgrid(np.arange(0,last_non_zero_spectrum+1), channels)
+            ax1.set_ylabel('channel', fontsize='large')          
+        
+        if logz:
+            ax1.pcolormesh(xx, yy, spectrums.transpose(), cmap='viridis', norm = colors.LogNorm(), rasterized=True)
+        else:
+            ax1.pcolormesh(xx, yy, spectrums.transpose(), cmap='viridis', rasterized=True)
+        
         plt.show()
         
     if plot_sum:
         fig = plt.figure(figsize=(12,4.5))
         ax1 = fig.add_subplot(111)
-        ax1.set_xlabel('channel', fontsize='large')
         ax1.set_ylabel('counts', fontsize='large')
-        ax1.plot(channels, np.sum(spectrums, axis = 0), 'b.-', label='Sum of spectrums')
-        ax1.legend(fontsize='large')
         if logz: ax1.set_yscale('log')
+        if use_eV:
+            ax1.set_xlabel('eV', fontsize='large')
+            ax1.plot(eVs, np.sum(spectrums, axis = 0), 'b.-', label='Sum of spectrums')
+        else:
+            ax1.set_xlabel('channel', fontsize='large')
+            ax1.plot(channels, np.sum(spectrums, axis = 0), 'b.-', label='Sum of spectrums')  
+        ax1.legend(fontsize='large')
         plt.show()
 
     if plot_first_last:    
         #Plot the selected channel range
         fig = plt.figure(figsize=(12,4.5))
         ax1 = fig.add_subplot(111)
-        ax1.set_xlabel('channel', fontsize='large')
         ax1.set_ylabel('counts', fontsize='large')
-        ax1.plot(channels, spectrums[0], 'b.-', label='First spectrum')
-        ax1.plot(channels, spectrums[-1], 'r.-', label='Last spectrum')
-        ax1.legend(fontsize='large')
         if logz: ax1.set_yscale('log')
+        if use_eV:
+            ax1.set_xlabel('eV', fontsize='large')        
+            ax1.plot(eVs, spectrums[0], 'b.-', label='First spectrum')
+            ax1.plot(eVs, spectrums[-1], 'r.-', label='Last spectrum')            
+        else:
+            ax1.set_xlabel('channel', fontsize='large')        
+            ax1.plot(channels, spectrums[0], 'b.-', label='First spectrum')
+            ax1.plot(channels, spectrums[-1], 'r.-', label='Last spectrum')
+        ax1.legend(fontsize='large')
         plt.show()
 
 

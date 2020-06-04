@@ -833,10 +833,25 @@ def Choose_treatment(expt):
         except: value = 2047
         w_last_channel = widgets.IntText(value=value, description='Last channel', style=style, layout = short_layout)
 
+        # use_eV
+        try: value = expt.use_eV
+        except: value = False
+        w_use_eV = widgets.Checkbox(value=value, style=style, layout = short_layout, description='use eV')
+
+        # gain
+        try: value = expt.gain
+        except: value = 10.
+        w_gain = widgets.FloatText(value=value, description='Gain', style=style, layout = short_layout)        
+
+        # eV0
+        try: value = expt.eV0
+        except: value = 0.
+        w_eV0 = widgets.FloatText(value=value, description='eV0', style=style, layout = short_layout)        
         
         display(widgets.HBox([w_show_data_stamps, w_verbose]))
         display(widgets.HBox([w_plot_spectrogram, w_plot_first_last, w_plot_sum]))
         display(widgets.HBox([w_XRF_logz, w_elems_str, w_first_channel, w_last_channel]))
+        display(widgets.HBox([w_use_eV, w_gain, w_eV0]))
             
         def on_button_plot_clicked(b):
 
@@ -845,6 +860,9 @@ def Choose_treatment(expt):
             expt.elems_str = w_elems_str.value
             expt.first_channel = w_first_channel.value
             expt.last_channel = w_last_channel.value
+            expt.use_eV = w_use_eV.value
+            expt.gain = w_gain.value
+            expt.eV0 = w_eV0.value
             expt.show_data_stamps = w_show_data_stamps.value
             expt.verbose = w_verbose.value
             expt.plot_spectrogram = w_plot_spectrogram.value
@@ -863,6 +881,9 @@ def Choose_treatment(expt):
                            'list_elems='+str(list_elems)+','+
                            'first_channel='+str(expt.first_channel)+','+
                            'last_channel='+str(expt.last_channel)+','+
+                           'use_eV='+str(expt.use_eV)+','+
+                           'gain='+str(expt.gain)+','+
+                           'eV0='+str(expt.eV0)+','+
                            'show_data_stamps='+str(expt.show_data_stamps)+','+
                            'verbose='+str(expt.verbose)+','+
                            'plot_spectrogram='+str(expt.plot_spectrogram)+','+
