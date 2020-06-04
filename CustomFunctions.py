@@ -562,7 +562,7 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
                  logx=False, logy=False, logz=False,
                  channel0=600, thetazfactor=0.01, wavelength=0.155, thetac=0.0028, thetai=0.002,
                  binsize=10, computeqz=True, nblevels=50, moytocreate=(10, 20, 40),
-                 show_data_stamps=False, verbose=False, plot_true_GIXD=False):
+                 show_data_stamps=False, verbose=False, cmap='jet', plot_true_GIXD=False):
     
     """
     Extract, plot, and save the GIXD scan. 
@@ -757,7 +757,7 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
         else:
             zmax=mat.max()
             zmin=mat.min()
-            ax2.contourf(datx[istart:istop], qz, (mat.transpose()),levels=np.linspace(zmin, zmax, nblevels), cmap='jet')
+            ax2.contourf(datx[istart:istop], qz, (mat.transpose()),levels=np.linspace(zmin, zmax, nblevels), cmap=cmap)
 
         if computeqz:
             ax2.set_ylabel('Qz (nm-1)', fontsize='large')
@@ -811,12 +811,12 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
             fig=plt.figure(figsize=(12,5))
             fig.subplots_adjust(hspace=0.4, wspace=0.4, bottom=0.16)
             ax1=fig.add_subplot(121)
-            ax1.pcolormesh(twotheta*180./np.pi, alphaf*180./np.pi, mat.transpose(), cmap = 'jet', rasterized=True)
+            ax1.pcolormesh(twotheta*180./np.pi, alphaf*180./np.pi, mat.transpose(), cmap=cmap, rasterized=True)
             ax1.set_xlabel('2 theta (deg)', fontsize='large')
             ax1.set_ylabel('alpha_f (deg)', fontsize='large')
 
             ax2=fig.add_subplot(122)
-            ax2.pcolormesh(qxy, qz, mat.transpose(), cmap = 'jet', rasterized=True)
+            ax2.pcolormesh(qxy, qz, mat.transpose(), cmap=cmap, rasterized=True)
             ax2.set_xlabel('qxy (nm^-1)', fontsize='large')
             ax2.set_ylabel('qz (nm^-1)', fontsize='large')
             fig.suptitle('True GIXD', fontsize='x-large')

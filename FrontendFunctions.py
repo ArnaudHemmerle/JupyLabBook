@@ -443,41 +443,160 @@ def Choose_treatment(expt):
     style = {'description_width': 'initial'}
     tiny_layout = widgets.Layout(width='150px', height='40px')
     short_layout = widgets.Layout(width='200px', height='40px')
+    medium_layout = widgets.Layout(width='250px', height='40px')
     
     # Define the function called when clicking the button
     # DEFINE HERE A FUNCTION TO CREATE A CELL CALLING YOUR CUSTOM FUNCTION
 
     def on_button_GIXD_clicked(b):
-        for scan in expt.scans:
-            
-            Create_cell(code='CF.Extract_GIXD(nxs_filename=\''+scan.nxs+'\','+
-                        'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
-                        'logx=False, logy=False, logz=False, '+
-                        'channel0=expt.channel0, thetazfactor=expt.thetazfactor, '+
-                        'wavelength=expt.wavelength, thetac=expt.thetac, thetai=expt.thetai, '+
-                        'binsize=expt.binsize, computeqz=True, nblevels=expt.nblevels, moytocreate=expt.moytocreate, '+
-                        'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+', plot_true_GIXD=False)',
-                        position='below', celltype='code', is_print = True)
-            
-            if len(expt.scans)>1:
-                Create_cell(code='### '+scan.id+': '+scan.command,
-                        position ='below', celltype='markdown', is_print=True)
 
-    def on_button_true_GIXD_clicked(b):
-        for scan in expt.scans:
-       
-            Create_cell(code='CF.Extract_GIXD(nxs_filename=\''+scan.nxs+'\','+
-                        'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
-                        'logx=False, logy=False, logz=False, '+
-                        'channel0=expt.channel0, thetazfactor=expt.thetazfactor, '+
-                        'wavelength=expt.wavelength, thetac=expt.thetac, thetai=expt.thetai, '+
-                        'binsize=expt.binsize, computeqz=True, nblevels=expt.nblevels, moytocreate=expt.moytocreate, '+
-                        'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+', plot_true_GIXD=True)',
-                        position='below', celltype='code', is_print = True)
+        # logx
+        try: value = expt.GIXD_logx
+        except: value = False
+        w_GIXD_logx = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='log x')
         
-            if len(expt.scans)>1:
-                Create_cell(code='### '+scan.id+': '+scan.command,
-                        position ='below', celltype='markdown', is_print=True)
+        # logy
+        try: value = expt.GIXD_logy
+        except: value = False
+        w_GIXD_logy = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='log y')
+        
+        # GIXD_logz
+        try: value = expt.GIXD_logz
+        except: value = True
+        w_GIXD_logz = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='log z')
+        
+        # channel0
+        try: value = expt.channel0
+        except: value = 640
+        w_channel0 = widgets.FloatText(value=value, style=style, layout=short_layout, description='Vineyard (chan)')
+
+        # thetazfactor
+        try: value = expt.thetazfactor
+        except: value = 0.000243
+        w_thetazfactor = widgets.FloatText(value=value, style=style, layout=medium_layout,
+                                           description='thetazfactor (rad/chan)')
+        
+        # wavelength
+        try: value = expt.wavelength
+        except: value = 0.155
+        w_wavelength = widgets.FloatText(value=value, style=style, layout=short_layout, description='wavelength (nm)')
+
+        # thetac
+        try: value = expt.thetac
+        except: value = 0.0028
+        w_thetac = widgets.FloatText(value=value, style=style, layout=tiny_layout, description='thetac (rad)')
+        
+        # thetai
+        try: value = expt.thetai
+        except: value = 0.002
+        w_thetai = widgets.FloatText(value=value, style=style, layout=tiny_layout, description='thetai (rad)')
+
+        # binsize
+        try: value = expt.binsize
+        except: value = 10
+        w_binsize = widgets.IntText(value=value, style=style, layout=tiny_layout, description='binsize')
+
+        # computeqz
+        try: value = expt.computeqz
+        except: value = False
+        w_computeqz = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='compute qz')
+               
+        # nblevels
+        try: value = expt.nblevels
+        except: value = 50
+        w_nblevels = widgets.IntText(value=value, style=style, layout=tiny_layout, description='nblevels')
+        
+        # moytocreate
+        try: value = expt.moytocreate_str
+        except: value = '10, 20, 40'
+        w_moytocreate_str = widgets.Text(value=value, description='moy to create', style=style, layout = short_layout)
+            
+        # show_data_stamps
+        try: value = expt.show_data_stamps
+        except: value = False
+        w_show_data_stamps = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print sensors')
+
+        # verbose
+        try: value = expt.verbose
+        except: value = False
+        w_verbose = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print scan info')
+          
+        # GIXD_cmap
+        try: value = expt.GIXD_cmap
+        except: value = 'jet'
+        w_GIXD_cmap = widgets.Text(value=value, style=style, layout=tiny_layout, description='cmap')
+        
+        # plot_GIXD/plot_true_GIXD
+        try: value = expt.GIXD_plot_type
+        except: value = 'GIXD'
+        w_GIXD_plot_type = widgets.Select(value=value, style=style, rows=2,
+                                          options=['GIXD', 'True GIXD'], description='Plot type')
+            
+        display(widgets.HBox([w_show_data_stamps, w_verbose, w_GIXD_logx, w_GIXD_logy, w_GIXD_logz, w_GIXD_cmap]))        
+        display(widgets.HBox([w_binsize, w_nblevels, w_moytocreate_str, w_channel0, w_computeqz]))
+        display(widgets.HBox([w_wavelength, w_thetai, w_thetac, w_thetazfactor]))
+                
+        
+        def on_button_plot_clicked(b):
+
+            # Pass current values as default values
+            expt.GIXD_logx = w_GIXD_logx.value
+            expt.GIXD_logy = w_GIXD_logy.value
+            expt.GIXD_logz = w_GIXD_logz.value
+            expt.channel0 = w_channel0.value
+            expt.thetazfactor = w_thetazfactor.value
+            expt.wavelength = w_wavelength.value
+            expt.thetac = w_thetac.value
+            expt.thetai = w_thetai.value
+            expt.binsize = w_binsize.value
+            expt.computeqz = w_computeqz.value
+            expt.nblevels = w_nblevels.value
+            expt.moytocreate_str = w_moytocreate_str.value
+            expt.show_data_stamps = w_show_data_stamps.value
+            expt.verbose = w_verbose.value
+            expt.GIXD_cmap = w_GIXD_cmap.value
+            expt.GIXD_plot_type = w_GIXD_plot_type.value
+            
+            # Pass plot type to param    
+            expt.plot_true_GIXD = True if w_GIXD_plot_type.value == 'True GIXD' else False
+            
+            # Convert moytocreate_str into a list
+            list_moytocreate = [int(expt.moytocreate_str.split(',')[i]) for i in range(len(expt.moytocreate_str.split(',')))]
+            
+            # Pass plot type to param    
+            expt.plot_true_GIXD = True if w_GIXD_plot_type.value == 'True GIXD' else False
+            
+            for scan in expt.scans:
+                             
+                Create_cell(code='CF.Extract_GIXD(nxs_filename=\''+scan.nxs+'\','+
+                            'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
+                            'logx='+str(expt.GIXD_logx)+','+
+                            'logy='+str(expt.GIXD_logy)+','+
+                            'logz='+str(expt.GIXD_logz)+','+
+                            'channel0='+str(expt.channel0)+','+
+                            'thetazfactor='+str(expt.thetazfactor)+','+
+                            'wavelength='+str(expt.wavelength)+','+
+                            'thetac='+str(expt.thetac)+','+
+                            'thetai='+str(expt.thetai)+','+
+                            'binsize='+str(expt.binsize)+','+
+                            'computeqz='+str(expt.computeqz)+','+
+                            'nblevels='+str(expt.nblevels)+','+
+                            'moytocreate='+str(list_moytocreate)+','+
+                            'show_data_stamps='+str(expt.show_data_stamps)+','+
+                            'verbose='+str(expt.verbose)+','+
+                            'cmap=\''+str(expt.GIXD_cmap)+'\','+
+                            'plot_true_GIXD='+str(expt.plot_true_GIXD)+')',
+                            position='below', celltype='code', is_print = True)
+
+                if len(expt.scans)>1:
+                    Create_cell(code='### '+scan.id+': '+scan.command,
+                            position ='below', celltype='markdown', is_print=True)
+
+                
+        button_plot = widgets.Button(description="Plot")
+        button_plot.on_click(on_button_plot_clicked)
+        display(widgets.HBox([w_GIXD_plot_type,button_plot]))
+
 
     def on_button_pilatus_clicked(b):
         for scan in expt.scans:
@@ -490,58 +609,13 @@ def Choose_treatment(expt):
             if len(expt.scans)>1:
                 Create_cell(code='### '+scan.id+': '+scan.command,
                         position ='below', celltype='markdown', is_print=True)     
-        
-    def on_button_GIXS_angles_clicked(b):
-        for scan in expt.scans:
-            
-            Create_cell(code='CF.Extract_GIXS(nxs_filename=\''+scan.nxs+'\','+ 
-                       'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
-                       'logz=True, wavelength=expt.wavelength, thetai=expt.thetai, distance=expt.distance, '+
-                       'pixel_PONI_x=expt.pixel_PONI_x, pixel_PONI_y=expt.pixel_PONI_y, '+
-                       'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+' ,cmap=expt.cmap, '+
-                        'plot_twotheta_alphaf=True)',
-                        position='below', celltype='code', is_print = True)
-
-            if len(expt.scans)>1:
-                Create_cell(code='### '+scan.id+': '+scan.command,
-                        position ='below', celltype='markdown', is_print=True)
-               
-    def on_button_GIXS_qxy_qz_clicked(b):
-        for scan in expt.scans:
-            
-            Create_cell(code='CF.Extract_GIXS(nxs_filename=\''+scan.nxs+'\','+ 
-                       'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
-                       'logz=True, wavelength=expt.wavelength, thetai=expt.thetai, distance=expt.distance, '+
-                       'pixel_PONI_x=expt.pixel_PONI_x, pixel_PONI_y=expt.pixel_PONI_y,  '+
-                       'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+' ,cmap=expt.cmap, '+
-                        'plot_qxy_qz=True)',
-                        position='below', celltype='code', is_print = True)
-            
-            if len(expt.scans)>1:
-                Create_cell(code='### '+scan.id+': '+scan.command,
-                            position ='below', celltype='markdown', is_print=True)
-        
-    def on_button_GIXS_qxy_q_clicked(b):
-        for scan in expt.scans:
-            
-            Create_cell(code='CF.Extract_GIXS(nxs_filename=\''+scan.nxs+'\','+ 
-                   'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
-                   'logz=True, wavelength=expt.wavelength, thetai=expt.thetai, distance=expt.distance, '+
-                   'pixel_PONI_x=expt.pixel_PONI_x, pixel_PONI_y=expt.pixel_PONI_y, '+
-                   'show_data_stamps='+str(w_stamps.value)+', verbose='+str(w_verbose.value)+' ,cmap=expt.cmap, '+
-                   'plot_qxy_q=True)',
-                        position='below', celltype='code', is_print = True)
-            
-            if len(expt.scans)>1:
-                Create_cell(code='### '+scan.id+': '+scan.command,
-                            position ='below', celltype='markdown', is_print=True)
-                
+                    
                 
     def on_button_GIXS_clicked(b):
         
         # Checkboxes for options       
 
-        # logz
+        # GIXS_logz
         try: value = expt.GIXS_logz
         except: value = True
         w_GIXS_logz = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='log z')
@@ -586,10 +660,10 @@ def Choose_treatment(expt):
         except: value = False
         w_verbose = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print scan info')
           
-        # cmap
-        try: value = expt.cmap
+        # GIXS_cmap
+        try: value = expt.GIXS_cmap
         except: value = 'viridis'
-        w_cmap = widgets.Text(value=value, style=style, layout=tiny_layout, description='cmap')
+        w_GIXS_cmap = widgets.Text(value=value, style=style, layout=tiny_layout, description='cmap')
         
         # plot_twotheta_alphaf/plot_qxy_qz/plot_qxy_q
         try: value = expt.GIXS_plot_type
@@ -597,7 +671,7 @@ def Choose_treatment(expt):
         w_GIXS_plot_type = widgets.Select(value=value, style=style, rows=4,
                                           options=['pixels only', 'angles', 'qxy/qz', 'qxy/q'], description='Plot type')
             
-        display(widgets.HBox([w_show_data_stamps, w_verbose, w_GIXS_logz, w_cmap, w_pixel_size]))        
+        display(widgets.HBox([w_show_data_stamps, w_verbose, w_GIXS_logz, w_GIXS_cmap, w_pixel_size]))        
         display(widgets.HBox([w_wavelength, w_distance, w_thetai, w_pixel_PONI_x, w_pixel_PONI_y]))
         
 
@@ -614,7 +688,7 @@ def Choose_treatment(expt):
             expt.pixel_size = w_pixel_size.value
             expt.show_data_stamps = w_show_data_stamps.value
             expt.verbose = w_verbose.value
-            expt.cmap = w_cmap.value
+            expt.GIXS_cmap = w_GIXS_map.value
             expt.GIXS_plot_type = w_GIXS_plot_type.value
             
             # Pass plot type to params    
@@ -636,7 +710,7 @@ def Choose_treatment(expt):
                         'pixel_size='+str(expt.pixel_size)+','+  
                         'show_data_stamps='+str(expt.show_data_stamps)+','+
                         'verbose='+str(expt.verbose)+','+
-                        'cmap=\''+str(expt.cmap)+'\','+
+                        'cmap=\''+str(expt.GIXS_cmap)+'\','+
                         'plot_twotheta_alphaf='+str(expt.plot_twotheta_alphaf)+','+
                         'plot_qxy_qz='+str(expt.plot_qxy_qz)+','+
                         'plot_qxy_q='+str(expt.plot_qxy_q)+')',
@@ -820,9 +894,6 @@ def Choose_treatment(expt):
     button_GIXD = widgets.Button(description="Plot GIXD")
     button_GIXD.on_click(on_button_GIXD_clicked)
     
-    button_true_GIXD = widgets.Button(description="Plot true GIXD")
-    button_true_GIXD.on_click(on_button_true_GIXD_clicked)
-    
     button_XRF = widgets.Button(description="Plot XRF")
     button_XRF.on_click(on_button_XRF_clicked)
     
@@ -857,7 +928,7 @@ def Choose_treatment(expt):
               print('%s: %s'%(scan.nxs,scan.command))
         
     # Buttons for specific treatment
-    buttons1 = widgets.HBox([button_GIXD, button_true_GIXD, button_XRF, button_isotherm])
+    buttons1 = widgets.HBox([button_GIXD, button_XRF, button_isotherm])
     display(buttons1)
     
     buttons2 = widgets.HBox([button_pilatus, button_GIXS])
