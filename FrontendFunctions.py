@@ -1363,6 +1363,9 @@ def Create_form():
         
         Create_cell(code='# Experimental setup', position ='below', celltype='markdown', is_print=True)
         
+        # Remove the widget when done
+        Delete_current_cell()
+        
     button = widgets.Button(description="Print form")
     out = widgets.Output()
     display(button,out)
