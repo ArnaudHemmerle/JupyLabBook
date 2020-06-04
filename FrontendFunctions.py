@@ -245,8 +245,7 @@ def Choose_action(expt):
         
         Delete_current_cell()
         
-        Create_cell(code='**Insert your comment (double-click here and replace current text).**',
-                    position ='below', celltype='markdown', is_print=True)
+        Create_cell(code='', position ='below', celltype='markdown', is_print=True, is_execute=False)
     
         Create_cell(code='FF.Choose_action(expt)', position ='at_bottom', celltype='code', is_print=False)
         
@@ -382,7 +381,7 @@ def Delete_current_cell():
         """
     ))
 
-def Create_cell(code='', position='below', celltype='markdown', is_print = False):
+def Create_cell(code='', position='below', celltype='markdown', is_print = False, is_execute = True):
     """Create a cell in the IPython Notebook.
     code: unicode, Code to fill the new cell with.
     celltype: unicode, Type of cells "code" or "markdown".
@@ -396,20 +395,15 @@ def Create_cell(code='', position='below', celltype='markdown', is_print = False
     # Create a unique id based on epoch time
     display_id = int(time.time()*1e9)
 
-    if is_print:
-        display(Javascript("""
-        var cell = IPython.notebook.insert_cell_{0}("{1}");
-        cell.set_text(atob("{2}"));
-        cell.execute();
-        """.format(position, celltype, encoded_code)),display_id=display_id)
-
-    else:
-        display(Javascript("""
-        var cell = IPython.notebook.insert_cell_{0}("{1}");
-        cell.set_text(atob("{2}"));
-        cell.metadata.tags = ['notPrint']
-        cell.execute();
-        """.format(position, celltype, encoded_code)),display_id=display_id)
+    js_code = """var cell = IPython.notebook.insert_cell_{0}("{1}");
+              cell.set_text(atob("{2}"));
+              """
+    if not is_print: js_code += """cell.metadata.tags = ['notPrint']
+                                """
+        
+    if is_execute: js_code += """cell.execute();
+                                """
+    display(Javascript(js_code.format(position, celltype, encoded_code)),display_id=display_id)
 
     # Necessary hack to avoid self-execution of cells at notebook re-opening
     # See http://tiny.cc/fnf3nz
@@ -1000,8 +994,7 @@ def Choose_treatment(expt):
         """ 
         Delete_current_cell()
         
-        Create_cell(code='**Insert your comment (double-click here and replace current text).**',
-                    position ='below', celltype='markdown', is_print=True)
+        Create_cell(code='', position ='below', celltype='markdown', is_print=True, is_execute=False)
     
         Create_cell(code='FF.Choose_treatment(expt)', position ='at_bottom', celltype='code', is_print=False)
        
