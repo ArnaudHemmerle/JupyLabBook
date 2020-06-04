@@ -14,7 +14,7 @@ from scipy.special import erf
 from PIL import Image
 from psutil import virtual_memory as vm
 
-__version__ = '0.8'
+__version__ = '0.9'
 
 """
 Here are defined the custom functions used for analysis of data in the JupyLabBook.

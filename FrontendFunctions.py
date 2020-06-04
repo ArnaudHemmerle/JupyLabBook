@@ -12,7 +12,7 @@ import sys
 import nbformat as nbf
 import CustomFunctions as CF
 
-__version__ = '0.8'
+__version__ = '0.9'
 
 """
 -Here are defined all the functions relevant to the front end of JupyLabBook,
@@ -242,10 +242,14 @@ def Choose_action(expt):
         """
         Insert a markdown cell below the current cell.
         """ 
+        
+        Delete_current_cell()
+        
         Create_cell(code='**Insert your comment (double-click here and replace current text).**',
                     position ='below', celltype='markdown', is_print=True)
     
-                    
+        Create_cell(code='FF.Choose_action(expt)', position ='at_bottom', celltype='code', is_print=False)
+        
     def on_button_script_clicked(b):
         """
         Insert a script as a markdown cell.
@@ -944,11 +948,14 @@ def Choose_treatment(expt):
         display(button_plot)                    
                     
     # Actions relevant for single scan analysis only
-    def on_button_1D_clicked(b):
+    def on_button_1D_clicked(b):            
         scan = expt.scans[0]
         Create_cell(code='CF.Plot_1D(nxs_filename=\''+scan.nxs+'\', recording_dir=expt.recording_dir,'+
                     'xLabel=\''+scan.xLabel+'\', yLabel=\''+scan.yLabel+'\')',
                     position='below', celltype='code', is_print = True)
+        
+        # Do as if the button next was clicked
+        on_button_next_clicked(b) 
         
     def on_button_fit_erf_clicked(b):
         scan = expt.scans[0]
@@ -991,9 +998,12 @@ def Choose_treatment(expt):
         """
         Insert a markdown cell below the current cell.
         """ 
+        Delete_current_cell()
+        
         Create_cell(code='**Insert your comment (double-click here and replace current text).**',
                     position ='below', celltype='markdown', is_print=True)
-        
+    
+        Create_cell(code='FF.Choose_treatment(expt)', position ='at_bottom', celltype='code', is_print=False)
        
     # Display the widgets    
     # ADD HERE A CALL TO YOUR BUTTON
@@ -1034,7 +1044,7 @@ def Choose_treatment(expt):
         # Options for single scan analysis only
         
         # Buttons for general treatment
-        buttons0 = widgets.HBox([button_1D, button_markdown, button_next])
+        buttons0 = widgets.HBox([button_markdown, button_next])
         display(buttons0)
 
         # Set up an interactive 1D plot
@@ -1046,7 +1056,7 @@ def Choose_treatment(expt):
               print('%s: %s'%(scan.nxs,scan.command))
         
     # Buttons for specific treatment
-    buttons1 = widgets.HBox([button_vineyard, button_fit_gau, button_fit_erf])
+    buttons1 = widgets.HBox([button_vineyard, button_fit_gau, button_fit_erf, button_1D])
     display(buttons1)
     
     buttons2 = widgets.HBox([button_GIXD, button_XRF, button_isotherm, button_pilatus, button_GIXS])
