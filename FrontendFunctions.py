@@ -37,7 +37,12 @@ def Print_version():
     print("Check that you are using the last versions of the modules and read the manual on: \n%s"%"https://github.com/ArnaudHemmerle/JupyLabBook"+'\n')
 
 def Check_files(expt):
-
+    """
+    Take an object from the class Experiment.
+    1) Print the versions of custom modules
+    2) Check if files and folders exist
+    3) Create the first cell
+    """
     Print_version()
     
     if not os.path.exists(expt.working_dir):
@@ -65,6 +70,8 @@ def Check_files(expt):
         print('latex_template.tplx')
         print("This file contains the template for generating PDF and should be placed in the same folder as the notebook.")
         print("") 
+        
+    Create_cell(code='FF.Choose_action(expt)', position ='at_bottom', celltype='code', is_print=False)   
 
 
 def Define_scan_identifiers(scan, expt):
@@ -153,7 +160,7 @@ def Choose_action(expt):
         """
         Generate and execute cells corresponding to the chosen scans.
         """
-        clear_output(wait=False)
+        #clear_output(wait=False)
         
         Create_cell(code='FF.Choose_treatment(expt)',
                     position ='below', celltype='code', is_print=False)
@@ -161,6 +168,8 @@ def Choose_action(expt):
         if len(expt.scans)==1:
             Create_cell(code='### '+expt.scans[0].id+': '+expt.scans[0].command,
                         position ='below', celltype='markdown', is_print=True)
+            
+        Delete_current_cell()
 
         
     def on_button_refresh_clicked(b):
@@ -181,7 +190,7 @@ def Choose_action(expt):
         """
         Create a cell for the calibration of thetaz.
         """
-        clear_output(wait=False)
+        #clear_output(wait=False)
         
         Create_cell(code=
                     'calib_thetaz_data=np.array(['+'\n'+
@@ -202,15 +211,17 @@ def Choose_action(expt):
 
         Create_cell(code='FF.Choose_action(expt)', position ='at_bottom', celltype='code', is_print=False)        
         
+        Delete_current_cell()
         
     def on_button_form_clicked(b):
         """
         Create a form.
         """
-        clear_output(wait=False)
+        #clear_output(wait=False)
         Create_cell(code='FF.Create_form()',position ='below', celltype='code', is_print=False)
         Create_cell(code='FF.Choose_action(expt)', position ='at_bottom', celltype='code', is_print=False)        
-     
+         
+        Delete_current_cell()
             
     def on_button_export_clicked(b):
         """
