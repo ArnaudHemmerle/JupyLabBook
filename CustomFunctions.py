@@ -12,9 +12,9 @@ import sys
 import lmfit as L
 from scipy.special import erf
 from PIL import Image
-from psutil import virtual_memory as vm
 
-__version__ = '0.9'
+
+__version__ = '0.10'
 
 """
 Here are defined the custom functions used for analysis of data in the JupyLabBook.
@@ -583,13 +583,7 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
         if verbose: print(PN._BLUE+" - Open Nexus Data File :"+ PN._RESET)
         if verbose: print('\t'+nxs_path)
         try:
-            # Check available memory
-            mem = vm()
-            if mem.free*0.9 < os.path.getsize(nxs_path):
-                fast = False
-            else:
-                fast = True
-            nexus=PN.PyNexusFile(nxs_path, fast=fast)
+            nexus=PN.PyNexusFile(nxs_path, fast=True)
         except:
             print(PN._RED,'\t Nexus file seems not to exist or is not correct',PN._RESET)
             return
@@ -927,13 +921,7 @@ def Plot_isotherm(nxs_filename='SIRIUS_test.nxs', recording_dir='', show_data_st
         if verbose: print(PN._BLUE+" - Open Nexus Data File :"+ PN._RESET)
         if verbose: print('\t'+nxs_path)
         try:
-            # Check available memory
-            mem = vm()
-            if mem.free*0.9 < os.path.getsize(nxs_path):
-                fast = False
-            else:
-                fast = True
-            nexus=PN.PyNexusFile(nxs_path, fast=fast)
+            nexus=PN.PyNexusFile(nxs_path, fast=True)
         except:
             print(PN._RED,'\t Nexus file seems not to exist or is not correct',PN._RESET)
             return
@@ -1036,13 +1024,7 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
         if verbose: print(PN._BLUE+" - Open Nexus Data File :"+ PN._RESET)
         if verbose: print('\t'+nxs_path)
         try:
-            # Check available memory
-            mem = vm()
-            if mem.free*0.9 < os.path.getsize(nxs_path):
-                fast = False
-            else:
-                fast = True
-            nexus=PN.PyNexusFile(nxs_path, fast=fast)
+            nexus=PN.PyNexusFile(nxs_path, fast=True)
         except:
             print(PN._RED,'\t Nexus file seems not to exist or is not correct',PN._RESET)
             return
@@ -1242,13 +1224,7 @@ def Extract_XRF(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir=''
         if verbose: print(PN._BLUE+" - Open Nexus Data File :"+ PN._RESET)
         if verbose: print('\t'+nxs_path)
         try:            
-            # Check available memory
-            mem = vm()
-            if mem.free*0.9 < os.path.getsize(nxs_path):
-                fast = False
-            else:
-                fast = True
-            nexus=PN.PyNexusFile(nxs_path, fast=fast)
+            nexus=PN.PyNexusFile(nxs_path, fast=True)
         except:
             print(PN._RED,'\t Nexus file seems not to exist or is not correct',PN._RESET)
             return
@@ -1404,13 +1380,7 @@ def Extract_pilatus_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recordin
         if verbose: print(PN._BLUE+" - Open Nexus Data File :"+ PN._RESET)
         if verbose: print('\t'+nxs_path)
         try:
-            # Check available memory
-            mem = vm()
-            if mem.free*0.9 < os.path.getsize(nxs_path):
-                fast = False
-            else:
-                fast = True
-            nexus=PN.PyNexusFile(nxs_path, fast=fast)
+            nexus=PN.PyNexusFile(nxs_path, fast=True)
         except:
             print(PN._RED,'\t Nexus file seems not to exist or is not correct',PN._RESET)
             return
