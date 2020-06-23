@@ -528,11 +528,6 @@ def Choose_treatment(expt):
         try: value = expt.verbose
         except: value = False
         w_verbose = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print scan info')
-
-        # fastextract
-        try: value = expt.fastextract
-        except: value = True
-        w_fastextract = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Fast extract')
                        
         # GIXD_cmap
         try: value = expt.GIXD_cmap
@@ -548,7 +543,7 @@ def Choose_treatment(expt):
                                           options=['GIXD', 'True GIXD'], description='Plot type')
             
         display(widgets.HBox([w_show_data_stamps, w_verbose, w_GIXD_logx, w_GIXD_logy, w_GIXD_logz, w_GIXD_cmap]))        
-        display(widgets.HBox([w_binsize, w_nblevels, w_moytocreate_str, w_channel0, w_computeqz, w_fastextract]))
+        display(widgets.HBox([w_binsize, w_nblevels, w_moytocreate_str, w_channel0, w_computeqz]))
         display(widgets.HBox([w_wavelength, w_thetai, w_thetac, w_thetazfactor]))
                 
         
@@ -565,7 +560,6 @@ def Choose_treatment(expt):
             expt.thetai = w_thetai.value
             expt.binsize = w_binsize.value
             expt.computeqz = w_computeqz.value
-            expt.fastextract = w_fastextract.value
             expt.nblevels = w_nblevels.value
             expt.moytocreate_str = w_moytocreate_str.value
             expt.show_data_stamps = w_show_data_stamps.value
@@ -596,7 +590,6 @@ def Choose_treatment(expt):
                             'thetai='+str(expt.thetai)+','+
                             'binsize='+str(expt.binsize)+','+
                             'computeqz='+str(expt.computeqz)+','+
-                            'fast='+str(expt.fastextract)+','+
                             'nblevels='+str(expt.nblevels)+','+
                             'moytocreate='+str(list_moytocreate)+','+
                             'show_data_stamps='+str(expt.show_data_stamps)+','+
@@ -635,18 +628,13 @@ def Choose_treatment(expt):
         except: value = False
         w_verbose = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print scan info')
 
-        # fastextract
-        try: value = expt.fastextract
-        except: value = True
-        w_fastextract = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Fast extract')
-          
         # pilatus_cmap
         try: value = expt.pilatus_cmap
         except: value = 'Greys'
         w_pilatus_cmap = widgets.Select(value=value, style=style, rows=5, description='cmap',
                                         options=['viridis', 'jet', 'Greys', 'cividis', 'hot'])
      
-        display(widgets.HBox([w_show_data_stamps, w_verbose, w_fastextract, w_pilatus_logz, w_pilatus_cmap]))        
+        display(widgets.HBox([w_show_data_stamps, w_verbose, w_pilatus_logz, w_pilatus_cmap]))        
 
         def on_button_plot_clicked(b):
 
@@ -654,7 +642,6 @@ def Choose_treatment(expt):
             expt.pilatus_logz = w_pilatus_logz.value
             expt.show_data_stamps = w_show_data_stamps.value
             expt.verbose = w_verbose.value
-            expt.fastextract = w_fastextract.value
             expt.pilatus_cmap = w_pilatus_cmap.value
 
             for scan in expt.scans:
@@ -664,7 +651,6 @@ def Choose_treatment(expt):
                             'logz='+str(expt.pilatus_logz)+','+
                             'show_data_stamps='+str(expt.show_data_stamps)+','+
                             'verbose='+str(expt.verbose)+','+
-                            'fast='+str(expt.fastextract)+','+
                             'cmap=\''+str(expt.pilatus_cmap)+'\''+')',
                             position='below', celltype='code', is_print = True)
 
@@ -728,11 +714,6 @@ def Choose_treatment(expt):
         except: value = False
         w_verbose = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print scan info')
        
-        # fastextract
-        try: value = expt.fastextract
-        except: value = True
-        w_fastextract = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Fast extract')
-
         # GIXS_cmap
         try: value = expt.GIXS_cmap
         except: value = 'viridis'
@@ -747,7 +728,7 @@ def Choose_treatment(expt):
                                           options=['pixels only', 'angles', 'qxy/qz', 'qxy/q'], description='Plot type')
             
         display(widgets.HBox([w_show_data_stamps, w_verbose, w_GIXS_logz, w_GIXS_cmap, w_pixel_size]))        
-        display(widgets.HBox([w_wavelength, w_distance, w_thetai, w_pixel_PONI_x, w_pixel_PONI_y, w_fastextract]))
+        display(widgets.HBox([w_wavelength, w_distance, w_thetai, w_pixel_PONI_x, w_pixel_PONI_y]))
         
         def on_button_plot_clicked(b):
             
@@ -761,7 +742,6 @@ def Choose_treatment(expt):
             expt.pixel_size = w_pixel_size.value
             expt.show_data_stamps = w_show_data_stamps.value
             expt.verbose = w_verbose.value
-            expt.fastextract = w_fastextract.value
             expt.GIXS_cmap = w_GIXS_cmap.value
             expt.GIXS_plot_type = w_GIXS_plot_type.value
             
@@ -781,7 +761,6 @@ def Choose_treatment(expt):
                         'distance='+str(expt.distance)+','+
                         'pixel_PONI_x='+str(expt.pixel_PONI_x)+','+
                         'pixel_PONI_y='+str(expt.pixel_PONI_y)+','+
-                        'fast='+str(expt.fastextract)+','+
                         'pixel_size='+str(expt.pixel_size)+','+  
                         'show_data_stamps='+str(expt.show_data_stamps)+','+
                         'verbose='+str(expt.verbose)+','+       
@@ -942,18 +921,26 @@ def Choose_treatment(expt):
         except: value = False
         w_verbose = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print scan info')
         
-        display(widgets.HBox([w_show_data_stamps, w_verbose]))   
+        # fastextract
+        try: value = expt.fastextract
+        except: value = True
+        w_fastextract = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Fast extract')
+
+        
+        display(widgets.HBox([w_show_data_stamps, w_verbose, w_fastextract]))   
         
         def on_button_plot_clicked(b):
 
             # Pass current values as default values
             expt.show_data_stamps = w_show_data_stamps.value
             expt.verbose = w_verbose.value
+            expt.fastextract = w_fastextract.value
 
             for scan in expt.scans:
 
                 Create_cell(code='CF.Plot_isotherm(nxs_filename=\''+scan.nxs+'\', recording_dir=expt.recording_dir, '+
-                           'show_data_stamps='+str(w_show_data_stamps.value)+', verbose='+str(w_verbose.value)+')',
+                           'show_data_stamps='+str(w_show_data_stamps.value)+', verbose='+str(w_verbose.value)+', '+
+                            'fast='+str(w_fastextract.value)+')',
                             position='below', celltype='code', is_print = True)
 
                 if len(expt.scans)>1:
