@@ -823,7 +823,7 @@ def Choose_treatment(expt):
         
         # list_elems
         try: value = expt.elems_str
-        except: value = '0, 1, 2, 3'
+        except: value = '4'
         w_elems_str = widgets.Text(value=value, description='Elements', style=style, layout = short_layout)
 
         # first_channel

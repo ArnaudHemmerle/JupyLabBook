@@ -1245,95 +1245,114 @@ def Extract_XRF(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir=''
     def extract_and_correct(ind_spectrum):
         """Extract the requested fluospectrum from the nexus file and correct it with ICR/OCR"""
 
+        is_icr_found = False
+        is_ocr_found = False
         for i in range(len(stamps)):
             if (stamps[i][1] != None and stamps[i][1].lower() == "fluoicr0"+ind_spectrum):
                 fluoicr = data[i]
+                is_icr_found = True
             if (stamps[i][1] != None and stamps[i][1].lower() == "fluoocr0"+ind_spectrum):
                 fluoocr = data[i]
+                is_ocr_found = True
             if (stamps[i][1] != None and stamps[i][1].lower() == "fluospectrum0"+ind_spectrum):
                 fluospectrum = data[i]
             if (stamps[i][1] == None and stamps[i][0].lower() == "integration_time"):
                 integration_time = data[i]
                 
-        ICR = fluoicr
-        try:
-            OCR = fluoocr
-        except:
-            print(PN._RED+"OCR not found in data. Taking OCR = spectrum_intensity/counting_time."+PN._RESET)
-            OCR = np.array([np.sum(fluospectrum[n])/integration_time[n] for n in range(len(fluospectrum))])
-            
-        ratio = np.array([ICR[n]/OCR[n] if (~np.isclose(OCR[n],0.) & ~np.isnan(OCR[n]) & ~np.isnan(ICR[n]))
-                          else 0. for n in range(len(ICR))])
-        spectrums_corr = np.array([fluospectrum[n]*ratio[n] for n in range(len(ratio))])
-        return spectrums_corr
+        if is_icr_found:
+            ICR = fluoicr
+            if is_ocr_found:
+                OCR = fluoocr
+            else:
+                print(PN._RED+"OCR not found in data. Taking OCR = spectrum_intensity/counting_time."+PN._RESET)
+                OCR = np.array([np.sum(fluospectrum[n])/integration_time[n] for n in range(len(fluospectrum))])
+                
+            ratio = np.array([ICR[n]/OCR[n] if (~np.isclose(OCR[n],0.) & ~np.isnan(OCR[n]) & ~np.isnan(ICR[n]))
+                              else 0. for n in range(len(ICR))])
+            spectrums_corr = np.array([fluospectrum[n]*ratio[n] for n in range(len(ratio))])
+            is_extract_ok = True
+            return is_extract_ok, spectrums_corr
+                
+        else:
+            print(PN._RED+"ICR not found in data. Check if the box \'Elements\' is right."+PN._RESET)
+            print(PN._RED+"Try to put 4 in the box \'Elements\' for the single-element detector."+PN._RESET)
+            print(PN._RED+"Try to put 0, 1, 2, 3 in the box \'Elements\' for the four-elements detector."+PN._RESET)
 
+            is_extract_ok = False
+            return is_extract_ok, None
+           
     # Correct each chosen element with ICR/OCR and sum them
     allspectrums_corr = np.zeros((nbpts, 2048))
 
     for i in list_elems:
-        allspectrums_corr  += extract_and_correct(str(i))
+        is_extract_ok, allspectrums_corr_i = extract_and_correct(str(i))
+        if is_extract_ok:
+            allspectrums_corr  += allspectrums_corr_i
+        else:
+            break
     
-    ind_non_zero_spectrums = np.where(np.sum(allspectrums_corr, axis = 1)>10.)[0]
-    list_ranges = np.split(ind_non_zero_spectrums, np.where(np.diff(ind_non_zero_spectrums) != 1)[0]+1)
-    last_non_zero_spectrum = ind_non_zero_spectrums[-1]
+    if is_extract_ok:
+        ind_non_zero_spectrums = np.where(np.sum(allspectrums_corr, axis = 1)>10.)[0]
+        list_ranges = np.split(ind_non_zero_spectrums, np.where(np.diff(ind_non_zero_spectrums) != 1)[0]+1)
+        last_non_zero_spectrum = ind_non_zero_spectrums[-1]
 
-    channels = np.arange(int(first_channel), int(last_channel+1))
-    eVs = channels*gain+eV0
-    spectrums = allspectrums_corr[0:last_non_zero_spectrum+1,
-                                  int(first_channel):int(last_channel+1)]
+        channels = np.arange(int(first_channel), int(last_channel+1))
+        eVs = channels*gain+eV0
+        spectrums = allspectrums_corr[0:last_non_zero_spectrum+1,
+                                      int(first_channel):int(last_channel+1)]
 
-    if plot_spectrogram:
-        
-        fig = plt.figure(figsize=(12,4.6))
-        ax1 = fig.add_subplot(111)
-        ax1.set_title(nxs_filename.split('\\')[-1], fontsize='x-large')
-        ax1.set_xlabel('spectrum index', fontsize='large')
-        ax1.set_xlim(left = 0, right = last_non_zero_spectrum)
-        
-        if use_eV:
-            xx, yy = np.meshgrid(np.arange(0,last_non_zero_spectrum+1), eVs)
-            ax1.set_ylabel('eV', fontsize='large')
-        else:
-            xx, yy = np.meshgrid(np.arange(0,last_non_zero_spectrum+1), channels)
-            ax1.set_ylabel('channel', fontsize='large')          
-        
-        if logz:
-            ax1.pcolormesh(xx, yy, spectrums.transpose(), cmap='viridis', norm = colors.LogNorm(), rasterized=True)
-        else:
-            ax1.pcolormesh(xx, yy, spectrums.transpose(), cmap='viridis', rasterized=True)
-        
-        plt.show()
-        
-    if plot_sum:
-        fig = plt.figure(figsize=(12,4.5))
-        ax1 = fig.add_subplot(111)
-        ax1.set_ylabel('counts', fontsize='large')
-        if logz: ax1.set_yscale('log')
-        if use_eV:
-            ax1.set_xlabel('eV', fontsize='large')
-            ax1.plot(eVs, np.sum(spectrums, axis = 0), 'b.-', label='Sum of spectrums')
-        else:
-            ax1.set_xlabel('channel', fontsize='large')
-            ax1.plot(channels, np.sum(spectrums, axis = 0), 'b.-', label='Sum of spectrums')  
-        ax1.legend(fontsize='large')
-        plt.show()
+        if plot_spectrogram:
 
-    if plot_first_last:    
-        #Plot the selected channel range
-        fig = plt.figure(figsize=(12,4.5))
-        ax1 = fig.add_subplot(111)
-        ax1.set_ylabel('counts', fontsize='large')
-        if logz: ax1.set_yscale('log')
-        if use_eV:
-            ax1.set_xlabel('eV', fontsize='large')        
-            ax1.plot(eVs, spectrums[0], 'b.-', label='First spectrum')
-            ax1.plot(eVs, spectrums[-1], 'r.-', label='Last spectrum')            
-        else:
-            ax1.set_xlabel('channel', fontsize='large')        
-            ax1.plot(channels, spectrums[0], 'b.-', label='First spectrum')
-            ax1.plot(channels, spectrums[-1], 'r.-', label='Last spectrum')
-        ax1.legend(fontsize='large')
-        plt.show()
+            fig = plt.figure(figsize=(12,4.6))
+            ax1 = fig.add_subplot(111)
+            ax1.set_title(nxs_filename.split('\\')[-1], fontsize='x-large')
+            ax1.set_xlabel('spectrum index', fontsize='large')
+            ax1.set_xlim(left = 0, right = last_non_zero_spectrum)
+
+            if use_eV:
+                xx, yy = np.meshgrid(np.arange(0,last_non_zero_spectrum+1), eVs)
+                ax1.set_ylabel('eV', fontsize='large')
+            else:
+                xx, yy = np.meshgrid(np.arange(0,last_non_zero_spectrum+1), channels)
+                ax1.set_ylabel('channel', fontsize='large')          
+
+            if logz:
+                ax1.pcolormesh(xx, yy, spectrums.transpose(), cmap='viridis', norm = colors.LogNorm(), rasterized=True)
+            else:
+                ax1.pcolormesh(xx, yy, spectrums.transpose(), cmap='viridis', rasterized=True)
+
+            plt.show()
+
+        if plot_sum:
+            fig = plt.figure(figsize=(12,4.5))
+            ax1 = fig.add_subplot(111)
+            ax1.set_ylabel('counts', fontsize='large')
+            if logz: ax1.set_yscale('log')
+            if use_eV:
+                ax1.set_xlabel('eV', fontsize='large')
+                ax1.plot(eVs, np.sum(spectrums, axis = 0), 'b.-', label='Sum of spectrums')
+            else:
+                ax1.set_xlabel('channel', fontsize='large')
+                ax1.plot(channels, np.sum(spectrums, axis = 0), 'b.-', label='Sum of spectrums')  
+            ax1.legend(fontsize='large')
+            plt.show()
+
+        if plot_first_last:    
+            #Plot the selected channel range
+            fig = plt.figure(figsize=(12,4.5))
+            ax1 = fig.add_subplot(111)
+            ax1.set_ylabel('counts', fontsize='large')
+            if logz: ax1.set_yscale('log')
+            if use_eV:
+                ax1.set_xlabel('eV', fontsize='large')        
+                ax1.plot(eVs, spectrums[0], 'b.-', label='First spectrum')
+                ax1.plot(eVs, spectrums[-1], 'r.-', label='Last spectrum')            
+            else:
+                ax1.set_xlabel('channel', fontsize='large')        
+                ax1.plot(channels, spectrums[0], 'b.-', label='First spectrum')
+                ax1.plot(channels, spectrums[-1], 'r.-', label='Last spectrum')
+            ax1.legend(fontsize='large')
+            plt.show()
 
 
 ##########################################################################################
