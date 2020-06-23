@@ -3,9 +3,11 @@ A Jupyter Notebook used as a lab book on the beamline SIRIUS (SOLEIL Synchrotron
 
 # Current status
 JupyLabBook is presently in development & testing.  
-Last versions of modules:  
-FrontendFunctions.py: 0.9  
-CustomFunctions.py: 0.10
+
+### Last versions of modules:  
+FrontendFunctions.py: 0.10  
+CustomFunctions.py: 0.11  
+
 
 # What is JupyLabBook?
 JupyLabBook is an interactive lab book to be used on SIRIUS. It is meant to be as close as possible as the paper-like lab book that you would use on the beamline (except for the ruler and the tape).  

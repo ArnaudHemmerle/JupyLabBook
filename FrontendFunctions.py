@@ -12,7 +12,7 @@ import sys
 import nbformat as nbf
 import CustomFunctions as CF
 
-__version__ = '0.9'
+__version__ = '0.10'
 
 """
 -Here are defined all the functions relevant to the front end of JupyLabBook,
@@ -507,8 +507,8 @@ def Choose_treatment(expt):
         # computeqz
         try: value = expt.computeqz
         except: value = True
-        w_computeqz = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='compute qz')
-               
+        w_computeqz = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Compute qz')
+        
         # nblevels
         try: value = expt.nblevels
         except: value = 50
@@ -528,7 +528,12 @@ def Choose_treatment(expt):
         try: value = expt.verbose
         except: value = False
         w_verbose = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print scan info')
-          
+
+        # fastextract
+        try: value = expt.fastextract
+        except: value = True
+        w_fastextract = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Fast extract')
+                       
         # GIXD_cmap
         try: value = expt.GIXD_cmap
         except: value = 'jet'
@@ -543,7 +548,7 @@ def Choose_treatment(expt):
                                           options=['GIXD', 'True GIXD'], description='Plot type')
             
         display(widgets.HBox([w_show_data_stamps, w_verbose, w_GIXD_logx, w_GIXD_logy, w_GIXD_logz, w_GIXD_cmap]))        
-        display(widgets.HBox([w_binsize, w_nblevels, w_moytocreate_str, w_channel0, w_computeqz]))
+        display(widgets.HBox([w_binsize, w_nblevels, w_moytocreate_str, w_channel0, w_computeqz, w_fastextract]))
         display(widgets.HBox([w_wavelength, w_thetai, w_thetac, w_thetazfactor]))
                 
         
@@ -560,6 +565,7 @@ def Choose_treatment(expt):
             expt.thetai = w_thetai.value
             expt.binsize = w_binsize.value
             expt.computeqz = w_computeqz.value
+            expt.fastextract = w_fastextract.value
             expt.nblevels = w_nblevels.value
             expt.moytocreate_str = w_moytocreate_str.value
             expt.show_data_stamps = w_show_data_stamps.value
@@ -590,6 +596,7 @@ def Choose_treatment(expt):
                             'thetai='+str(expt.thetai)+','+
                             'binsize='+str(expt.binsize)+','+
                             'computeqz='+str(expt.computeqz)+','+
+                            'fast='+str(expt.fastextract)+','+
                             'nblevels='+str(expt.nblevels)+','+
                             'moytocreate='+str(list_moytocreate)+','+
                             'show_data_stamps='+str(expt.show_data_stamps)+','+
@@ -627,6 +634,11 @@ def Choose_treatment(expt):
         try: value = expt.verbose
         except: value = False
         w_verbose = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print scan info')
+
+        # fastextract
+        try: value = expt.fastextract
+        except: value = True
+        w_fastextract = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Fast extract')
           
         # pilatus_cmap
         try: value = expt.pilatus_cmap
@@ -634,7 +646,7 @@ def Choose_treatment(expt):
         w_pilatus_cmap = widgets.Select(value=value, style=style, rows=5, description='cmap',
                                         options=['viridis', 'jet', 'Greys', 'cividis', 'hot'])
      
-        display(widgets.HBox([w_show_data_stamps, w_verbose, w_pilatus_logz, w_pilatus_cmap]))        
+        display(widgets.HBox([w_show_data_stamps, w_verbose, w_fastextract, w_pilatus_logz, w_pilatus_cmap]))        
 
         def on_button_plot_clicked(b):
 
@@ -642,6 +654,7 @@ def Choose_treatment(expt):
             expt.pilatus_logz = w_pilatus_logz.value
             expt.show_data_stamps = w_show_data_stamps.value
             expt.verbose = w_verbose.value
+            expt.fastextract = w_fastextract.value
             expt.pilatus_cmap = w_pilatus_cmap.value
 
             for scan in expt.scans:
@@ -651,6 +664,7 @@ def Choose_treatment(expt):
                             'logz='+str(expt.pilatus_logz)+','+
                             'show_data_stamps='+str(expt.show_data_stamps)+','+
                             'verbose='+str(expt.verbose)+','+
+                            'fast='+str(expt.fastextract)+','+
                             'cmap=\''+str(expt.pilatus_cmap)+'\''+')',
                             position='below', celltype='code', is_print = True)
 
@@ -708,12 +722,17 @@ def Choose_treatment(expt):
         try: value = expt.show_data_stamps
         except: value = False
         w_show_data_stamps = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print sensors')
-
+       
         # verbose
         try: value = expt.verbose
         except: value = False
         w_verbose = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print scan info')
-          
+       
+        # fastextract
+        try: value = expt.fastextract
+        except: value = True
+        w_fastextract = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Fast extract')
+
         # GIXS_cmap
         try: value = expt.GIXS_cmap
         except: value = 'viridis'
@@ -728,7 +747,7 @@ def Choose_treatment(expt):
                                           options=['pixels only', 'angles', 'qxy/qz', 'qxy/q'], description='Plot type')
             
         display(widgets.HBox([w_show_data_stamps, w_verbose, w_GIXS_logz, w_GIXS_cmap, w_pixel_size]))        
-        display(widgets.HBox([w_wavelength, w_distance, w_thetai, w_pixel_PONI_x, w_pixel_PONI_y]))
+        display(widgets.HBox([w_wavelength, w_distance, w_thetai, w_pixel_PONI_x, w_pixel_PONI_y, w_fastextract]))
         
         def on_button_plot_clicked(b):
             
@@ -742,6 +761,7 @@ def Choose_treatment(expt):
             expt.pixel_size = w_pixel_size.value
             expt.show_data_stamps = w_show_data_stamps.value
             expt.verbose = w_verbose.value
+            expt.fastextract = w_fastextract.value
             expt.GIXS_cmap = w_GIXS_cmap.value
             expt.GIXS_plot_type = w_GIXS_plot_type.value
             
@@ -761,9 +781,10 @@ def Choose_treatment(expt):
                         'distance='+str(expt.distance)+','+
                         'pixel_PONI_x='+str(expt.pixel_PONI_x)+','+
                         'pixel_PONI_y='+str(expt.pixel_PONI_y)+','+
+                        'fast='+str(expt.fastextract)+','+
                         'pixel_size='+str(expt.pixel_size)+','+  
                         'show_data_stamps='+str(expt.show_data_stamps)+','+
-                        'verbose='+str(expt.verbose)+','+
+                        'verbose='+str(expt.verbose)+','+       
                         'cmap=\''+str(expt.GIXS_cmap)+'\','+
                         'plot_twotheta_alphaf='+str(expt.plot_twotheta_alphaf)+','+
                         'plot_qxy_qz='+str(expt.plot_qxy_qz)+','+
@@ -794,7 +815,12 @@ def Choose_treatment(expt):
         try: value = expt.verbose
         except: value = False
         w_verbose = widgets.Checkbox(value=value, style=style, layout = short_layout, description='Print scan info')
-  
+       
+        # fastextract
+        try: value = expt.fastextract
+        except: value = True
+        w_fastextract = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Fast extract')
+
         # plot_spectrogram
         try: value = expt.plot_spectrogram
         except: value = True
@@ -834,7 +860,7 @@ def Choose_treatment(expt):
         # use_eV
         try: value = expt.use_eV
         except: value = False
-        w_use_eV = widgets.Checkbox(value=value, style=style, layout = short_layout, description='use eV')
+        w_use_eV = widgets.Checkbox(value=value, style=style, layout = short_layout, description='Use eV')
 
         # gain
         try: value = expt.gain
@@ -846,7 +872,7 @@ def Choose_treatment(expt):
         except: value = 0.
         w_eV0 = widgets.FloatText(value=value, description='eV0', style=style, layout = short_layout)        
         
-        display(widgets.HBox([w_show_data_stamps, w_verbose]))
+        display(widgets.HBox([w_show_data_stamps, w_verbose, w_fastextract]))
         display(widgets.HBox([w_plot_spectrogram, w_plot_first_last, w_plot_sum]))
         display(widgets.HBox([w_XRF_logz, w_elems_str, w_first_channel, w_last_channel]))
         display(widgets.HBox([w_use_eV, w_gain, w_eV0]))
@@ -863,6 +889,7 @@ def Choose_treatment(expt):
             expt.eV0 = w_eV0.value
             expt.show_data_stamps = w_show_data_stamps.value
             expt.verbose = w_verbose.value
+            expt.fastextract = w_fastextract.value
             expt.plot_spectrogram = w_plot_spectrogram.value
             expt.plot_first_last = w_plot_first_last.value
             expt.plot_sum = w_plot_sum.value
@@ -884,6 +911,7 @@ def Choose_treatment(expt):
                            'eV0='+str(expt.eV0)+','+
                            'show_data_stamps='+str(expt.show_data_stamps)+','+
                            'verbose='+str(expt.verbose)+','+
+                           'fast='+str(expt.fastextract)+','+
                            'plot_spectrogram='+str(expt.plot_spectrogram)+','+
                            'plot_first_last='+str(expt.plot_first_last)+','+
                            'plot_sum='+str(expt.plot_sum)+

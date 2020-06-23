@@ -14,7 +14,7 @@ from scipy.special import erf
 from PIL import Image
 
 
-__version__ = '0.10'
+__version__ = '0.11'
 
 """
 Here are defined the custom functions used for analysis of data in the JupyLabBook.
@@ -561,7 +561,7 @@ def Groupe(mat, binsize=10):
 def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='',
                  logx=False, logy=False, logz=False,
                  channel0=600, thetazfactor=0.01, wavelength=0.155, thetac=0.0028, thetai=0.002,
-                 binsize=10, computeqz=True, nblevels=50, moytocreate=(10, 20, 40),
+                 binsize=10, computeqz=True, fast=True, nblevels=50, moytocreate=(10, 20, 40),
                  show_data_stamps=False, verbose=False, cmap='jet', plot_true_GIXD=False):
     
     """
@@ -583,7 +583,7 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
         if verbose: print(PN._BLUE+" - Open Nexus Data File :"+ PN._RESET)
         if verbose: print('\t'+nxs_path)
         try:
-            nexus=PN.PyNexusFile(nxs_path, fast=True)
+            nexus=PN.PyNexusFile(nxs_path, fast=fast)
         except:
             print(PN._RED,'\t Nexus file seems not to exist or is not correct',PN._RESET)
             return
@@ -1007,7 +1007,7 @@ def Plot_isotherm(nxs_filename='SIRIUS_test.nxs', recording_dir='', show_data_st
 def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='',
                  logz=True, wavelength=0.155, thetai=0.002, distance=2722,
                  pixel_PONI_x=490, pixel_PONI_y=975, pixel_size=0.172,
-                 show_data_stamps=False, verbose=False, cmap='viridis',
+                 show_data_stamps=False, verbose=False, fast=True, cmap='viridis',
                  plot_twotheta_alphaf=False, plot_qxy_qz=False, plot_qxy_q=False):
     
     """
@@ -1024,7 +1024,7 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
         if verbose: print(PN._BLUE+" - Open Nexus Data File :"+ PN._RESET)
         if verbose: print('\t'+nxs_path)
         try:
-            nexus=PN.PyNexusFile(nxs_path, fast=True)
+            nexus=PN.PyNexusFile(nxs_path, fast=fast)
         except:
             print(PN._RED,'\t Nexus file seems not to exist or is not correct',PN._RESET)
             return
@@ -1209,7 +1209,7 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
 def Extract_XRF(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='',
                 logz=False, list_elems=[0,1,2,3], first_channel=0, last_channel=2048,
                 use_eV=False, gain=10., eV0=0.,
-                show_data_stamps=False, verbose=False,
+                show_data_stamps=False, verbose=False, fast=True,
                 plot_spectrogram=False, plot_first_last=False, plot_sum=False):
     """
     Extract, correct with ICR/OCR, and plot the fluo spectrum. 
@@ -1224,7 +1224,7 @@ def Extract_XRF(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir=''
         if verbose: print(PN._BLUE+" - Open Nexus Data File :"+ PN._RESET)
         if verbose: print('\t'+nxs_path)
         try:            
-            nexus=PN.PyNexusFile(nxs_path, fast=True)
+            nexus=PN.PyNexusFile(nxs_path, fast=fast)
         except:
             print(PN._RED,'\t Nexus file seems not to exist or is not correct',PN._RESET)
             return
@@ -1364,7 +1364,7 @@ def Plot_1D(nxs_filename='SIRIUS_test.nxs', recording_dir='',
 
     
 def Extract_pilatus_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='', logz=True,
-                        show_data_stamps=False, verbose=False, cmap='viridis'):
+                        show_data_stamps=False, verbose=False, fast=True, cmap='viridis'):
     
     """
     Extract, plot, and save the sum of all the pilatus images in a scan. 
@@ -1380,7 +1380,7 @@ def Extract_pilatus_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recordin
         if verbose: print(PN._BLUE+" - Open Nexus Data File :"+ PN._RESET)
         if verbose: print('\t'+nxs_path)
         try:
-            nexus=PN.PyNexusFile(nxs_path, fast=True)
+            nexus=PN.PyNexusFile(nxs_path, fast=fast)
         except:
             print(PN._RED,'\t Nexus file seems not to exist or is not correct',PN._RESET)
             return
