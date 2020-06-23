@@ -223,6 +223,16 @@ def Choose_action(expt):
          
         Delete_current_cell()
             
+    def on_button_wm_clicked(b):
+        """
+        Print the motors positions from a log file.
+        """
+        
+        Create_cell(code='FF.Print_wm(expt)',position ='below', celltype='code', is_print=False)
+        Create_cell(code='FF.Choose_action(expt)', position ='at_bottom', celltype='code', is_print=False)        
+         
+        Delete_current_cell()            
+            
     def on_button_export_clicked(b):
         """
         Export the notebook to PDF.
@@ -317,6 +327,10 @@ def Choose_action(expt):
     button_form = widgets.Button(description="Fill form")
     button_form.on_click(on_button_form_clicked)
     
+    # Click to print motors
+    button_wm = widgets.Button(description="Print wm")
+    button_wm.on_click(on_button_wm_clicked)
+    
     # Click to export to pdf
     button_export = widgets.Button(description="Export to PDF")
     button_export.on_click(on_button_export_clicked)
@@ -337,7 +351,7 @@ def Choose_action(expt):
     w_print_scans.widget.children[0].description = 'Next scan(s):'
     w_print_scans.widget.children[0].layout = {'width': '400px'}
     
-    buttons1 = widgets.HBox([button_form, button_calibthetaz])
+    buttons1 = widgets.HBox([button_form, button_wm, button_calibthetaz])
     display(buttons1)
 
     buttons2 = widgets.HBox([button_markdown, button_script, button_export])
@@ -1071,7 +1085,6 @@ def Choose_treatment(expt):
     display(buttons2)
 
     
-    
 def Create_form():
 
     short_layout = widgets.Layout(width='200px', height='40px')
@@ -1378,3 +1391,132 @@ def Create_form():
     out = widgets.Output()
     display(button,out)
     button.on_click(on_button_clicked)
+
+    
+def Print_wm(expt):
+    """
+    Print the positions of the motors/sensors from extracting the command wm in a log file.
+    """
+
+    try:
+        default_value = expt.default_wm_log_file
+    except:
+        default_value = expt.list_logs_files[0]
+    
+    w_select_log = widgets.Dropdown(
+                 options=expt.list_logs_files,
+                 value=default_value,
+                 layout=widgets.Layout(width='400px'),
+                 style={'description_width': 'initial'})
+
+    def on_button_select_clicked(b):
+        clear_output(wait=False)
+        
+        # Keep history of the chosen file
+        expt.default_wm_log_file = w_select_log.value
+        
+        # Construct the list of wm in the log
+        list_wm = []
+        log_file =  w_select_log.value
+        with open(expt.logs_dir+log_file) as f:
+            for line in f:
+                if "# " in line: temp = line
+                if ("wm " in line and "pwm" not in line and "ERROR" not in line):
+                    list_wm.append(temp.replace('\n','')+'; '+line.replace('\n',''))
+        f.close()
+
+        if list_wm == []:
+            print(PN._RED+"No wm in the log file: "+log_file+PN._RESET)
+            print(PN._RED+"Re-execute this cell and choose another log file."+PN._RESET)
+            return
+
+        w_select_wm = widgets.Dropdown(
+                     options=list_wm,
+                     value=list_wm[-1],
+                     layout=widgets.Layout(width='700px'),
+                     style={'description_width': 'initial'})
+
+        display(w_select_wm)
+
+
+
+        def on_button_print_clicked(b):
+            clear_output(wait=False)
+
+            # Extract the date of the wm (used as an identifier to be found in the log)
+            date_wm = w_select_wm.value.split('; ')[0]
+
+            # Find the right lines in the log
+            list_sensors = []
+            is_date_found = False
+            count = 0
+            with open(expt.logs_dir+log_file) as f:
+                for line in f:
+                    if date_wm in line: 
+                        is_date_found = True
+                    if (is_date_found and '-------' in line):
+                        count += 1    
+                    if (count == 2 and '-------' not in line):
+                        # append name, value, unit
+                        list_sensors.append(line.split()[2:5])
+
+                        # if unit is not present
+                        if ('[' in line.split()[4]):  
+                            list_sensors[-1][-1] = ' '
+
+                        # if unit is 'No unit'
+                        if ('No' in line.split()[4]):  
+                            list_sensors[-1][-1] = ' '
+
+            f.close()
+
+            # Display as a markdown table
+            max_elem_per_line = 6
+            if len(list_sensors) >= max_elem_per_line:
+                nb_per_line = min(len(list_sensors)//2, max_elem_per_line)
+            else:
+                nb_per_line = max_elem_per_line
+
+            list_sensors_str = []
+            for i in range(0,len(list_sensors),nb_per_line):
+                list_sensors_cut = list_sensors[i:i+nb_per_line]
+
+                tbw_str = '' 
+                for sensor in list_sensors_cut:
+                    tbw_str += '|'+str(sensor[0])
+                tbw_str += '|'+' \n'
+
+                for sensor in list_sensors_cut:
+                    tbw_str += '|'+':-:'
+                tbw_str += '|'+' \n'
+
+                for sensor in list_sensors_cut:
+                    tbw_str += '|'+str(sensor[1])
+                tbw_str += '|'+' \n'
+
+                for sensor in list_sensors_cut:
+                    tbw_str += '|'+str(sensor[2])
+                tbw_str += '|'
+
+                list_sensors_str.append(tbw_str)
+
+            for sensor_str in list_sensors_str[::-1]:
+                # Create markdown cells with the tables
+                Create_cell(code=sensor_str, position ='below', celltype='markdown', is_print=True)
+
+            # Put title    
+            Create_cell(code='## '+w_select_wm.value.split('; ')[1], position ='below', celltype='markdown', is_print=True)
+           
+            # Remove the widget when done
+            Delete_current_cell()
+            
+            
+        button = widgets.Button(description="Add wm to report")
+        display(button)
+        button.on_click(on_button_print_clicked)
+
+
+    button = widgets.Button(description="Select log")
+    button.on_click(on_button_select_clicked)
+
+    display(widgets.HBox([w_select_log, button]))   
