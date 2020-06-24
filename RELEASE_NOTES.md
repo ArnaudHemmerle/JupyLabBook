@@ -2,8 +2,6 @@
 
 ### 23/06/2020
 
-Merge id: 
-
 FrontendFunctions.py: 0.10  
 CustomFunctions.py: 0.11
 
