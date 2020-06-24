@@ -11,6 +11,7 @@ import subprocess
 import sys
 import nbformat as nbf
 import CustomFunctions as CF
+import math
 
 __version__ = '0.10'
 
@@ -1472,13 +1473,15 @@ def Print_wm(expt):
 
             # Display as a markdown table
             max_elem_per_line = 6
-            if len(list_sensors) >= max_elem_per_line:
-                nb_per_line = min(len(list_sensors)//2, max_elem_per_line)
+            nb_elem = len(list_sensors)
+            if nb_elem >= max_elem_per_line:
+                nb_line = math.ceil(nb_elem/max_elem_per_line)
+                nb_per_line = math.ceil(nb_elem/nb_line)
             else:
                 nb_per_line = max_elem_per_line
 
             list_sensors_str = []
-            for i in range(0,len(list_sensors),nb_per_line):
+            for i in range(0,nb_elem,nb_per_line):
                 list_sensors_cut = list_sensors[i:i+nb_per_line]
 
                 tbw_str = '' 
@@ -1505,7 +1508,7 @@ def Print_wm(expt):
                 Create_cell(code=sensor_str, position ='below', celltype='markdown', is_print=True)
 
             # Put title    
-            Create_cell(code='## '+w_select_wm.value.split('; ')[1], position ='below', celltype='markdown', is_print=True)
+            Create_cell(code='### '+w_select_wm.value.split('; ')[1], position ='below', celltype='markdown', is_print=True)
            
             # Remove the widget when done
             Delete_current_cell()
