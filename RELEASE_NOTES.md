@@ -8,3 +8,9 @@ CustomFunctions.py: 0.11
 - Add the choice to do a PyNexus fast extract for the extraction of XRF and Isotherms. All the other extractions are set to fast=True by default.
 - Add an informative error message when elements are not right in XRF. Set default to 4 instead of 0, 1, 2, 3.
 - Add the possibility to print wm ('where motors') through a button. Goes as a table in the pdf.
+
+### 30/06/2020
+
+FrontendFunctions.py: 0.11
+
+- Add delay on cell creation to avoid creation of several identical cells on fast computers. 
