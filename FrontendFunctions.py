@@ -228,11 +228,11 @@ def Choose_action(expt):
         """
         Print the motors positions from a log file.
         """
-        
-        Create_cell(code='FF.Print_wm(expt)',position ='below', celltype='code', is_print=False)
-        Create_cell(code='FF.Choose_action(expt)', position ='at_bottom', celltype='code', is_print=False)        
+        Print_wm(expt)
+        #Create_cell(code='FF.Print_wm(expt)',position ='below', celltype='code', is_print=False)
+        #Create_cell(code='FF.Choose_action(expt)', position ='at_bottom', celltype='code', is_print=False)        
          
-        Delete_current_cell()            
+        #Delete_current_cell()            
             
     def on_button_export_clicked(b):
         """
@@ -1445,7 +1445,6 @@ def Print_wm(expt):
                  style={'description_width': 'initial'})
 
     def on_button_select_clicked(b):
-        clear_output(wait=False)
         
         # Keep history of the chosen file
         expt.default_wm_log_file = w_select_log.value
@@ -1461,8 +1460,8 @@ def Print_wm(expt):
         f.close()
 
         if list_wm == []:
-            print(PN._RED+"No wm in the log file: "+log_file+PN._RESET)
-            print(PN._RED+"Re-execute this cell and choose another log file."+PN._RESET)
+            print(PN._RED+"No positions in the log file: "+log_file+PN._RESET)
+            print(PN._RED+"Choose another log file."+PN._RESET)
             return
 
         w_select_wm = widgets.Dropdown(
@@ -1476,8 +1475,7 @@ def Print_wm(expt):
 
 
         def on_button_print_clicked(b):
-            clear_output(wait=False)
-
+             
             # Extract the date of the wm (used as an identifier to be found in the log)
             date_wm = w_select_wm.value.split('; ')[0]
 
@@ -1543,12 +1541,13 @@ def Print_wm(expt):
 
             # Put title    
             Create_cell(code='### '+w_select_wm.value.split('; ')[1], position ='below', celltype='markdown', is_print=True)
-           
-            # Remove the widget when done
+            
             Delete_current_cell()
+        
+            Create_cell(code='FF.Choose_action(expt)',
+                        position ='at_bottom', celltype='code', is_print=False)  
             
-            
-        button = widgets.Button(description="Add wm to report")
+        button = widgets.Button(description="Insert positions")
         display(button)
         button.on_click(on_button_print_clicked)
 
