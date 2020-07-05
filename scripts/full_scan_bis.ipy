@@ -1,0 +1,9 @@
+%shopen
+%amove delta -40
+%continuous_ascan delta -40 -35 125 5
+%run reset_motors.ipy
+%amove delta -35
+%continuous_ascan delta -35 -25 250 5
+%run reset_motors.ipy
+
+%shclose

@@ -229,10 +229,7 @@ def Choose_action(expt):
         Print the motors positions from a log file.
         """
         Print_wm(expt)
-        #Create_cell(code='FF.Print_wm(expt)',position ='below', celltype='code', is_print=False)
-        #Create_cell(code='FF.Choose_action(expt)', position ='at_bottom', celltype='code', is_print=False)        
-         
-        #Delete_current_cell()            
+          
             
     def on_button_export_clicked(b):
         """
@@ -264,78 +261,7 @@ def Choose_action(expt):
         """
         Insert a script as a markdown cell.
         """ 
-
-        # Check if there is already a path for scripts directories
-        # If not, use the recording directory
-        try:
-            path_to_dir_default = expt.path_to_dir
-        except:
-            path_to_dir_default = expt.recording_dir
-
-        # Widget to write path
-        w_path_to_dir = widgets.Text(
-                value=path_to_dir_default,
-                description='Scripts directory:',
-                layout=widgets.Layout(width='800px', height='40px'),
-                style={'description_width': 'initial'})
-                
-        def on_button_validate_path_clicked(b):
-            """
-            Validate the path of the script folder. Open selection for the script.
-            """
-
-            if not os.path.exists(w_path_to_dir.value):
-                print(PN._RED+"Wrong folder name."+PN._RESET)
-                print("")
-                return
-            
-            # Pass the current value of the directory to the default one
-            expt.path_to_dir = w_path_to_dir.value
-            
-            # Define the list of log files in the log directory
-            list_scripts_files = [file for file in sorted(os.listdir(expt.path_to_dir)) if '.ipy' in file][::-1]
-
-            if len(list_scripts_files) < 1:
-                print(PN._RED+"There is no script in this folder."+PN._RESET)
-                print("")
-                return                
-            
-            # Widget to select script
-            w_select_script = widgets.Dropdown(
-                 options=list_scripts_files,
-                 value=list_scripts_files[-1],
-                 layout=widgets.Layout(width='300px'),
-                 style={'description_width': 'Script:'})
-            
-            def on_button_insert_script_clicked(b):
-                """
-                Display a script in a markdown cell.
-                """ 
-                
-                # Refresh the cell
-                on_button_refresh_clicked(b)
-                
-                # Get and insert the script
-                path_to_dir = w_path_to_dir.value
-                script_name = w_select_script.value
-                text_file = open(path_to_dir+script_name)
-                file_content = text_file.read()
-                text_file.close()
-                code = '```python\n'+file_content+'```'
-
-                Create_cell(code='### '+ script_name, position ='above', celltype='markdown', is_print=True)
-                Create_cell(code=code, position ='above', celltype='markdown', is_print=True)
-
-            button_insert_script = widgets.Button(description="Insert script")
-            button_insert_script.on_click(on_button_insert_script_clicked)
-
-            display(widgets.HBox([w_select_script, button_insert_script]))
-
-        button_validate_path = widgets.Button(description="Validate path")
-        button_validate_path.on_click(on_button_validate_path_clicked)
-        display(widgets.HBox([w_path_to_dir, button_validate_path]))
-                      
-
+        Print_script(expt)
     
     # Display the widgets
    
@@ -1472,8 +1398,6 @@ def Print_wm(expt):
 
         display(w_select_wm)
 
-
-
         def on_button_print_clicked(b):
              
             # Extract the date of the wm (used as an identifier to be found in the log)
@@ -1555,4 +1479,81 @@ def Print_wm(expt):
     button = widgets.Button(description="Select log")
     button.on_click(on_button_select_clicked)
 
-    display(widgets.HBox([w_select_log, button]))   
+    display(widgets.HBox([w_select_log, button]))  
+    
+def Print_script(expt):
+    """
+    Collect info from a wm command in a log and add it to the report.
+    """
+
+    # Check if there is already a path for scripts directories
+    # If not, use the recording directory
+    try:
+        path_to_dir_default = expt.path_to_dir
+    except:
+        path_to_dir_default = expt.recording_dir
+
+    # Widget to write path
+    w_path_to_dir = widgets.Text(
+            value=path_to_dir_default,
+            description='Scripts directory:',
+            layout=widgets.Layout(width='800px', height='40px'),
+            style={'description_width': 'initial'})
+
+    def on_button_validate_path_clicked(b):
+        """
+        Validate the path of the script folder. Open selection for the script.
+        """
+
+        if not os.path.exists(w_path_to_dir.value):
+            print(PN._RED+"Wrong folder name."+PN._RESET)
+            print("")
+            return
+
+        # Pass the current value of the directory to the default one
+        expt.path_to_dir = w_path_to_dir.value
+
+        # Define the list of log files in the log directory
+        list_scripts_files = [file for file in sorted(os.listdir(expt.path_to_dir)) if '.ipy' in file][::-1]
+
+        if len(list_scripts_files) < 1:
+            print(PN._RED+"There is no script in this folder."+PN._RESET)
+            print("")
+            return                
+
+        # Widget to select script
+        w_select_script = widgets.Dropdown(
+             options=list_scripts_files,
+             value=list_scripts_files[-1],
+             layout=widgets.Layout(width='300px'),
+             style={'description_width': 'Script:'})
+
+        def on_button_insert_script_clicked(b):
+            """
+            Display a script in a markdown cell.
+            """ 
+
+            # Get and insert the script
+            path_to_dir = w_path_to_dir.value
+            script_name = w_select_script.value
+            text_file = open(path_to_dir+script_name)
+            file_content = text_file.read()
+            text_file.close()
+            code = '```python\n'+file_content+'```'
+
+            Create_cell(code='### '+ script_name, position ='above', celltype='markdown', is_print=True)
+            Create_cell(code=code, position ='above', celltype='markdown', is_print=True)
+            
+            Delete_current_cell()
+        
+            Create_cell(code='FF.Choose_action(expt)',
+                        position ='at_bottom', celltype='code', is_print=False)  
+
+        button_insert_script = widgets.Button(description="Insert script")
+        button_insert_script.on_click(on_button_insert_script_clicked)
+
+        display(widgets.HBox([w_select_script, button_insert_script]))
+
+    button_validate_path = widgets.Button(description="Validate path")
+    button_validate_path.on_click(on_button_validate_path_clicked)
+    display(widgets.HBox([w_path_to_dir, button_validate_path]))
