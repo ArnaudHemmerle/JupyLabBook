@@ -243,7 +243,11 @@ def Choose_action(expt):
         if export_done:
             print('Notebook exported to %s.pdf'%expt.notebook_name.split('.')[0])
         else:
-            print("There was something wrong with the export to pdf. Please try again.")
+            print("There was something wrong with the export to pdf.")
+            print("Did you rename the Notebook? If yes:")
+            print("1) Change the value of expt.notebook_name in the first cell (top of the Notebook).")
+            print("2) Re-execute the first cell.")
+            print("3) Try to export the pdf again in the last cell (bottom of the Notebook).")
 
                 
     def on_button_markdown_clicked(b):
@@ -1557,3 +1561,6 @@ def Print_script(expt):
     button_validate_path = widgets.Button(description="Validate path")
     button_validate_path.on_click(on_button_validate_path_clicked)
     display(widgets.HBox([w_path_to_dir, button_validate_path]))
+    
+
+
