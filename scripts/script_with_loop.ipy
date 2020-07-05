@@ -1,0 +1,23 @@
+%shopen
+%amove delta -40
+%run reset_motors.ipy
+%amove delta -35
+%continuous_ascan delta -35 -25 250 5
+%run reset_motors.ipy
+for i in range(4):
+    %amove delta -20
+    %continuous_ascan delta -10 -3 175 5
+    %run reset_motors.ipy
+    %run cont_regh_abs.ipy
+
+
+for i in range(3):
+    %amove delta -20
+    %continuous_ascan delta -10 -3 175 5
+    %run reset_motors.ipy
+    %run cont_regh_abs.ipy
+    %run cont_regh_abs.ipy
+
+%continuous_ascan delta -35 -25 250 5
+%amove delta -40
+%shclose
