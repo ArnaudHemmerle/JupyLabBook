@@ -13,7 +13,7 @@ import nbformat as nbf
 import CustomFunctions as CF
 import math
 
-__version__ = '0.11'
+__version__ = '0.12'
 
 """
 -Here are defined all the functions relevant to the front end of JupyLabBook,
@@ -299,7 +299,7 @@ def Choose_action(expt):
             text_file = open(path_to_dir.value+script_name.value)
             file_content = text_file.read()
             text_file.close()
-            code = '```python'+file_content+'```'
+            code = '```python\n'+file_content+'```'
 
             Create_cell(code='### '+ script_name.value, position ='above', celltype='markdown', is_print=True)
             Create_cell(code=code, position ='above', celltype='markdown', is_print=True)
@@ -348,7 +348,11 @@ def Choose_action(expt):
     display(buttons0)
       
     # Widget for selection of multiple scans
-    w_print_scans = widgets.interact(selection_scans, nxs_files = widgets.SelectMultiple(options=expt.list_nxs_files))
+    w_print_scans = widgets.interact(selection_scans,
+                                     nxs_files = widgets.SelectMultiple(
+                                                 options=expt.list_nxs_files,
+                                                 rows=10)
+                                    )
     w_print_scans.widget.children[0].description = 'Next scan(s):'
     w_print_scans.widget.children[0].layout = {'width': '400px'}
     
