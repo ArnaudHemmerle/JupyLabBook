@@ -1535,16 +1535,73 @@ def Print_script(expt):
         def on_button_insert_script_clicked(b):
             """
             Display a script in a markdown cell.
+            Add scan numbers.
             """ 
 
             # Get and insert the script
             path_to_dir = w_path_to_dir.value
             script_name = w_select_script.value
             text_file = open(path_to_dir+script_name)
-            expt.text = text_file
-            file_content = text_file.read()
+            
+            # Import original script
+            script_init = text_file.read()
+            
+            # Split the different lines
+            script_split = script_init.split('\n')
+            
+            ###################################
+            # Add scan number
+            ###################################
+            
+            # List of names which triggers an increment of the scan number
+            list_trig = ['cont_regh', 'scan']
+            count = w_index_first_scan.value
+            is_loop = False
+            for i in range(len(script_split)):
+
+                if is_loop:
+
+                    # Fist run on the loop to collect info
+                    loop_length = 0
+                    nb_scan_in_loop = 0
+                    is_first_run = True
+                    for k in range(i,len(script_split)):
+                        if is_first_run: 
+                            if ('    ' in script_split[k]) or ('\t' in script_split[k]):
+                                loop_length +=1
+                                if any(elem in script_split[k] for elem in list_trig):
+                                    nb_scan_in_loop+=1
+                            else:
+                                is_first_run = False
+
+                    # Attribute the scan numbers
+                    for j in range(repet_nb-1):
+                        for k in range(i,i+loop_length):
+                            if any(elem in script_split[k] for elem in list_trig):
+                                    script_split[k] = script_split[k]+' #'+str(count)
+                                    count+=1
+
+                    is_loop = False
+
+                # Detect a loop
+                if ('in range' in script_split[i]):
+                    repet_nb = int(''.join([str(s) for s in script_split[i] if s.isdigit()]))
+                    is_loop = True
+
+                # Regular scan not in a loop
+                if any(elem in script_split[i] for elem in list_trig):
+                    script_split[i] = script_split[i]+' #'+str(count)
+                    count+=1
+
+            ##################################
+            
+            # Re-create the script with added scan numbers
+            script_modif ='\n'.join(script_split)
+            
             text_file.close()
-            code = '```python\n'+file_content+'```'
+            
+            
+            code = '```python\n'+script_modif+'```'
 
             Create_cell(code='### '+ script_name, position ='above', celltype='markdown', is_print=True)
             Create_cell(code=code, position ='above', celltype='markdown', is_print=True)
@@ -1554,10 +1611,18 @@ def Print_script(expt):
             Create_cell(code='FF.Choose_action(expt)',
                         position ='at_bottom', celltype='code', is_print=False)  
 
+        
+        # Get number of the first scan
+        w_index_first_scan = widgets.IntText(value=0,
+                                             style = {'description_width': 'initial'},
+                                             layout = widgets.Layout(width='200px'),
+                                             description='Index first scan')
+        
+
         button_insert_script = widgets.Button(description="Insert script")
         button_insert_script.on_click(on_button_insert_script_clicked)
 
-        display(widgets.HBox([w_select_script, button_insert_script]))
+        display(widgets.HBox([w_select_script, w_index_first_scan, button_insert_script]))
 
     button_validate_path = widgets.Button(description="Validate path")
     button_validate_path.on_click(on_button_validate_path_clicked)

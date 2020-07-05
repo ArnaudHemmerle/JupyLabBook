@@ -9,14 +9,15 @@ for i in range(4):
     %continuous_ascan delta -10 -3 175 5
     %run reset_motors.ipy
     %run cont_regh_abs.ipy
-
-
 for i in range(3):
     %amove delta -20
     %continuous_ascan delta -10 -3 175 5
     %run reset_motors.ipy
     %run cont_regh_abs.ipy
     %run cont_regh_abs.ipy
+for i in range(2):
+    %amove delta -20
+    %tscan 10 100
 
 %continuous_ascan delta -35 -25 250 5
 %amove delta -40
