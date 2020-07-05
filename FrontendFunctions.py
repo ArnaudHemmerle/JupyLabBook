@@ -1541,6 +1541,7 @@ def Print_script(expt):
             path_to_dir = w_path_to_dir.value
             script_name = w_select_script.value
             text_file = open(path_to_dir+script_name)
+            expt.text = text_file
             file_content = text_file.read()
             text_file.close()
             code = '```python\n'+file_content+'```'
