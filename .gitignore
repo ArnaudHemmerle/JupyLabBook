@@ -3,6 +3,7 @@
 logs/
 recording/
 working/
+scripts/
 .ipynb_checkpoints/
 __pycache__/
 JupylabBook.pdf
