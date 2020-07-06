@@ -229,8 +229,13 @@ def Choose_action(expt):
         Print the motors positions from a log file.
         """
         Print_wm(expt)
-          
-            
+
+    def on_button_commands_clicked(b):
+        """
+        Print list of commands from a log file.
+        """
+        Print_commands(expt)        
+        
     def on_button_export_clicked(b):
         """
         Export the notebook to PDF.
@@ -289,6 +294,10 @@ def Choose_action(expt):
     button_wm = widgets.Button(description="Insert positions")
     button_wm.on_click(on_button_wm_clicked)
     
+    # Click to print a list of commands
+    button_commands = widgets.Button(description="Insert commands")
+    button_commands.on_click(on_button_commands_clicked)
+    
     # Click to export to pdf
     button_export = widgets.Button(description="Export to PDF")
     button_export.on_click(on_button_export_clicked)
@@ -316,7 +325,7 @@ def Choose_action(expt):
     buttons1 = widgets.HBox([button_form, button_calibthetaz])
     display(buttons1)
 
-    buttons2 = widgets.HBox([button_markdown, button_script, button_wm, button_export])
+    buttons2 = widgets.HBox([button_markdown, button_script, button_wm, button_commands, button_export])
     display(buttons2)
     
 
@@ -1630,4 +1639,89 @@ def Print_script(expt):
     display(widgets.HBox([w_path_to_dir, button_validate_path]))
     
 
+def Print_commands(expt):
+    """
+    Print a list of commands from a log file. Add the scan numbers at the end of each line.
+    """
 
+    try:
+        default_value = expt.default_wm_log_file
+    except:
+        default_value = expt.list_logs_files[0]
+
+    w_select_log = widgets.Dropdown(
+                 options=expt.list_logs_files,
+                 value=default_value,
+                 layout=widgets.Layout(width='400px'),
+                 style={'description_width': 'initial'})
+
+    def on_button_select_clicked(b):
+
+        # Keep history of the chosen file
+        expt.default_wm_log_file = w_select_log.value
+
+        pathToFile = expt.logs_dir+w_select_log.value
+
+
+        #Define the elements to be removed of the original log file
+        remove_elem_0 = ['#', ']', '\n']
+        remove_elem = [
+                      'DevError', 'desc =', 'origin =', 'reason =', 'severity =',
+                      'connection'
+                       ]
+
+
+        with open(pathToFile, 'r') as f:
+            log_lines = f.readlines()
+
+        rlog_lines = np.empty([], dtype ='<U1000')
+
+        for i in range(len(log_lines)):
+            if 'Scan Index' in log_lines[i]:
+                scan_number = ''.join(filter(str.isdigit, log_lines[i]))
+                while scan_number[0]=='0':
+                    # Delete trailing zero
+                    scan_number = scan_number[1:]
+                rlog_lines[-1] = rlog_lines[-1][:-1] +  ' #' + scan_number +'\n' 
+            elif '*** ABORT ***' in log_lines[i]:
+                rlog_lines = np.append(rlog_lines, '*** ABORT ***'+'\n')
+            elif 'Scan aborted' in log_lines[i]:
+                rlog_lines = np.append(rlog_lines, '*** SCAN ABORTED ***'+'\n')
+            elif log_lines[i][0] in remove_elem_0:
+                pass
+            elif any([elem in log_lines[i] for elem in remove_elem]):
+                pass
+            else:
+                rlog_lines = np.append(rlog_lines, log_lines[i])
+
+
+        w_select_commands = widgets.SelectMultiple(options=rlog_lines,rows=30)
+
+        display(w_select_commands)
+
+        def on_button_insert_commands_clicked(b):
+            """
+            Display selected commands and scan numbers in a markdown cell.
+            """ 
+
+            code = '```python\n'+''.join(w_select_commands.value)+'```'
+
+            Create_cell(code='### List of commands', position ='above', celltype='markdown', is_print=True)
+            
+            Create_cell(code=code, position ='above', celltype='markdown', is_print=True)
+
+            Delete_current_cell()
+
+            Create_cell(code='FF.Choose_action(expt)',
+                        position ='at_bottom', celltype='code', is_print=False)  
+
+        # Click to insert a script
+        button_insert_commands = widgets.Button(description="Insert commands")
+        button_insert_commands.on_click(on_button_insert_commands_clicked)
+
+        display(button_insert_commands)
+
+    button = widgets.Button(description="Select log")
+    button.on_click(on_button_select_clicked)
+
+    display(widgets.HBox([w_select_log, button]))  
