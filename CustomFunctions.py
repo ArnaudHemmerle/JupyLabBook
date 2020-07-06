@@ -14,7 +14,7 @@ from scipy.special import erf
 from PIL import Image
 
 
-__version__ = '0.11'
+__version__ = '0.12'
 
 """
 Here are defined the custom functions used for analysis of data in the JupyLabBook.
@@ -1294,6 +1294,7 @@ def Extract_XRF(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir=''
     if is_extract_ok:
         ind_non_zero_spectrums = np.where(np.sum(allspectrums_corr, axis = 1)>10.)[0]
         list_ranges = np.split(ind_non_zero_spectrums, np.where(np.diff(ind_non_zero_spectrums) != 1)[0]+1)
+        first_non_zero_spectrum = ind_non_zero_spectrums[0]
         last_non_zero_spectrum = ind_non_zero_spectrums[-1]
 
         channels = np.arange(int(first_channel), int(last_channel+1))
@@ -1345,11 +1346,11 @@ def Extract_XRF(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir=''
             if logz: ax1.set_yscale('log')
             if use_eV:
                 ax1.set_xlabel('eV', fontsize='large')        
-                ax1.plot(eVs, spectrums[0], 'b.-', label='First spectrum')
+                ax1.plot(eVs, spectrums[first_non_zero_spectrum], 'b.-', label='First spectrum')
                 ax1.plot(eVs, spectrums[-1], 'r.-', label='Last spectrum')            
             else:
                 ax1.set_xlabel('channel', fontsize='large')        
-                ax1.plot(channels, spectrums[0], 'b.-', label='First spectrum')
+                ax1.plot(channels, spectrums[first_non_zero_spectrum], 'b.-', label='First spectrum')
                 ax1.plot(channels, spectrums[-1], 'r.-', label='Last spectrum')
             ax1.legend(fontsize='large')
             plt.show()
