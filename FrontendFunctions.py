@@ -431,6 +431,7 @@ def Choose_treatment(expt):
     tiny_layout = widgets.Layout(width='150px', height='40px')
     short_layout = widgets.Layout(width='200px', height='40px')
     medium_layout = widgets.Layout(width='250px', height='40px')
+    large_layout = widgets.Layout(width='300px', height='40px')
     
     # Define the function called when clicking the button
     # DEFINE HERE A FUNCTION TO CREATE A CELL CALLING YOUR CUSTOM FUNCTION
@@ -460,7 +461,7 @@ def Choose_treatment(expt):
         # thetazfactor
         try: value = expt.thetazfactor
         except: value = 0.000243
-        w_thetazfactor = widgets.FloatText(value=value, style=style, layout=medium_layout,
+        w_thetazfactor = widgets.FloatText(value=value, style=style, layout=large_layout,
                                            description='thetazfactor (rad/chan)')
         
         # wavelength
@@ -471,12 +472,12 @@ def Choose_treatment(expt):
         # thetac
         try: value = expt.thetac
         except: value = 0.0028
-        w_thetac = widgets.FloatText(value=value, style=style, layout=tiny_layout, description='thetac (rad)')
+        w_thetac = widgets.FloatText(value=value, style=style, layout=short_layout, description='thetac (rad)')
         
         # thetai
         try: value = expt.thetai
         except: value = 0.002
-        w_thetai = widgets.FloatText(value=value, style=style, layout=tiny_layout, description='thetai (rad)')
+        w_thetai = widgets.FloatText(value=value, style=style, layout=short_layout, description='thetai (rad)')
 
         # binsize
         try: value = expt.binsize
@@ -661,7 +662,7 @@ def Choose_treatment(expt):
         # thetai
         try: value = expt.thetai
         except: value = 0.002
-        w_thetai = widgets.FloatText(value=value, style=style, layout=tiny_layout, description='thetai (rad)')
+        w_thetai = widgets.FloatText(value=value, style=style, layout=short_layout, description='thetai (rad)')
         
         # distance 
         try: value = expt.distance
