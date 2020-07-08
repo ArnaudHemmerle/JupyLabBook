@@ -16,7 +16,7 @@ import io
 from contextlib import redirect_stdout
 
 
-__version__ = '0.14'
+__version__ = '0.15'
 
 """
 Here are defined the custom functions used for analysis of data in the JupyLabBook.
@@ -1036,7 +1036,8 @@ def Plot_isotherm(nxs_filename='SIRIUS_test.nxs', working_dir = '', recording_di
 def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='',
                  logz=True, wavelength=0.155, thetai=0.002, distance=2722,
                  pixel_PONI_x=490, pixel_PONI_y=975, pixel_size=0.172,
-                 show_data_stamps=False, verbose=False, absorbers='', cmap='viridis',
+                 show_data_stamps=False, force_gamma_delta=False, fgamma=0., fdelta=0.,
+                 verbose=False, absorbers='', cmap='viridis',
                  plot_twotheta_alphaf=False, plot_qxy_qz=False, plot_qxy_q=False):
     
     """
@@ -1119,23 +1120,18 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
             if (stamps[i][1] != None and stamps[i][1].lower()=='gamma'):
                 i_gamma = i    
 
-        if i_gamma != None:
+        if (i_gamma != None) and (force_gamma_delta==False):
             gamma = np.mean(data[i_gamma])
             if verbose: print('\t. Gamma motor data found, mean value %3.4g deg'%(gamma))
         else:
-            print(PN._RED,'\t. No gamma found!', PN._RESET)
-            gamma = float(input('Enter gamma:') or 0.)
-            print(PN._RED,'\t. gamma = %g'%gamma, PN._RESET)
-            print(" ")
-        if i_delta != None:
+            gamma = fgamma
+            print(PN._RED,'\t. No gamma found! gamma = %g'%gamma, PN._RESET)
+        if (i_delta != None) and (force_gamma_delta==False):
             delta = np.mean(data[i_delta])
             if verbose: print('\t. Delta motor data found, mean value %3.4g deg'%(delta))
         else:
-            print(PN._RED,'\t. No delta found!', PN._RESET)
-            delta = float(input('Enter delta:') or 0.)
-            print(PN._RED,'\t. delta = %g'%delta, PN._RESET)
-            print(" ")
-
+            delta = fdelta
+            print(PN._RED,'\t. No delta found! delta = %g'%delta, PN._RESET)
 
         if verbose: 
             print('\t. For more details on the geometry, see:')

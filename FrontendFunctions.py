@@ -13,7 +13,7 @@ import nbformat as nbf
 import CustomFunctions as CF
 import math
 
-__version__ = '0.14'
+__version__ = '0.15'
 
 """
 -Here are defined all the functions relevant to the front end of JupyLabBook,
@@ -739,6 +739,21 @@ def Choose_treatment(expt):
         try: value = expt.pixel_PONI_y
         except: value = 0.
         w_pixel_PONI_y = widgets.FloatText(value=value, style=style, layout=tiny_layout, description='PONIy (pix)')
+
+        # force_gamma_delta 
+        try: value = expt.force_gamma_delta
+        except: value = False
+        w_force_gamma_delta = widgets.Checkbox(value=value, style=style, layout=short_layout, description='Force Gamma&Delta')        
+
+        # fgamma
+        try: value = expt.fgamma
+        except: value = 0.
+        w_fgamma = widgets.FloatText(value=value, style=style, layout=short_layout, description='Forced Gamma')        
+
+        # fdelta
+        try: value = expt.fdelta
+        except: value = 0.
+        w_fdelta = widgets.FloatText(value=value, style=style, layout=short_layout, description='Forced Delta')         
         
         # pixel_size 
         try: value = expt.pixel_size
@@ -775,6 +790,7 @@ def Choose_treatment(expt):
             
         display(widgets.HBox([w_show_data_stamps, w_verbose, w_show_absorbers, w_GIXS_logz, w_GIXS_cmap, w_pixel_size]))        
         display(widgets.HBox([w_wavelength, w_distance, w_thetai, w_pixel_PONI_x, w_pixel_PONI_y]))
+        display(widgets.HBox([w_force_gamma_delta, w_fgamma, w_fdelta]))
         
         def on_button_plot_clicked(b):
             
@@ -786,6 +802,9 @@ def Choose_treatment(expt):
             expt.pixel_PONI_x = w_pixel_PONI_x.value
             expt.pixel_PONI_y = w_pixel_PONI_y.value
             expt.pixel_size = w_pixel_size.value
+            expt.force_gamma_delta = w_force_gamma_delta.value
+            expt.fgamma = w_fgamma.value
+            expt.fdelta = w_fdelta.value
             expt.show_data_stamps = w_show_data_stamps.value
             expt.verbose = w_verbose.value
             expt.show_absorbers = w_show_absorbers.value
@@ -816,6 +835,9 @@ def Choose_treatment(expt):
                         'pixel_PONI_y='+str(expt.pixel_PONI_y)+','+
                         'pixel_size='+str(expt.pixel_size)+','+  
                         'show_data_stamps='+str(expt.show_data_stamps)+','+
+                        'force_gamma_delta='+str(expt.force_gamma_delta)+','+
+                        'fgamma='+str(expt.fgamma)+','+
+                        'fdelta='+str(expt.fdelta)+','+
                         'verbose='+str(expt.verbose)+','+ 
                         'absorbers='+'\''+str(absorbers)+'\''+','+
                         'cmap=\''+str(expt.GIXS_cmap)+'\','+

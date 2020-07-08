@@ -2,6 +2,12 @@
 
 ### 08/07/2020
 
+FrontendFunctions.py: 0.15
+CustomFunctions.py: 0.15
+- Add the possibility to force the value of gamma and delta in GIXS.
+
+### 08/07/2020
+
 FrontendFunctions.py: 0.14
 CustomFunctions.py: 0.14
 - Save all data in the working directory.
