@@ -16,7 +16,7 @@ import io
 from contextlib import redirect_stdout
 
 
-__version__ = '0.15'
+__version__ = '0.16'
 
 """
 Here are defined the custom functions used for analysis of data in the JupyLabBook.
@@ -1450,7 +1450,7 @@ def Plot_1D(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='',
     plt.show()
 
     
-def Extract_pilatus_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='', logz=True,
+def Extract_pilatus_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='', logz=True, xmin=0, xmax=980,
                         show_data_stamps=False, verbose=False, absorbers='', fast=True, cmap='viridis'):
     
     """
@@ -1547,6 +1547,9 @@ def Extract_pilatus_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recordin
         #Plot a profile along x (integrated over y)
         ax2 = fig.add_subplot(inner[1])
         profile_x = images_sum.sum(axis=0)
+        ax2.set_xlim(xmin,xmax)
+        if np.min(profile_x[int(xmin):int(xmax)])>0:
+            ax2.set_ylim(np.min(profile_x[int(xmin):int(xmax)])*0.8,np.max(profile_x[int(xmin):int(xmax)])*1.2)
         ax2.set_yscale('log')
         ax2.set(xlabel = 'horizontal pixel (x)', ylabel = 'integration along y')
         ax2.plot(profile_x)

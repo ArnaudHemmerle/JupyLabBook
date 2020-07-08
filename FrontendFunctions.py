@@ -13,7 +13,7 @@ import nbformat as nbf
 import CustomFunctions as CF
 import math
 
-__version__ = '0.15'
+__version__ = '0.16'
 
 """
 -Here are defined all the functions relevant to the front end of JupyLabBook,
@@ -666,8 +666,19 @@ def Choose_treatment(expt):
         except: value = 'Greys'
         w_pilatus_cmap = widgets.Select(value=value, style=style, rows=5, description='cmap',
                                         options=['viridis', 'jet', 'Greys', 'cividis', 'hot'])
-     
-        display(widgets.HBox([w_show_data_stamps, w_verbose, w_show_absorbers, w_pilatus_logz, w_pilatus_cmap]))        
+        
+        # xmin
+        try: value = expt.xmin
+        except: value = 0
+        w_xmin = widgets.FloatText(value=value, style=style, layout=short_layout, description='x min (pix)')        
+
+        # xmax
+        try: value = expt.xmax
+        except: value = 980
+        w_xmax = widgets.FloatText(value=value, style=style, layout=short_layout, description='x max (pix)')         
+        
+        display(widgets.HBox([w_show_data_stamps, w_verbose, w_show_absorbers, w_pilatus_logz, w_pilatus_cmap]))  
+        display(widgets.HBox([w_xmin, w_xmax])) 
 
         def on_button_plot_clicked(b):
 
@@ -677,6 +688,8 @@ def Choose_treatment(expt):
             expt.verbose = w_verbose.value
             expt.show_absorbers = w_show_absorbers.value
             expt.pilatus_cmap = w_pilatus_cmap.value
+            expt.xmin = w_xmin.value
+            expt.xmax = w_xmax.value
 
             for scan in expt.scans:
                 
@@ -689,6 +702,8 @@ def Choose_treatment(expt):
                 Create_cell(code='CF.Extract_pilatus_sum(nxs_filename=\''+scan.nxs+'\','+ 
                            'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
                             'logz='+str(expt.pilatus_logz)+','+
+                            'xmin='+str(expt.xmin)+','+
+                            'xmax='+str(expt.xmax)+','+
                             'show_data_stamps='+str(expt.show_data_stamps)+','+
                             'verbose='+str(expt.verbose)+','+
                             'absorbers='+'\''+str(absorbers)+'\''+','+

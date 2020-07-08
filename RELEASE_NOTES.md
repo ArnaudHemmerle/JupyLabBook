@@ -1,5 +1,12 @@
 # Release notes
 
+  
+### 08/07/2020
+
+FrontendFunctions.py: 0.16
+CustomFunctions.py: 0.16
+- Add the possibility to put xmin and xmax in the profile in Extract_Pilatus.
+
 ### 08/07/2020
 
 FrontendFunctions.py: 0.15

@@ -5,8 +5,8 @@ A Jupyter Notebook used as a lab book on the beamline SIRIUS (SOLEIL Synchrotron
 JupyLabBook is presently in development & testing.  
 
 ### Last versions of modules:  
-FrontendFunctions.py: 0.15  
-CustomFunctions.py: 0.15  
+FrontendFunctions.py: 0.16  
+CustomFunctions.py: 0.16  
 
 
 # What is JupyLabBook?
