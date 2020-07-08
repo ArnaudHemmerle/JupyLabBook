@@ -7,6 +7,7 @@ FrontendFunctions.py: 0.13
 
 CustomFunctions.py: 0.13
 - Add possibility to print absorbers of a scan.
+- Print in red in Vineyard.
 
 ### 06/07/2020
 

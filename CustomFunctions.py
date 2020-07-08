@@ -536,8 +536,8 @@ def Extract_channel_Qc(nxs_filename='SIRIUS_test.nxs', working_dir='', recording
         ax3.set_ylabel('Q$\mathregular{_{xy}}$ - Integrated Intensity', fontsize='large')
         plt.show()
         
-        print('Data not saved. To save data, run a GIXD on the scan.')
-        print('Channel0: %g'%i_max)
+        print(PN._RED, 'Data not saved. To save data, run a GIXD on the scan.', PN._RESET)
+        print(PN._RED, 'Channel0: %g'%i_max, PN._RESET)
        
         
     return i_max
