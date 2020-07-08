@@ -13,7 +13,7 @@ import nbformat as nbf
 import CustomFunctions as CF
 import math
 
-__version__ = '0.13'
+__version__ = '0.14'
 
 """
 -Here are defined all the functions relevant to the front end of JupyLabBook,
@@ -436,6 +436,7 @@ def Set_interactive_1D(scan):
 
 
     def plot_interactive_1D(xLabel, yLabel):
+        
         xArg = sensor_list.index(xLabel)
         yArg = sensor_list.index(yLabel)
 
@@ -1004,8 +1005,10 @@ def Choose_treatment(expt):
 
             for scan in expt.scans:
 
-                Create_cell(code='CF.Plot_isotherm(nxs_filename=\''+scan.nxs+'\', recording_dir=expt.recording_dir, '+
-                           'show_data_stamps='+str(w_show_data_stamps.value)+', verbose='+str(w_verbose.value)+', '+
+                Create_cell(code='CF.Plot_isotherm(nxs_filename=\''+scan.nxs+'\','+
+                            'working_dir=expt.working_dir,recording_dir=expt.recording_dir,'+
+                            'show_data_stamps='+str(w_show_data_stamps.value)+
+                            ', verbose='+str(w_verbose.value)+', '+
                             'fast='+str(w_fastextract.value)+')',
                             position='below', celltype='code', is_print = True)
 
@@ -1025,7 +1028,8 @@ def Choose_treatment(expt):
     # Actions relevant for single scan analysis only
     def on_button_1D_clicked(b):            
         scan = expt.scans[0]
-        Create_cell(code='CF.Plot_1D(nxs_filename=\''+scan.nxs+'\', recording_dir=expt.recording_dir,'+
+        Create_cell(code='CF.Plot_1D(nxs_filename=\''+scan.nxs+'\','+
+                    'working_dir=expt.working_dir,recording_dir=expt.recording_dir,'+
                     'xLabel=\''+scan.xLabel+'\', yLabel=\''+scan.yLabel+'\')',
                     position='below', celltype='code', is_print = True)
         

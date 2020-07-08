@@ -2,6 +2,12 @@
 
 ### 08/07/2020
 
+FrontendFunctions.py: 0.14
+CustomFunctions.py: 0.14
+- Save all data in the working directory.
+
+### 08/07/2020
+
 FrontendFunctions.py: 0.13
 - Add possibility to print absorbers of a scan. 
 

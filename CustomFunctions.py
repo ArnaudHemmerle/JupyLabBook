@@ -12,9 +12,11 @@ import sys
 import lmfit as L
 from scipy.special import erf
 from PIL import Image
+import io
+from contextlib import redirect_stdout
 
 
-__version__ = '0.13'
+__version__ = '0.14'
 
 """
 Here are defined the custom functions used for analysis of data in the JupyLabBook.
@@ -913,7 +915,8 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
         plt.show()
         
         
-def Plot_isotherm(nxs_filename='SIRIUS_test.nxs', recording_dir='', show_data_stamps=False, verbose=False, fast=True):
+def Plot_isotherm(nxs_filename='SIRIUS_test.nxs', working_dir = '', recording_dir='',
+                  show_data_stamps=False, verbose=False, fast=True):
     
     nxs_path = recording_dir+nxs_filename
 
@@ -933,9 +936,29 @@ def Plot_isotherm(nxs_filename='SIRIUS_test.nxs', recording_dir='', show_data_st
             return
         nbpts=np.int(nexus.get_nbpts())
         if verbose: print("\t. Number of data points: ", nbpts)
+            
         # Get stamps and Data
         stamps, data=nexus.extractData('0D')
+        
+        # Save data
+        f = io.StringIO()
+        # Avoid printing sensors in the notebook
+        with redirect_stdout(f):
+            old_nexus_filename = nexus.filename
+            # Save in working dir
+            nexus.filename = working_dir+nxs_filename
+            nexus.savePointExtractedData((stamps, data))
+            nexus.filename = old_nexus_filename
+        out = f.getvalue()        
+        
         nexus.close()
+
+        
+        if verbose: 
+            savename = working_dir+nxs_filename[:nxs_filename.rfind('.nxs')]
+            print('\t. Data saved in:')
+            print("\t", savename+'.dat')
+                        
         
         # Explore stamps
         if show_data_stamps : print("\t. Available Counters:")
@@ -1243,6 +1266,27 @@ def Extract_XRF(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir=''
             
         # Get stamps
         stamps, data= nexus.extractData()
+
+        # Save data
+        f = io.StringIO()
+        # Avoid printing sensors in the notebook
+        with redirect_stdout(f):
+            old_nexus_filename = nexus.filename
+            # Save in working dir
+            nexus.filename = working_dir+nxs_filename
+            nexus.savePointExtractedData((stamps, data))
+            nexus.saveOneDExtractedData((stamps, data))
+            nexus.filename = old_nexus_filename
+        out = f.getvalue()
+        
+        if verbose: 
+            savename = working_dir+nxs_filename[:nxs_filename.rfind('.nxs')]
+            print('\t. 0D data saved in:')
+            print("\t", savename+'.dat')
+            print('\t. Spectrum(s) saved in:')
+            print("\t", savename+'_fluospectrum*.mat')
+                
+
         nexus.close()
         if show_data_stamps : print("\t. Available Counters:")
         for i in range(len(stamps)):
@@ -1375,7 +1419,7 @@ def Extract_XRF(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir=''
 ###################################### GENERAL ###########################################
 ##########################################################################################
 
-def Plot_1D(nxs_filename='SIRIUS_test.nxs', recording_dir='',
+def Plot_1D(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='',
             xLabel='zs', yLabel='alphax'):
     """
     Simple 1D plot. When called by FrontendFunctions by clicking on Treat Scan, 
@@ -1384,6 +1428,18 @@ def Plot_1D(nxs_filename='SIRIUS_test.nxs', recording_dir='',
     """
     nexus = PN.PyNexusFile(recording_dir+nxs_filename, fast=True)
     stamps0D, data0D = nexus.extractData('0D')
+    
+    # Save data
+    f = io.StringIO()
+    # Avoid printing sensors in the notebook
+    with redirect_stdout(f):
+        old_nexus_filename = nexus.filename
+        # Save in working dir
+        nexus.filename = working_dir+nxs_filename
+        nexus.savePointExtractedData((stamps0D, data0D))
+        nexus.filename = old_nexus_filename
+    out = f.getvalue()
+   
     nexus.close()
     sensor_list = [stamps0D[i][0] if stamps0D[i][1]== None else stamps0D[i][1] for i in range(len(stamps0D))]
 
