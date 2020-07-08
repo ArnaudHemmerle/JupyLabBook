@@ -14,7 +14,7 @@ from scipy.special import erf
 from PIL import Image
 
 
-__version__ = '0.12'
+__version__ = '0.13'
 
 """
 Here are defined the custom functions used for analysis of data in the JupyLabBook.
@@ -562,7 +562,7 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
                  logx=False, logy=False, logz=False,
                  channel0=600, thetazfactor=0.01, wavelength=0.155, thetac=0.0028, thetai=0.002,
                  binsize=10, computeqz=True, nblevels=50, moytocreate=(10, 20, 40),
-                 show_data_stamps=False, verbose=False, cmap='jet', plot_true_GIXD=False):
+                 show_data_stamps=False, verbose=False, absorbers='', cmap='jet', plot_true_GIXD=False):
     
     """
     Extract, plot, and save the GIXD scan. 
@@ -589,6 +589,7 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
             return
         nbpts=np.int(nexus.get_nbpts())
         if verbose: print("\t. Number of data points: ", nbpts)
+        
         # Get stamps
         stamps=nexus.extractStamps()
         if show_data_stamps : print("\t. Available Counters:")
@@ -599,6 +600,11 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
                     columnz=i
             else:
                 if show_data_stamps : print("\t\t",i, ' -------> ', stamps[i][0])
+        
+        # Get absorbers
+        if absorbers != '':
+            print("\t. Absorbers:", str(absorbers))
+                    
         # Extract 0D data
         sys.stdout.write('Extracting 0D data\r')
         sys.stdout.flush()
@@ -1007,7 +1013,7 @@ def Plot_isotherm(nxs_filename='SIRIUS_test.nxs', recording_dir='', show_data_st
 def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='',
                  logz=True, wavelength=0.155, thetai=0.002, distance=2722,
                  pixel_PONI_x=490, pixel_PONI_y=975, pixel_size=0.172,
-                 show_data_stamps=False, verbose=False, cmap='viridis',
+                 show_data_stamps=False, verbose=False, absorbers='', cmap='viridis',
                  plot_twotheta_alphaf=False, plot_qxy_qz=False, plot_qxy_q=False):
     
     """
@@ -1030,6 +1036,7 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
             return
         nbpts=np.int(nexus.get_nbpts())
         if verbose: print("\t. Number of data points: ", nbpts)
+            
         # Get stamps
         stamps=nexus.extractStamps()
         if show_data_stamps : print("\t. Available Counters:")
@@ -1041,7 +1048,10 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
             else:
                 if show_data_stamps : print("\t\t",i, ' -------> ', stamps[i][0])
         
-        
+        # Get absorbers
+        if absorbers != '':
+            print("\t. Absorbers:", str(absorbers))
+                    
         # Check that Pilatus data are present (images)
         if i_pilatus is not None:
             if verbose: print('\t. Pilatus data found, (column %d, alias %s)'%(i_pilatus, stamps[i_pilatus][1]))
@@ -1209,7 +1219,7 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
 def Extract_XRF(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='',
                 logz=False, list_elems=[0,1,2,3], first_channel=0, last_channel=2048,
                 use_eV=False, gain=10., eV0=0.,
-                show_data_stamps=False, verbose=False, fast=True,
+                show_data_stamps=False, verbose=False, absorbers='', fast=True,
                 plot_spectrogram=False, plot_first_last=False, plot_sum=False):
     """
     Extract, correct with ICR/OCR, and plot the fluo spectrum. 
@@ -1230,6 +1240,7 @@ def Extract_XRF(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir=''
             return
         nbpts=np.int(nexus.get_nbpts())
         if verbose: print("\t. Number of data points: ", nbpts)
+            
         # Get stamps
         stamps, data= nexus.extractData()
         nexus.close()
@@ -1242,6 +1253,10 @@ def Extract_XRF(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir=''
             else:
                 if show_data_stamps : print("\t\t",i, ' -------> ', stamps[i][0])
          
+        # Get absorbers
+        if absorbers != '':
+            print("\t. Absorbers:", str(absorbers))        
+        
     def extract_and_correct(ind_spectrum):
         """Extract the requested fluospectrum from the nexus file and correct it with ICR/OCR"""
 
@@ -1384,7 +1399,7 @@ def Plot_1D(nxs_filename='SIRIUS_test.nxs', recording_dir='',
 
     
 def Extract_pilatus_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='', logz=True,
-                        show_data_stamps=False, verbose=False, fast=True, cmap='viridis'):
+                        show_data_stamps=False, verbose=False, absorbers='', fast=True, cmap='viridis'):
     
     """
     Extract, plot, and save the sum of all the pilatus images in a scan. 
@@ -1406,6 +1421,7 @@ def Extract_pilatus_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recordin
             return
         nbpts=np.int(nexus.get_nbpts())
         if verbose: print("\t. Number of data points: ", nbpts)
+            
         # Get stamps
         stamps=nexus.extractStamps()
         if show_data_stamps : print("\t. Available Counters:")
@@ -1416,8 +1432,11 @@ def Extract_pilatus_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recordin
                     i_pilatus=i
             else:
                 if show_data_stamps : print("\t\t",i, ' -------> ', stamps[i][0])
-        
-        
+
+        # Get absorbers
+        if absorbers != '':
+            print("\t. Absorbers:", str(absorbers))                    
+                       
         # Check that Pilatus data are present (images)
         if i_pilatus is not None:
             if verbose: print('\t. Pilatus data found, (column %d, alias %s)'%(i_pilatus, stamps[i_pilatus][1]))

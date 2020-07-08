@@ -1,5 +1,13 @@
 # Release notes
 
+### 08/07/2020
+
+FrontendFunctions.py: 0.13
+- Add possibility to print absorbers of a scan. 
+
+CustomFunctions.py: 0.13
+- Add possibility to print absorbers of a scan.
+
 ### 06/07/2020
 
 FrontendFunctions.py: 0.12

@@ -13,7 +13,7 @@ import nbformat as nbf
 import CustomFunctions as CF
 import math
 
-__version__ = '0.12'
+__version__ = '0.13'
 
 """
 -Here are defined all the functions relevant to the front end of JupyLabBook,
@@ -95,10 +95,9 @@ def Find_command_in_logs(scan, expt):
     """
     Find the command corresponding to the scan in the logs.
     """
-    command_found = False
+    scan_found = False
     scan.command = 'No command found'
     
-
     for log_file in expt.list_logs_files:
         with open(expt.logs_dir+log_file) as f:
             for line in f:
@@ -106,12 +105,37 @@ def Find_command_in_logs(scan, expt):
                 if scan.id in line:
                     # Remove the line jump
                     scan.command = temp.replace('\n','')
-                    command_found = True
+                    scan_found = True
             f.close()
 
-        if command_found:
+        if scan_found:
             break
+ 
+
+def Find_absorbers_in_logs(scan, expt):
+    """
+    Find the absorbers of the scan in the logs.
+    """
+    scan_found = False
+    absorbers = 'No abs found' 
     
+    for log_file in expt.list_logs_files:
+        with open(expt.logs_dir+log_file) as f:
+            for line in f:
+                if "Aborbers" in line: 
+                    temp = line.split(': ')[-1]
+                if "Absorbers" in line: 
+                    temp = line.split('- ')[-1]
+                if scan.id in line:
+                    # Remove the line jump
+                    absorbers = temp.replace('\n','')
+                    scan_found = True
+            f.close()
+
+        if scan_found:
+            break   
+            
+    return absorbers
     
 def Choose_action(expt):
     """
@@ -517,7 +541,12 @@ def Choose_treatment(expt):
         try: value = expt.verbose
         except: value = False
         w_verbose = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print scan info')
-                       
+
+        # show_absorbers
+        try: value = expt.show_absorbers
+        except: value = False
+        w_show_absorbers = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print abs')        
+        
         # GIXD_cmap
         try: value = expt.GIXD_cmap
         except: value = 'jet'
@@ -531,7 +560,8 @@ def Choose_treatment(expt):
         w_GIXD_plot_type = widgets.Select(value=value, style=style, rows=2,
                                           options=['GIXD', 'True GIXD'], description='Plot type')
             
-        display(widgets.HBox([w_show_data_stamps, w_verbose, w_GIXD_logx, w_GIXD_logy, w_GIXD_logz, w_GIXD_cmap]))        
+        display(widgets.HBox([w_show_data_stamps, w_verbose, w_show_absorbers,
+                              w_GIXD_logx, w_GIXD_logy, w_GIXD_logz, w_GIXD_cmap]))        
         display(widgets.HBox([w_binsize, w_nblevels, w_moytocreate_str, w_channel0, w_computeqz]))
         display(widgets.HBox([w_wavelength, w_thetai, w_thetac, w_thetazfactor]))
                 
@@ -553,6 +583,7 @@ def Choose_treatment(expt):
             expt.moytocreate_str = w_moytocreate_str.value
             expt.show_data_stamps = w_show_data_stamps.value
             expt.verbose = w_verbose.value
+            expt.show_absorbers = w_show_absorbers.value
             expt.GIXD_cmap = w_GIXD_cmap.value
             expt.GIXD_plot_type = w_GIXD_plot_type.value
             
@@ -564,8 +595,14 @@ def Choose_treatment(expt):
             
             # Pass plot type to param    
             expt.plot_true_GIXD = True if w_GIXD_plot_type.value == 'True GIXD' else False
-            
+                        
             for scan in expt.scans:
+                
+                # Extract absorbers
+                if expt.show_absorbers:
+                    absorbers = Find_absorbers_in_logs(scan, expt)
+                else:
+                    absorbers = ''
                              
                 Create_cell(code='CF.Extract_GIXD(nxs_filename=\''+scan.nxs+'\','+
                             'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
@@ -583,6 +620,7 @@ def Choose_treatment(expt):
                             'moytocreate='+str(list_moytocreate)+','+
                             'show_data_stamps='+str(expt.show_data_stamps)+','+
                             'verbose='+str(expt.verbose)+','+
+                            'absorbers='+'\''+str(absorbers)+'\''+','+
                             'cmap=\''+str(expt.GIXD_cmap)+'\','+
                             'plot_true_GIXD='+str(expt.plot_true_GIXD)+')',
                             position='below', celltype='code', is_print = True)
@@ -617,13 +655,18 @@ def Choose_treatment(expt):
         except: value = False
         w_verbose = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print scan info')
 
+        # show_absorbers
+        try: value = expt.show_absorbers
+        except: value = False
+        w_show_absorbers = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print abs')
+        
         # pilatus_cmap
         try: value = expt.pilatus_cmap
         except: value = 'Greys'
         w_pilatus_cmap = widgets.Select(value=value, style=style, rows=5, description='cmap',
                                         options=['viridis', 'jet', 'Greys', 'cividis', 'hot'])
      
-        display(widgets.HBox([w_show_data_stamps, w_verbose, w_pilatus_logz, w_pilatus_cmap]))        
+        display(widgets.HBox([w_show_data_stamps, w_verbose, w_show_absorbers, w_pilatus_logz, w_pilatus_cmap]))        
 
         def on_button_plot_clicked(b):
 
@@ -631,15 +674,23 @@ def Choose_treatment(expt):
             expt.pilatus_logz = w_pilatus_logz.value
             expt.show_data_stamps = w_show_data_stamps.value
             expt.verbose = w_verbose.value
+            expt.show_absorbers = w_show_absorbers.value
             expt.pilatus_cmap = w_pilatus_cmap.value
 
             for scan in expt.scans:
+                
+                # Extract absorbers
+                if expt.show_absorbers:
+                    absorbers = Find_absorbers_in_logs(scan, expt)
+                else:
+                    absorbers = ''                
 
                 Create_cell(code='CF.Extract_pilatus_sum(nxs_filename=\''+scan.nxs+'\','+ 
                            'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
                             'logz='+str(expt.pilatus_logz)+','+
                             'show_data_stamps='+str(expt.show_data_stamps)+','+
                             'verbose='+str(expt.verbose)+','+
+                            'absorbers='+'\''+str(absorbers)+'\''+','+
                             'cmap=\''+str(expt.pilatus_cmap)+'\''+')',
                             position='below', celltype='code', is_print = True)
 
@@ -702,7 +753,12 @@ def Choose_treatment(expt):
         try: value = expt.verbose
         except: value = False
         w_verbose = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print scan info')
-       
+
+        # show_absorbers
+        try: value = expt.show_absorbers
+        except: value = False
+        w_show_absorbers = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print abs')
+        
         # GIXS_cmap
         try: value = expt.GIXS_cmap
         except: value = 'viridis'
@@ -716,7 +772,7 @@ def Choose_treatment(expt):
         w_GIXS_plot_type = widgets.Select(value=value, style=style, rows=4,
                                           options=['pixels only', 'angles', 'qxy/qz', 'qxy/q'], description='Plot type')
             
-        display(widgets.HBox([w_show_data_stamps, w_verbose, w_GIXS_logz, w_GIXS_cmap, w_pixel_size]))        
+        display(widgets.HBox([w_show_data_stamps, w_verbose, w_show_absorbers, w_GIXS_logz, w_GIXS_cmap, w_pixel_size]))        
         display(widgets.HBox([w_wavelength, w_distance, w_thetai, w_pixel_PONI_x, w_pixel_PONI_y]))
         
         def on_button_plot_clicked(b):
@@ -731,6 +787,7 @@ def Choose_treatment(expt):
             expt.pixel_size = w_pixel_size.value
             expt.show_data_stamps = w_show_data_stamps.value
             expt.verbose = w_verbose.value
+            expt.show_absorbers = w_show_absorbers.value
             expt.GIXS_cmap = w_GIXS_cmap.value
             expt.GIXS_plot_type = w_GIXS_plot_type.value
             
@@ -742,6 +799,12 @@ def Choose_treatment(expt):
             
             for scan in expt.scans:
 
+                # Extract absorbers
+                if expt.show_absorbers:
+                    absorbers = Find_absorbers_in_logs(scan, expt)
+                else:
+                    absorbers = ''                
+                
                 Create_cell(code='CF.Extract_GIXS(nxs_filename=\''+scan.nxs+'\','+ 
                        'working_dir=expt.working_dir, recording_dir=expt.recording_dir,'+
                         'logz='+str(expt.GIXS_logz)+','+
@@ -752,7 +815,8 @@ def Choose_treatment(expt):
                         'pixel_PONI_y='+str(expt.pixel_PONI_y)+','+
                         'pixel_size='+str(expt.pixel_size)+','+  
                         'show_data_stamps='+str(expt.show_data_stamps)+','+
-                        'verbose='+str(expt.verbose)+','+       
+                        'verbose='+str(expt.verbose)+','+ 
+                        'absorbers='+'\''+str(absorbers)+'\''+','+
                         'cmap=\''+str(expt.GIXS_cmap)+'\','+
                         'plot_twotheta_alphaf='+str(expt.plot_twotheta_alphaf)+','+
                         'plot_qxy_qz='+str(expt.plot_qxy_qz)+','+
@@ -783,7 +847,12 @@ def Choose_treatment(expt):
         try: value = expt.verbose
         except: value = False
         w_verbose = widgets.Checkbox(value=value, style=style, layout = short_layout, description='Print scan info')
-       
+
+        # show_absorbers
+        try: value = expt.show_absorbers
+        except: value = False
+        w_show_absorbers = widgets.Checkbox(value=value, style=style, layout = short_layout, description='Print abs')
+        
         # fastextract
         try: value = expt.fastextract
         except: value = True
@@ -840,7 +909,7 @@ def Choose_treatment(expt):
         except: value = 0.
         w_eV0 = widgets.FloatText(value=value, description='eV0', style=style, layout = short_layout)        
         
-        display(widgets.HBox([w_show_data_stamps, w_verbose, w_fastextract]))
+        display(widgets.HBox([w_show_data_stamps, w_verbose, w_show_absorbers, w_fastextract]))
         display(widgets.HBox([w_plot_spectrogram, w_plot_first_last, w_plot_sum]))
         display(widgets.HBox([w_XRF_logz, w_elems_str, w_first_channel, w_last_channel]))
         display(widgets.HBox([w_use_eV, w_gain, w_eV0]))
@@ -857,6 +926,7 @@ def Choose_treatment(expt):
             expt.eV0 = w_eV0.value
             expt.show_data_stamps = w_show_data_stamps.value
             expt.verbose = w_verbose.value
+            expt.show_absorbers = w_show_absorbers.value
             expt.fastextract = w_fastextract.value
             expt.plot_spectrogram = w_plot_spectrogram.value
             expt.plot_first_last = w_plot_first_last.value
@@ -866,7 +936,13 @@ def Choose_treatment(expt):
             list_elems = [int(expt.elems_str.split(',')[i]) for i in range(len(expt.elems_str.split(',')))]
             
             for scan in expt.scans:
-
+                
+                # Extract absorbers
+                if expt.show_absorbers:
+                    absorbers = Find_absorbers_in_logs(scan, expt)
+                else:
+                    absorbers = ''
+                                            
                 Create_cell(code='CF.Extract_XRF('+
                            'nxs_filename=\''+scan.nxs+'\','+ 
                            'working_dir=expt.working_dir,recording_dir=expt.recording_dir,'+
@@ -879,6 +955,7 @@ def Choose_treatment(expt):
                            'eV0='+str(expt.eV0)+','+
                            'show_data_stamps='+str(expt.show_data_stamps)+','+
                            'verbose='+str(expt.verbose)+','+
+                           'absorbers='+'\''+str(absorbers)+'\''+','+
                            'fast='+str(expt.fastextract)+','+
                            'plot_spectrogram='+str(expt.plot_spectrogram)+','+
                            'plot_first_last='+str(expt.plot_first_last)+','+
