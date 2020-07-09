@@ -1840,39 +1840,48 @@ def Print_commands(expt):
         pathToFile = expt.logs_dir+w_select_log.value
 
 
-        #Define the elements to be removed of the original log file
+        # Define the elements to be removed of the original log file
         remove_elem_0 = ['#', ']', '\n']
         remove_elem = [
                       'DevError', 'desc =', 'origin =', 'reason =', 'severity =',
                       'connection'
                        ]
-
-
+        
+        # List of possible dates
+        date_list = ['# Mon', '# Tue', '# Wed', '# Thu', '# Fri', '# Sat', '# Sun']
+        date = ''
+        
         with open(pathToFile, 'r') as f:
             log_lines = f.readlines()
 
         rlog_lines = np.empty([], dtype ='<U1000')
 
         for i in range(len(log_lines)):
-            if 'Scan Index' in log_lines[i]:
-                scan_number = ''.join(filter(str.isdigit, log_lines[i]))
+            if any(date in log_lines[i] for date in date_list):
+                date = log_lines[i].replace('\n',' ')[2:]
+            elif 'Scan File Name' in log_lines[i]:
+                #scan_number = ''.join(filter(str.isdigit, log_lines[i]))
+                scan_number = log_lines[i].split('_')[-1].replace('\n','')
                 while scan_number[0]=='0':
                     # Delete trailing zero
                     scan_number = scan_number[1:]
                 rlog_lines[-1] = rlog_lines[-1][:-1] +  ' #' + scan_number +'\n' 
             elif '*** ABORT ***' in log_lines[i]:
-                rlog_lines = np.append(rlog_lines, '*** ABORT ***'+'\n')
+                rlog_lines = np.append(rlog_lines, 'ABORTED :'+rlog_lines[-1])
             elif 'Scan aborted' in log_lines[i]:
-                rlog_lines = np.append(rlog_lines, '*** SCAN ABORTED ***'+'\n')
+                rlog_lines = np.append(rlog_lines, 'SCAN ABORTED: '+rlog_lines[-1])
+            
             elif log_lines[i][0] in remove_elem_0:
                 pass
             elif any([elem in log_lines[i] for elem in remove_elem]):
                 pass
             else:
-                rlog_lines = np.append(rlog_lines, log_lines[i])
+                rlog_lines = np.append(rlog_lines, date+log_lines[i])
 
-
-        w_select_commands = widgets.SelectMultiple(options=rlog_lines,rows=30)
+        # Remove first empty line
+        rlog_lines = rlog_lines[1:]
+        
+        w_select_commands = widgets.SelectMultiple(options=rlog_lines,rows=30,layout=widgets.Layout(width='800px'))
 
         display(w_select_commands)
 
