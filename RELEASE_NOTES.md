@@ -1,6 +1,17 @@
 # Release notes
 
-  
+### 09/07/2020
+
+CustomFunctions.py: 0.17
+- Save the profiles in Plot pilatus
+- Profile in x and y in Plot_pilatus
+- Replaced the pixel image by profiles in Extract_GIXS
+
+FrontendFunctions.py: 0.17
+- Fix the display bug in the print_command and add the date of each command
+- Profile in x and y in Plot_pilatus
+- Replaced the pixel image by profiles in Extract_GIXS
+
 ### 08/07/2020
 
 FrontendFunctions.py: 0.16
