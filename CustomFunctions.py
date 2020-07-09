@@ -1635,7 +1635,8 @@ def Plot_1D(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='',
     plt.show()
 
     
-def Extract_pilatus_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='', logz=True, xmin=0, xmax=980,
+def Extract_pilatus_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='', logz=True,
+                        xmin=0, xmax=980, ymin=0, ymax=1042,
                         show_data_stamps=False, verbose=False, absorbers='', fast=True, cmap='viridis'):
     
     """
@@ -1725,7 +1726,11 @@ def Extract_pilatus_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recordin
         #Plot a profile along y (integrated over x)
         ax1 = fig.add_subplot(inner[0])
         profile_y = images_sum.sum(axis=1)
-        ax1.set_yscale('log')
+        ax1.set_xlim(ymin,ymax)
+        
+        temp = profile_y[int(ymin):int(ymax)]
+        ax1.set_ylim(np.min(temp[temp>0])*0.8,np.max(profile_y[int(ymin):int(ymax)])*1.2)
+        if logz: ax1.set_yscale('log')
         ax1.set(xlabel = 'vertical pixel (y)', ylabel = 'integration along x')
         ax1.plot(profile_y)
 
@@ -1733,9 +1738,9 @@ def Extract_pilatus_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recordin
         ax2 = fig.add_subplot(inner[1])
         profile_x = images_sum.sum(axis=0)
         ax2.set_xlim(xmin,xmax)
-        if np.min(profile_x[int(xmin):int(xmax)])>0:
-            ax2.set_ylim(np.min(profile_x[int(xmin):int(xmax)])*0.8,np.max(profile_x[int(xmin):int(xmax)])*1.2)
-        ax2.set_yscale('log')
+        temp = profile_x[int(xmin):int(xmax)]
+        ax2.set_ylim(np.min(temp[temp>0])*0.8,np.max(profile_x[int(xmin):int(xmax)])*1.2)
+        if logz: ax2.set_yscale('log')
         ax2.set(xlabel = 'horizontal pixel (x)', ylabel = 'integration along y')
         ax2.plot(profile_x)
 
@@ -1758,9 +1763,17 @@ def Extract_pilatus_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recordin
 
         # Create Save Name
         savename=working_dir+nxs_filename[:nxs_filename.rfind('.nxs')]
-            
+        
+        # profile y
+        np.savetxt(savename+'_profile_y.dat', profile_y)
+        
+        # profile x
+        np.savetxt(savename+'_profile_x.dat', profile_x)
+        
+        # 2D matrix
         np.savetxt(savename+'_pilatus_sum.mat', images_sum)
 
+        # tiff image
         im = Image.fromarray(images_sum)
         im.save(savename+'_pilatus_sum.tiff')
 
