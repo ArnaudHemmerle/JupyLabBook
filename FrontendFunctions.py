@@ -792,32 +792,32 @@ def Choose_treatment(expt):
 
         # number_bins_x 
         try: value = expt.number_bins_x
-        except: value = 50
+        except: value = 200
         w_number_bins_x = widgets.IntText(value=value, style=style, layout=tiny_layout, description='Number bins x')        
         
         # xmin
         try: value = expt.xmin
-        except: value = 0
+        except: value = 0.
         w_xmin = widgets.FloatText(value=value, style=style, layout=short_layout, description='x min')   
  
         # xmax
         try: value = expt.xmax
-        except: value = 980
+        except: value = 1.
         w_xmax = widgets.FloatText(value=value, style=style, layout=short_layout, description='x max')  
 
         # number_bins_y 
         try: value = expt.number_bins_y
-        except: value = 50
+        except: value = 200
         w_number_bins_y = widgets.IntText(value=value, style=style, layout=tiny_layout, description='Number bins y')        
         
         # ymin
         try: value = expt.ymin
-        except: value = 0
+        except: value = 0.
         w_ymin = widgets.FloatText(value=value, style=style, layout=short_layout, description='y min')   
  
         # ymax
         try: value = expt.ymax
-        except: value = 1042
+        except: value = 1.
         w_ymax = widgets.FloatText(value=value, style=style, layout=short_layout, description='y max')          
         
         # show_data_stamps

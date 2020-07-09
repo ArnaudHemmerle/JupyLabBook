@@ -1036,7 +1036,7 @@ def Plot_isotherm(nxs_filename='SIRIUS_test.nxs', working_dir = '', recording_di
 def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='',
                  logz=True, wavelength=0.155, thetai=0.002, distance=2722,
                  pixel_PONI_x=490, pixel_PONI_y=975, pixel_size=0.172,
-                 number_bins_x=10, number_bins_y=10, xmin=0., xmax=980., ymin=0., ymax=1042.,
+                 number_bins_x=10, number_bins_y=10, xmin=0., xmax=1., ymin=0., ymax=1.,
                  show_data_stamps=False, force_gamma_delta=False, fgamma=0., fdelta=0.,
                  verbose=False, absorbers='', cmap='viridis',
                  plot_twotheta_alphaf=False, plot_qxy_qz=False, plot_qxy_q=False):
