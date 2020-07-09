@@ -16,7 +16,7 @@ import io
 from contextlib import redirect_stdout
 
 
-__version__ = '0.16'
+__version__ = '0.17'
 
 """
 Here are defined the custom functions used for analysis of data in the JupyLabBook.
@@ -1036,6 +1036,7 @@ def Plot_isotherm(nxs_filename='SIRIUS_test.nxs', working_dir = '', recording_di
 def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='',
                  logz=True, wavelength=0.155, thetai=0.002, distance=2722,
                  pixel_PONI_x=490, pixel_PONI_y=975, pixel_size=0.172,
+                 number_bins_x=10, number_bins_y=10, xmin=0., xmax=980., ymin=0., ymax=1042.,
                  show_data_stamps=False, force_gamma_delta=False, fgamma=0., fdelta=0.,
                  verbose=False, absorbers='', cmap='viridis',
                  plot_twotheta_alphaf=False, plot_qxy_qz=False, plot_qxy_q=False):
@@ -1163,53 +1164,237 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
         qz = k0*(np.sin(alphaf)+np.sin(alphai))
         qxy = np.sqrt(np.square(qx)+np.square(qy))
         q = np.sqrt(np.square(qxy)+np.square(qz))
-
-        
-        #Plot the image with horizontal/vertical pixels whatever the other choice is
-        if (plot_twotheta_alphaf or plot_qxy_qz or plot_qxy_q):
-            fig = plt.figure(figsize=(14.4,6))
-        else:
-            fig = plt.figure(figsize=(7.2,6))
-            
-        fig.subplots_adjust(hspace=0.4, wspace=0.4, top=0.93, bottom=0.16)
+              
+        fig = plt.figure(figsize=(15,15))
+        fig.subplots_adjust(top=0.95)
         fig.suptitle(nxs_filename.split('\\')[-1], fontsize='x-large')
         
-        if (plot_twotheta_alphaf or plot_qxy_qz or plot_qxy_q):
-            ax0 = fig.add_subplot(121)
-        else:
-            ax0 = fig.add_subplot(111)
-            
-        if logz:
-            ax0.pcolormesh(xx, yy, images_sum, cmap = cmap, norm = colors.LogNorm(), rasterized=True)
-        else:
-            ax0.pcolormesh(xx, yy, images_sum, cmap = cmap, rasterized=True)
-        ax0.invert_yaxis()
-        ax0.set_xlabel('Horizontal pixels (x)', fontsize='large')
-        ax0.set_ylabel('Vertical pixels (y)', fontsize='large')
+        #Divide the grid in 2x2
+        outer = gridspec.GridSpec(2, 2, wspace=0.2)
 
+        #Divide the left row in 2x1
+        inner = gridspec.GridSpecFromSubplotSpec(2, 1,
+                        subplot_spec=outer[0], hspace=0.5)
         
         if plot_twotheta_alphaf:
-        
-            ax1 = fig.add_subplot(122)
-            ax1.pcolormesh(twotheta*180./np.pi, alphaf*180./np.pi, images_sum, cmap = cmap,
-                           norm = colors.LogNorm(), rasterized=True)
+            
+            #Plot a profile along y (integrated over x)
+            ax0 = fig.add_subplot(inner[0])   
+            alphaf_bins = np.linspace(0.,np.max(alphaf),number_bins_y)
+
+            twotheta_binned = np.zeros(len(alphaf_bins)-1)
+            alphaf_binned = np.zeros(len(alphaf_bins)-1)
+            alphaf_flat = np.ravel(alphaf)
+            twotheta_flat = np.ravel(images_sum)
+            for n in range(len(alphaf_bins)-1):
+                alphaf_bin_inf = alphaf_bins[n]
+                alphaf_bin_sup = alphaf_bins[n+1]
+                twotheta_binned[n] = np.sum(twotheta_flat[(alphaf_flat<alphaf_bin_sup) & (alphaf_bin_inf<alphaf_flat)])
+                alphaf_binned[n] = (alphaf_bin_sup+alphaf_bin_inf)/2.                 
+                
+            if logz: ax0.set_yscale('log') 
+                
+            # Define lims of the plot
+            ax0.set_xlim(ymin,ymax)         
+            temp = twotheta_binned[(alphaf_binned*180./np.pi<ymax) & (ymin<alphaf_binned*180./np.pi)]
+            ymin_plot = np.min(temp[temp>0])   
+            ymax_plot = np.max(twotheta_binned[(alphaf_binned*180./np.pi<ymax) & (ymin<alphaf_binned*180./np.pi)])
+            ax0.set_ylim(0.8*ymin_plot*180./np.pi,1.2*ymax_plot*180./np.pi)       
+            
+            ax0.set_xlabel('alpha_f (deg)', fontsize='large')
+            ax0.set_ylabel('2 theta (deg)', fontsize='large')
+            ax0.plot(alphaf_binned*180./np.pi, twotheta_binned*180./np.pi)            
+            
+            
+            #Plot a profile along x (integrated over y)
+            ax1 = fig.add_subplot(inner[1])
+       
+            twotheta_bins = np.linspace(0.,np.max(twotheta),number_bins_x)
+
+            alphaf_binned = np.zeros(len(twotheta_bins)-1)
+            twotheta_binned = np.zeros(len(twotheta_bins)-1)
+            twotheta_flat = np.ravel(twotheta)
+            alphaf_flat = np.ravel(images_sum)
+
+            for n in range(len(twotheta_bins)-1):
+                twotheta_bin_inf = twotheta_bins[n]
+                twotheta_bin_sup = twotheta_bins[n+1]
+                alphaf_binned[n] = np.sum(alphaf_flat[(twotheta_flat<twotheta_bin_sup) & (twotheta_bin_inf<twotheta_flat)])
+                twotheta_binned[n] = (twotheta_bin_sup+twotheta_bin_inf)/2.  
+                
+            if logz: ax1.set_yscale('log')
+                
+            # Define lims of the plot
+            ax1.set_xlim(xmin,xmax)          
+            temp = alphaf_binned[(twotheta_binned*180./np.pi<xmax) & (xmin<twotheta_binned*180./np.pi)]
+            ymin_plot = np.min(temp[temp>0])   
+            ymax_plot = np.max(alphaf_binned[(twotheta_binned*180./np.pi<xmax) & (xmin<twotheta_binned*180./np.pi)])
+            ax1.set_ylim(0.8*ymin_plot*180./np.pi,1.2*ymax_plot*180./np.pi)                       
+                                          
+                
             ax1.set_xlabel('2 theta (deg)', fontsize='large')
             ax1.set_ylabel('alpha_f (deg)', fontsize='large')
+            ax1.plot(twotheta_binned*180./np.pi, alphaf_binned*180./np.pi)
+
+            #Divide the right row in 1x1
+            inner = gridspec.GridSpecFromSubplotSpec(1, 1,
+                            subplot_spec=outer[1], wspace=0.1, hspace=0.1)
+
+            #Show the full image integrated over the scan
+            ax2 = fig.add_subplot(inner[0])
+
+            ax2.pcolormesh(twotheta*180./np.pi, alphaf*180./np.pi, images_sum, cmap = cmap,
+                           norm = colors.LogNorm(), rasterized=True)
+            ax2.set_xlabel('2 theta (deg)', fontsize='large')
+            ax2.set_ylabel('alpha_f (deg)', fontsize='large')
+
 
         if plot_qxy_qz:
+            
+            #Plot a profile along y (integrated over x)
+            ax0 = fig.add_subplot(inner[0])
+            
+            qz_bins = np.linspace(0.,np.max(qz),number_bins_y)
 
-            ax1 = fig.add_subplot(122)
-            ax1.pcolormesh(qxy, qz, images_sum, cmap = cmap, norm = colors.LogNorm(), rasterized=True)
+            qxy_binned = np.zeros(len(qz_bins)-1)
+            qz_binned = np.zeros(len(qz_bins)-1)
+            qz_flat = np.ravel(qz)
+            qxy_flat = np.ravel(images_sum)
+            for n in range(len(qz_bins)-1):
+                qz_bin_inf = qz_bins[n]
+                qz_bin_sup = qz_bins[n+1]
+                qxy_binned[n] = np.sum(qxy_flat[(qz_flat<qz_bin_sup) & (qz_bin_inf<qz_flat)])
+                qz_binned[n] = (qz_bin_sup+qz_bin_inf)/2.                 
+                
+            if logz: ax0.set_yscale('log') 
+
+            # Define lims of the plot
+            ax0.set_xlim(ymin,ymax)
+            
+            temp = qxy_binned[(qz_binned<ymax) & (ymin<qz_binned)]
+            ymin_plot = np.min(temp[temp>0])   
+            ymax_plot = np.max(qxy_binned[(qz_binned<ymax) & (ymin<qz_binned)])
+            ax0.set_ylim(0.8*ymin_plot,1.2*ymax_plot)       
+            
+            ax0.set_xlabel('qz (nm^-1)', fontsize='large')
+            ax0.set_ylabel('qxy (nm^-1)', fontsize='large')
+            ax0.plot(qz_binned, qxy_binned)            
+            
+            #Plot a profile along x (integrated over y)
+            ax1 = fig.add_subplot(inner[1])
+     
+            qxy_bins = np.linspace(0.,np.max(qxy),number_bins_x)
+
+            qz_binned = np.zeros(len(qxy_bins)-1)
+            qxy_binned = np.zeros(len(qxy_bins)-1)
+            qxy_flat = np.ravel(qxy)
+            qz_flat = np.ravel(images_sum)
+
+            for n in range(len(qxy_bins)-1):
+                qxy_bin_inf = qxy_bins[n]
+                qxy_bin_sup = qxy_bins[n+1]
+                qz_binned[n] = np.sum(qz_flat[(qxy_flat<qxy_bin_sup) & (qxy_bin_inf<qxy_flat)])
+                qxy_binned[n] = (qxy_bin_sup+qxy_bin_inf)/2.  
+                
+            if logz: ax1.set_yscale('log')
+
+            # Define lims of the plot
+            ax1.set_xlim(xmin,xmax)          
+            temp = qz_binned[(qxy_binned<xmax) & (xmin<qxy_binned)]
+            ymin_plot = np.min(temp[temp>0])   
+            ymax_plot = np.max(qz_binned[(qxy_binned<xmax) & (xmin<qxy_binned)])
+            ax1.set_ylim(0.8*ymin_plot,1.2*ymax_plot)                              
+ 
             ax1.set_xlabel('qxy (nm^-1)', fontsize='large')
             ax1.set_ylabel('qz (nm^-1)', fontsize='large')
-            
-        if plot_qxy_q:
+            ax1.plot(qxy_binned, qz_binned)
 
-            ax1 = fig.add_subplot(122)
-            ax1.pcolormesh(qxy, q, images_sum, cmap = cmap, norm = colors.LogNorm(), rasterized=True)
+            #Divide the right row in 1x1
+            inner = gridspec.GridSpecFromSubplotSpec(1, 1,
+                            subplot_spec=outer[1], wspace=0.1, hspace=0.1)
+
+            #Show the full image integrated over the scan
+            ax2 = fig.add_subplot(inner[0])
+
+            ax2.pcolormesh(qxy, qz, images_sum, cmap = cmap,
+                           norm = colors.LogNorm(), rasterized=True)
+            ax2.set_xlabel('qxy (nm^-1)', fontsize='large')
+            ax2.set_ylabel('qz (nm^-1)', fontsize='large')
+
+ 
+        if plot_qxy_q:
+            
+            #Plot a profile along y (integrated over x)
+            ax0 = fig.add_subplot(inner[0])
+
+            q_bins = np.linspace(0.,np.max(q),number_bins_y)
+
+            qxy_binned = np.zeros(len(q_bins)-1)
+            q_binned = np.zeros(len(q_bins)-1)
+            q_flat = np.ravel(q)
+            qxy_flat = np.ravel(images_sum)
+            for n in range(len(q_bins)-1):
+                q_bin_inf = q_bins[n]
+                q_bin_sup = q_bins[n+1]
+                qxy_binned[n] = np.sum(qxy_flat[(q_flat<q_bin_sup) & (q_bin_inf<q_flat)])
+                q_binned[n] = (q_bin_sup+q_bin_inf)/2.                 
+                
+            if logz: ax0.set_yscale('log') 
+
+            # Define lims of the plot
+            ax0.set_xlim(ymin,ymax)
+            
+            temp = qxy_binned[(q_binned<ymax) & (ymin<q_binned)]
+            ymin_plot = np.min(temp[temp>0])   
+            ymax_plot = np.max(qxy_binned[(q_binned<ymax) & (ymin<q_binned)])
+            ax0.set_ylim(0.8*ymin_plot,1.2*ymax_plot)                                 
+             
+            ax0.set_xlabel('q (nm^-1)', fontsize='large')
+            ax0.set_ylabel('qxy (nm^-1)', fontsize='large')
+            ax0.plot(q_binned, qxy_binned)            
+            
+            #Plot a profile along x (integrated over y)
+            ax1 = fig.add_subplot(inner[1])
+       
+            qxy_bins = np.linspace(0.,np.max(qxy),number_bins_x)
+
+            q_binned = np.zeros(len(qxy_bins)-1)
+            qxy_binned = np.zeros(len(qxy_bins)-1)
+            qxy_flat = np.ravel(qxy)
+            q_flat = np.ravel(images_sum)
+            
+            for n in range(len(qxy_bins)-1):
+                qxy_bin_inf = qxy_bins[n]
+                qxy_bin_sup = qxy_bins[n+1]
+                q_binned[n] = np.sum(q_flat[(qxy_flat<qxy_bin_sup) & (qxy_bin_inf<qxy_flat)])
+                qxy_binned[n] = (qxy_bin_sup+qxy_bin_inf)/2.  
+                
+            if logz: ax1.set_yscale('log')
+                
+            # Define lims of the plot
+            ax1.set_xlim(xmin,xmax)          
+            temp = q_binned[(qxy_binned<xmax) & (xmin<qxy_binned)]
+            ymin_plot = np.min(temp[temp>0])   
+            ymax_plot = np.max(q_binned[(qxy_binned<xmax) & (xmin<qxy_binned)])
+            ax1.set_ylim(0.8*ymin_plot,1.2*ymax_plot)             
+                
             ax1.set_xlabel('qxy (nm^-1)', fontsize='large')
             ax1.set_ylabel('q (nm^-1)', fontsize='large')
-            
+            ax1.plot(qxy_binned, q_binned)
+
+            #Divide the right row in 1x1
+            inner = gridspec.GridSpecFromSubplotSpec(1, 1,
+                            subplot_spec=outer[1], wspace=0.1, hspace=0.1)
+
+            #Show the full image integrated over the scan
+            ax2 = fig.add_subplot(inner[0])
+
+            ax2.pcolormesh(qxy, q, images_sum, cmap = cmap,
+                           norm = colors.LogNorm(), rasterized=True)
+            ax2.set_xlabel('qxy (nm^-1)', fontsize='large')
+            ax2.set_ylabel('q (nm^-1)', fontsize='large')
+
+
         plt.show()
         plt.close()    
         
