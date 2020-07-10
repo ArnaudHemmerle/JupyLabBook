@@ -16,7 +16,7 @@ import io
 from contextlib import redirect_stdout
 
 
-__version__ = '0.17'
+__version__ = '0.18'
 
 """
 Here are defined the custom functions used for analysis of data in the JupyLabBook.

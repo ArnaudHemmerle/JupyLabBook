@@ -1,5 +1,17 @@
 # Release notes
 
+### 10/07/2020
+
+JupyLabBook.ipynb
+- Put a javascript command in the first cell to avoid cell collapse (no need to click on a cell to expand it)
+
+CustomFunctions.py: 0.18
+- Add possibility to print peak positions in XRF
+
+FrontendFunctions.py: 0.18
+- Add possibility to print peak positions in XRF
+- Add next action button when no scan is selected (by mistake)
+
 ### 09/07/2020
 
 CustomFunctions.py: 0.17
