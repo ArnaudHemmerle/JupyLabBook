@@ -1252,13 +1252,13 @@ def Choose_treatment(expt):
     
     button_markdown = widgets.Button(description="Insert comment")
     button_markdown.on_click(on_button_markdown_clicked)
-      
+
+    # Buttons for general treatment
+    buttons0 = widgets.HBox([button_markdown, button_next])
+    display(buttons0)    
+    
     if len(expt.scans)==1:
-        # Options for single scan analysis only
-        
-        # Buttons for general treatment
-        buttons0 = widgets.HBox([button_markdown, button_next])
-        display(buttons0)
+        # Option for single scan analysis only
 
         # Set up an interactive 1D plot
         Set_interactive_1D(expt.scans[0])
