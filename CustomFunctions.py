@@ -1422,13 +1422,13 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
 
 def Extract_XRF(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='',
                 logz=False, list_elems=[0,1,2,3], first_channel=0, last_channel=2048,
-                use_eV=False, gain=10., eV0=0.,
+                use_eV=False, gain=10., eV0=0., arr_peaks=None,
                 show_data_stamps=False, verbose=False, absorbers='', fast=True,
                 plot_spectrogram=False, plot_first_last=False, plot_sum=False):
     """
     Extract, correct with ICR/OCR, and plot the fluo spectrum. 
     """
-    
+        
     nxs_path = recording_dir+nxs_filename
 
     if not os.path.isfile(nxs_path):
@@ -1571,11 +1571,27 @@ def Extract_XRF(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir=''
             if logz: ax1.set_yscale('log')
             if use_eV:
                 ax1.set_xlabel('eV', fontsize='large')
-                ax1.plot(eVs, np.sum(spectrums, axis = 0), 'b.-', label='Sum of spectrums')
+                line1, = ax1.plot(eVs, np.sum(spectrums, axis = 0), 'b.-', label='Sum of spectrums')   
             else:
                 ax1.set_xlabel('channel', fontsize='large')
-                ax1.plot(channels, np.sum(spectrums, axis = 0), 'b.-', label='Sum of spectrums')  
-            ax1.legend(fontsize='large')
+                line1, = ax1.plot(channels, np.sum(spectrums, axis = 0), 'b.-', label='Sum of spectrums') 
+
+            if arr_peaks[0][0]!= None :  
+        
+                # Plot the peak positions
+                prop_cycle = plt.rcParams['axes.prop_cycle']
+                colors_axv = prop_cycle.by_key()['color']
+                
+                arr_peaks = np.array(arr_peaks)
+                axvlines = []
+                for i in range(len(arr_peaks)):                  
+                    axvlines.append(ax1.axvline(float(arr_peaks[i,1]), label = str(arr_peaks[i,0]), color = colors_axv[i]))
+                
+                axvlegends = ax1.legend(handles=axvlines, fontsize=10,
+                                        bbox_to_anchor=(1.01, 1.), loc='upper left',  borderaxespad=0.) 
+                plt.gca().add_artist(axvlegends)  
+
+            ax1.legend(handles=[line1], fontsize='large', loc='upper right')     
             plt.show()
 
         if plot_first_last:    
@@ -1586,13 +1602,29 @@ def Extract_XRF(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir=''
             if logz: ax1.set_yscale('log')
             if use_eV:
                 ax1.set_xlabel('eV', fontsize='large')        
-                ax1.plot(eVs, spectrums[first_non_zero_spectrum], 'b.-', label='First spectrum')
-                ax1.plot(eVs, spectrums[-1], 'r.-', label='Last spectrum')            
+                line1, = ax1.plot(eVs, spectrums[first_non_zero_spectrum], 'b.-', label='First spectrum')
+                line2, = ax1.plot(eVs, spectrums[-1], 'r.-', label='Last spectrum')            
             else:
                 ax1.set_xlabel('channel', fontsize='large')        
-                ax1.plot(channels, spectrums[first_non_zero_spectrum], 'b.-', label='First spectrum')
-                ax1.plot(channels, spectrums[-1], 'r.-', label='Last spectrum')
-            ax1.legend(fontsize='large')
+                line1, = ax1.plot(channels, spectrums[first_non_zero_spectrum], 'b.-', label='First spectrum')
+                line2, = ax1.plot(channels, spectrums[-1], 'r.-', label='Last spectrum')
+            
+            if arr_peaks[0][0]!= None :  
+                
+                # Plot the peak positions
+                prop_cycle = plt.rcParams['axes.prop_cycle']
+                colors_axv = prop_cycle.by_key()['color']
+                
+                arr_peaks = np.array(arr_peaks)
+                axvlines = []
+                for i in range(len(arr_peaks)):                  
+                    axvlines.append(ax1.axvline(float(arr_peaks[i,1]), label = str(arr_peaks[i,0]), color = colors_axv[i]))
+                
+                axvlegends = ax1.legend(handles=axvlines, fontsize=10,
+                                        bbox_to_anchor=(1.01, 1.), loc='upper left',  borderaxespad=0.)
+                plt.gca().add_artist(axvlegends)  
+            
+            ax1.legend(handles=[line1, line2], fontsize='large', loc='upper right')    
             plt.show()
 
 

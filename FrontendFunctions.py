@@ -12,6 +12,7 @@ import sys
 import nbformat as nbf
 import CustomFunctions as CF
 import math
+import ipysheet
 
 __version__ = '0.17'
 
@@ -1004,15 +1005,49 @@ def Choose_treatment(expt):
         # eV0
         try: value = expt.eV0
         except: value = 0.
-        w_eV0 = widgets.FloatText(value=value, description='eV0', style=style, layout = short_layout)        
+        w_eV0 = widgets.FloatText(value=value, description='eV0', style=style, layout = short_layout)
+        
+        # is_identify_peaks
+        expt.is_identify_peaks = False
         
         display(widgets.HBox([w_show_data_stamps, w_verbose, w_show_absorbers, w_fastextract]))
         display(widgets.HBox([w_plot_spectrogram, w_plot_first_last, w_plot_sum]))
         display(widgets.HBox([w_XRF_logz, w_elems_str, w_first_channel, w_last_channel]))
         display(widgets.HBox([w_use_eV, w_gain, w_eV0]))
+
+        def on_button_identify_peaks_clicked(b):
+            
+            sheet = ipysheet.easy.sheet(columns=2, rows=20 ,column_headers = ['Name','Position'])
+            
+            # Fill the sheet with previous values
+            try: to_fill = expt.arr_peaks_full
+            except: to_fill = np.array([[None,None] for i in range(20)])
+                
+            # ipysheet does not work correctly with None entries
+            # It is necessary to fill first the cells with something
+            for i in range(2):
+                ipysheet.easy.column(i,  to_fill[:,i])
+
+            def on_button_validate_clicked(b):
+                
+                expt.is_identify_peaks = True
+                
+                # Get values from the sheet
+                expt.arr_peaks_full = ipysheet.numpy_loader.to_array(ipysheet.easy.current())
+                
+                # Remove the empty lines and make array of tuples (name, eV)
+                expt.arr_peaks = [(elem[0],elem[1]) for elem in expt.arr_peaks_full if elem[0]!=None]
+
+            button_validate = widgets.Button(description="Validate Peaks")
+            button_validate.on_click(on_button_validate_clicked)
+
+            display(button_validate)
+            display(sheet)
             
         def on_button_plot_clicked(b):
-
+            
+            if not expt.is_identify_peaks: expt.arr_peaks = [(None,None)]
+            
             # Pass current values as default values
             expt.XRF_logz = w_XRF_logz.value
             expt.elems_str = w_elems_str.value
@@ -1050,6 +1085,7 @@ def Choose_treatment(expt):
                            'use_eV='+str(expt.use_eV)+','+
                            'gain='+str(expt.gain)+','+
                            'eV0='+str(expt.eV0)+','+
+                           'arr_peaks='+str(expt.arr_peaks)+','+
                            'show_data_stamps='+str(expt.show_data_stamps)+','+
                            'verbose='+str(expt.verbose)+','+
                            'absorbers='+'\''+str(absorbers)+'\''+','+
@@ -1066,12 +1102,15 @@ def Choose_treatment(expt):
 
             # Do as if the button next was clicked
             on_button_next_clicked(b)                    
-                    
+
+        button_identify_peaks = widgets.Button(description="Identify peaks")
+        button_identify_peaks.on_click(on_button_identify_peaks_clicked)            
+            
         button_plot = widgets.Button(description="Plot")
         button_plot.on_click(on_button_plot_clicked)
         
-        display(button_plot)
-
+        display(widgets.HBox([button_identify_peaks, button_plot]))
+    
     def on_button_isotherm_clicked(b):
             
         # show_data_stamps
