@@ -14,7 +14,7 @@ import CustomFunctions as CF
 import math
 import ipysheet
 
-__version__ = '0.18'
+__version__ = '0.19'
 
 """
 -Here are defined all the functions relevant to the front end of JupyLabBook,
@@ -560,7 +560,7 @@ def Choose_treatment(expt):
         try: value = expt.GIXD_plot_type
         except: value = 'GIXD'
         w_GIXD_plot_type = widgets.Select(value=value, style=style, rows=2,
-                                          options=['GIXD', 'True GIXD'], description='Plot type')
+                                          options=['GIXD', 'GIXD w/o approx.'], description='Plot type')
             
         display(widgets.HBox([w_show_data_stamps, w_verbose, w_show_absorbers,
                               w_GIXD_logx, w_GIXD_logy, w_GIXD_logz, w_GIXD_cmap]))        
@@ -590,13 +590,13 @@ def Choose_treatment(expt):
             expt.GIXD_plot_type = w_GIXD_plot_type.value
             
             # Pass plot type to param    
-            expt.plot_true_GIXD = True if w_GIXD_plot_type.value == 'True GIXD' else False
+            expt.plot_true_GIXD = True if w_GIXD_plot_type.value == 'GIXD w/o approx.' else False
             
             # Convert moytocreate_str into a list
             list_moytocreate = [int(expt.moytocreate_str.split(',')[i]) for i in range(len(expt.moytocreate_str.split(',')))]
             
             # Pass plot type to param    
-            expt.plot_true_GIXD = True if w_GIXD_plot_type.value == 'True GIXD' else False
+            expt.plot_true_GIXD = True if w_GIXD_plot_type.value == 'GIXD w/o approx.' else False
                         
             for scan in expt.scans:
                 

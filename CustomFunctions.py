@@ -16,7 +16,7 @@ import io
 from contextlib import redirect_stdout
 
 
-__version__ = '0.18'
+__version__ = '0.19'
 
 """
 Here are defined the custom functions used for analysis of data in the JupyLabBook.
@@ -785,7 +785,7 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
             Plot the true Qx, Qy, and Qz without the approx. of alphai~0 and qx~0.
             The change from theta to alpha seems redondant, but allows a better understanding of the GISAXS-like geometry.
             Note that the data saved in the .moy/.mat files are NOT the ones used in the true GIXD plots.
-            Most of the time the qy~0 is valid, but one should check that it is the case once per geometry used.
+            Most of the time the qx~0 is valid, but one should check that it is the case once per geometry used.
             """
             # Plot true GIXD
             twotheta = np.array(data[column_delta][istart:istop])*np.pi/180.
@@ -821,7 +821,7 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
             ax2.pcolormesh(qxy, qz, mat.transpose(), cmap=cmap, rasterized=True)
             ax2.set_xlabel('qxy (nm^-1)', fontsize='large')
             ax2.set_ylabel('qz (nm^-1)', fontsize='large')
-            fig.suptitle('True GIXD', fontsize='x-large')
+            fig.suptitle('GIXD w/o approx.', fontsize='x-large')
 
             if column_pi is not None:
                 fig.text(.04, .05, r'$\pi = %3.4gmN.m^{-1}$'%(mean_pi),
