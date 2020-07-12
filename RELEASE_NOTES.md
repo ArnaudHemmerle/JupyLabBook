@@ -1,5 +1,18 @@
 # Release notes
 
+
+### 12/07/2020
+
+CustomFunctions.py: 0.19
+- Removed the binning in GIXS (too complicated for the user, left for analysis).
+- Save profiles with header when plotting qxy/q in GIXS.
+- Added header in profiles in Plot_pilatus.
+
+FrontendFunctions.py: 0.19
+- Removed the binning in GIXS (too complicated for the user, left for analysis).
+- Add the possibility to extract the logs into a human-readable format with the command Convert logs.
+
+
 ### 10/07/2020
 
 JupyLabBook.ipynb
