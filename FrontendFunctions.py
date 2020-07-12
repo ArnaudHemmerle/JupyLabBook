@@ -211,6 +211,11 @@ def Choose_action(expt):
         # See http://tiny.cc/fnf3nz
         display(Javascript(""" """), display_id=display_id, update=True)
         
+    def on_button_convert_logs_clicked(b):
+        """
+        Convert the logs in human-readable files. 
+        """
+        Convert_logs(expt)
         
     def on_button_calibthetaz_clicked(b):
         """
@@ -310,7 +315,11 @@ def Choose_action(expt):
     # Click to do the calibthetaz
     button_calibthetaz = widgets.Button(description="Calib. theta z")
     button_calibthetaz.on_click(on_button_calibthetaz_clicked)
-        
+
+    # Click to export human-readable logs
+    button_convert_logs = widgets.Button(description="Convert logs")
+    button_convert_logs.on_click(on_button_convert_logs_clicked)
+      
     # Click to fill the form
     button_form = widgets.Button(description="Fill form")
     button_form.on_click(on_button_form_clicked)
@@ -347,10 +356,10 @@ def Choose_action(expt):
     w_print_scans.widget.children[0].description = 'Next scan(s):'
     w_print_scans.widget.children[0].layout = {'width': '400px'}
     
-    buttons1 = widgets.HBox([button_form, button_calibthetaz])
+    buttons1 = widgets.HBox([button_form, button_calibthetaz, button_convert_logs, button_export])
     display(buttons1)
 
-    buttons2 = widgets.HBox([button_markdown, button_script, button_wm, button_commands, button_export])
+    buttons2 = widgets.HBox([button_markdown, button_script, button_wm, button_commands])
     display(buttons2)
     
 
@@ -1839,8 +1848,13 @@ def Print_script(expt):
     button_validate_path = widgets.Button(description="Validate path")
     button_validate_path.on_click(on_button_validate_path_clicked)
     display(widgets.HBox([w_path_to_dir, button_validate_path]))
-    
 
+    
+############################################################
+################## PRINTING COMMANDS #######################    
+############################################################
+
+    
 def Print_commands(expt):
     """
     Print a list of commands from a log file. Add the scan numbers at the end of each line.
@@ -1864,47 +1878,8 @@ def Print_commands(expt):
 
         pathToFile = expt.logs_dir+w_select_log.value
 
-
-        # Define the elements to be removed of the original log file
-        remove_elem_0 = ['#', ']', '\n']
-        remove_elem = [
-                      'DevError', 'desc =', 'origin =', 'reason =', 'severity =',
-                      'connection'
-                       ]
-        
-        # List of possible dates
-        date_list = ['# Mon', '# Tue', '# Wed', '# Thu', '# Fri', '# Sat', '# Sun']
-        date = ''
-        
-        with open(pathToFile, 'r') as f:
-            log_lines = f.readlines()
-
-        rlog_lines = np.empty([], dtype ='<U1000')
-
-        for i in range(len(log_lines)):
-            if any(date in log_lines[i] for date in date_list):
-                date = log_lines[i].replace('\n',' ')[2:]
-            elif 'Scan File Name' in log_lines[i]:
-                #scan_number = ''.join(filter(str.isdigit, log_lines[i]))
-                scan_number = log_lines[i].split('_')[-1].replace('\n','')
-                while scan_number[0]=='0':
-                    # Delete trailing zero
-                    scan_number = scan_number[1:]
-                rlog_lines[-1] = rlog_lines[-1][:-1] +  ' #' + scan_number +'\n' 
-            elif '*** ABORT ***' in log_lines[i]:
-                rlog_lines = np.append(rlog_lines, 'ABORTED :'+rlog_lines[-1])
-            elif 'Scan aborted' in log_lines[i]:
-                rlog_lines = np.append(rlog_lines, 'SCAN ABORTED: '+rlog_lines[-1])
-            
-            elif log_lines[i][0] in remove_elem_0:
-                pass
-            elif any([elem in log_lines[i] for elem in remove_elem]):
-                pass
-            else:
-                rlog_lines = np.append(rlog_lines, date+log_lines[i])
-
-        # Remove first empty line
-        rlog_lines = rlog_lines[1:]
+        # Extract the formatted commands
+        rlog_lines = Extract_commands(pathToFile)
         
         w_select_commands = widgets.SelectMultiple(options=rlog_lines,rows=30,layout=widgets.Layout(width='800px'))
 
@@ -1936,3 +1911,80 @@ def Print_commands(expt):
     button.on_click(on_button_select_clicked)
 
     display(widgets.HBox([w_select_log, button]))  
+ 
+
+def Convert_logs(expt):
+    """
+    Convert all the logs in a human-readable version with date and commands.
+    """
+    
+    rlogs_dir = expt.working_dir+'readable_logs/'
+    
+    if not os.path.exists(rlogs_dir):
+            os.mkdir(rlogs_dir)   
+    
+    print("Conversion of logs into a human-readable format in the folder:") 
+    print(rlogs_dir)
+    print(" ")
+    
+    # Convert all the logs
+    for file in expt.list_logs_files:
+        rlog_lines = Extract_commands(expt.logs_dir+file) 
+        
+        wfile = open(rlogs_dir+'_r'+file[1:],'w')
+        for k in range(len(rlog_lines)):
+            wfile.write(rlog_lines[k])
+        wfile.close()
+        
+        print('_r'+file[1:]+': Done.')
+        
+    print(" ")    
+    print('Finished!')
+        
+def Extract_commands(pathToFile):
+    """
+    Extract commands from a log file. Returns an array of all the formatted commands.
+    """
+
+    # Define the elements to be removed of the original log file
+    remove_elem_0 = ['#', ']', '\n']
+    remove_elem = [
+                  'DevError', 'desc =', 'origin =', 'reason =', 'severity =',
+                  'connection'
+                   ]
+
+    # List of possible dates
+    date_list = ['# Mon', '# Tue', '# Wed', '# Thu', '# Fri', '# Sat', '# Sun']
+    date = ''
+
+    with open(pathToFile, 'r') as f:
+        log_lines = f.readlines()
+
+    rlog_lines = np.empty([], dtype ='<U1000')
+
+    for i in range(len(log_lines)):
+        if any(date in log_lines[i] for date in date_list):
+            date = log_lines[i].replace('\n',' ')[2:]
+        elif 'Scan File Name' in log_lines[i]:
+            #scan_number = ''.join(filter(str.isdigit, log_lines[i]))
+            scan_number = log_lines[i].split('_')[-1].replace('\n','')
+            while scan_number[0]=='0':
+                # Delete trailing zero
+                scan_number = scan_number[1:]
+            rlog_lines[-1] = rlog_lines[-1][:-1] +  ' #' + scan_number +'\n' 
+        elif '*** ABORT ***' in log_lines[i]:
+            rlog_lines = np.append(rlog_lines, 'ABORTED :'+rlog_lines[-1])
+        elif 'Scan aborted' in log_lines[i]:
+            rlog_lines = np.append(rlog_lines, 'SCAN ABORTED: '+rlog_lines[-1])
+
+        elif log_lines[i][0] in remove_elem_0:
+            pass
+        elif any([elem in log_lines[i] for elem in remove_elem]):
+            pass
+        else:
+            rlog_lines = np.append(rlog_lines, date+log_lines[i])
+
+    # Remove first empty line
+    rlog_lines = rlog_lines[1:]    
+
+    return rlog_lines
