@@ -791,35 +791,25 @@ def Choose_treatment(expt):
         except: value = 0.172
         w_pixel_size = widgets.FloatText(value=value, style=style, layout=tiny_layout, description='Pixel size (um)')
 
-        # number_bins_x 
-        try: value = expt.number_bins_x
-        except: value = 200
-        w_number_bins_x = widgets.IntText(value=value, style=style, layout=tiny_layout, description='Number bins x')        
-        
         # xmin
         try: value = expt.xmin
         except: value = 0.
-        w_xmin = widgets.FloatText(value=value, style=style, layout=short_layout, description='x min')   
+        w_xmin = widgets.FloatText(value=value, style=style, layout=tiny_layout, description='x min')   
  
         # xmax
         try: value = expt.xmax
         except: value = 1.
-        w_xmax = widgets.FloatText(value=value, style=style, layout=short_layout, description='x max')  
-
-        # number_bins_y 
-        try: value = expt.number_bins_y
-        except: value = 200
-        w_number_bins_y = widgets.IntText(value=value, style=style, layout=tiny_layout, description='Number bins y')        
+        w_xmax = widgets.FloatText(value=value, style=style, layout=tiny_layout, description='x max')  
         
         # ymin
         try: value = expt.ymin
         except: value = 0.
-        w_ymin = widgets.FloatText(value=value, style=style, layout=short_layout, description='y min')   
+        w_ymin = widgets.FloatText(value=value, style=style, layout=tiny_layout, description='y min')   
  
         # ymax
         try: value = expt.ymax
         except: value = 1.
-        w_ymax = widgets.FloatText(value=value, style=style, layout=short_layout, description='y max')          
+        w_ymax = widgets.FloatText(value=value, style=style, layout=tiny_layout, description='y max')          
         
         # show_data_stamps
         try: value = expt.show_data_stamps
@@ -852,8 +842,8 @@ def Choose_treatment(expt):
         display(widgets.HBox([w_show_data_stamps, w_verbose, w_show_absorbers, w_GIXS_logz, w_GIXS_cmap, w_pixel_size]))        
         display(widgets.HBox([w_wavelength, w_distance, w_thetai, w_pixel_PONI_x, w_pixel_PONI_y]))
         display(widgets.HBox([w_force_gamma_delta, w_fgamma, w_fdelta]))
-        display(widgets.HBox([w_number_bins_x, w_xmin, w_xmax])) 
-        display(widgets.HBox([w_number_bins_y, w_ymin, w_ymax])) 
+        display(widgets.HBox([w_xmin, w_xmax])) 
+        display(widgets.HBox([w_ymin, w_ymax])) 
         
         def on_button_plot_clicked(b):
             
@@ -865,8 +855,6 @@ def Choose_treatment(expt):
             expt.pixel_PONI_x = w_pixel_PONI_x.value
             expt.pixel_PONI_y = w_pixel_PONI_y.value
             expt.pixel_size = w_pixel_size.value
-            expt.number_bins_x = w_number_bins_x.value
-            expt.number_bins_y = w_number_bins_y.value
             expt.xmin = w_xmin.value
             expt.xmax = w_xmax.value
             expt.ymin = w_ymin.value
@@ -903,8 +891,6 @@ def Choose_treatment(expt):
                         'pixel_PONI_x='+str(expt.pixel_PONI_x)+','+
                         'pixel_PONI_y='+str(expt.pixel_PONI_y)+','+
                         'pixel_size='+str(expt.pixel_size)+','+  
-                        'number_bins_x='+str(expt.number_bins_x)+','+
-                        'number_bins_y='+str(expt.number_bins_y)+','+
                         'xmin='+str(expt.xmin)+','+
                         'xmax='+str(expt.xmax)+','+
                         'ymin='+str(expt.ymin)+','+
