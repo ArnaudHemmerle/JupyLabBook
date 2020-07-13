@@ -2,7 +2,6 @@
 *.swp
 logs/
 recording/
-working/
 scripts/
 .ipynb_checkpoints/
 __pycache__/
