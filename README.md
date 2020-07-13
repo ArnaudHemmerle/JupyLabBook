@@ -6,7 +6,7 @@ JupyLabBook is presently in development & testing.
 
 ### Last versions of modules:  
 FrontendFunctions.py: 0.19  
-CustomFunctions.py: 0.19  
+CustomFunctions.py: 0.20  
 
 
 # What is JupyLabBook?

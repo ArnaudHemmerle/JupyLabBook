@@ -16,7 +16,7 @@ import io
 from contextlib import redirect_stdout
 
 
-__version__ = '0.19'
+__version__ = '0.20'
 
 """
 Here are defined the custom functions used for analysis of data in the JupyLabBook.
@@ -1200,7 +1200,9 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
 
             #Plot a profile along y (integrated over x)
             ax1 = fig.add_subplot(inner[0])
-            integrated_qxy = images_sum.sum(axis=1)
+            
+            # Put all the negative pixels to zero before integration            
+            integrated_qxy = np.where(images_sum>0, images_sum, 0.).sum(axis=1)
             pixel_y_array = np.arange(0,len(integrated_qxy))
             alphaf_array = np.arctan( (pixel_size*(pixel_direct_y-pixel_y_array)-deltay0)/distance)
             qz_array = 2*np.pi/wavelength*(np.sin(alphaf_array)+np.sin(alphai))
@@ -1220,7 +1222,9 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
             #Plot a profile along x (integrated over y)
             ax2 = fig.add_subplot(inner[1])
             
-            integrated_qz = images_sum.sum(axis=0)
+            # Put all the negative pixels to zero before integration
+            integrated_qz = np.where(images_sum>0, images_sum, 0.).sum(axis=0)
+            
             pixel_x_array = np.arange(0,len(integrated_qz))
             twotheta_array = np.arctan(pixel_size*(pixel_x_array-pixel_direct_x)/distance)
             # Carefull, approx. qxy=4*pi/lambda*sin(2*theta/2)
@@ -1635,8 +1639,9 @@ def Extract_pilatus_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recordin
 
         #Plot a profile along y (integrated over x)
         ax1 = fig.add_subplot(inner[0])
-        integrated_x = images_sum.sum(axis=1)
-        
+        # Put all the negative pixels to zero before integration
+        integrated_x = np.where(images_sum>0, images_sum, 0.).sum(axis=1)
+ 
         ax1.set_xlim(ymin,ymax)
         temp = integrated_x[int(ymin):int(ymax)]
         ax1.set_ylim(np.min(temp[temp>0])*0.8,np.max(integrated_x[int(ymin):int(ymax)])*1.2)
@@ -1647,7 +1652,8 @@ def Extract_pilatus_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recordin
 
         #Plot a profile along x (integrated over y)
         ax2 = fig.add_subplot(inner[1])
-        integrated_y = images_sum.sum(axis=0)
+        # Put all the negative pixels to zero before integration
+        integrated_y = np.where(images_sum>0, images_sum, 0.).sum(axis=0)
         
         ax2.set_xlim(xmin,xmax)
         temp = integrated_y[int(xmin):int(xmax)]

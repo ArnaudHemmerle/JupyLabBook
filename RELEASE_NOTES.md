@@ -1,6 +1,11 @@
 # Release notes
 
 
+### 13/07/2020
+
+CustomFunctions.py: 0.20
+- Quick fix: the -2 were not removed before profile integration in GIXS and Extract_pilatus. They are now set to 0 before integration (but remains at -2 on the 2D images).
+
 ### 12/07/2020
 
 CustomFunctions.py: 0.19
