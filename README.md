@@ -17,7 +17,7 @@ Expert users can define their own functions to perform more involved data analys
 # What is not JupyLabBook?
 JupyLabBook was not designed to be a notebook for **analysis** but for **data reduction** only.  
 Think of it as the traditional lab book, that should remain untouched after the end of the experiment. Notebooks for specific analysis (GIXS, GIXD, XRF ...) can be provided as well on demand.
-JupyLabBook is not made of paper: it can crash, it can be corrupted, it can be deleted by mistake ... We advice users to always keep a written paper-like lab book in parallel with any interactive notebook. Especially for all the info concerning the samples used, that cannot be retrieved afterwards.
+JupyLabBook is not made of paper: it can crash, it can be corrupted, it can be deleted by mistake ... In the present state of development, we advise users to keep a written paper-like lab book in parallel with any interactive notebook. Especially for all the info concerning the samples used, that cannot be retrieved afterwards.
 
 # How to use JupyLabBook?
 1) Contrary to its name, JupyLabBook cannot be used with Jupyter Lab. It has to be used with Jupyter Notebook. If you are running Jupyter Lab, use the option "Launch Classic Notebook" in the Help menu.  
