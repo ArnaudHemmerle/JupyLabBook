@@ -7,3 +7,8 @@ scripts/
 .ipynb_checkpoints/
 __pycache__/
 JupylabBook.pdf
+JupyLabBook_User_Manual.docx
+example/working/
+example/logs/
+example/scripts/
+example/readable_logs/
