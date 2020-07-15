@@ -14,7 +14,7 @@ import CustomFunctions as CF
 import math
 import ipysheet
 
-__version__ = '0.19'
+__version__ = '0.20'
 
 """
 -Here are defined all the functions relevant to the front end of JupyLabBook,

@@ -1,5 +1,10 @@
 # Release notes
 
+### 15/07/2020
+
+FrontendFunctions.py: 0.20
+- Insert command now in reversed alphabetic order.
+
 
 ### 13/07/2020
 
