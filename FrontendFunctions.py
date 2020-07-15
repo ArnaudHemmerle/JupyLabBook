@@ -1881,7 +1881,7 @@ def Print_commands(expt):
         # Extract the formatted commands
         rlog_lines = Extract_commands(pathToFile)
         
-        w_select_commands = widgets.SelectMultiple(options=rlog_lines,rows=30,layout=widgets.Layout(width='800px'))
+        w_select_commands = widgets.SelectMultiple(options=rlog_lines[::-1],rows=30,layout=widgets.Layout(width='800px'))
 
         display(w_select_commands)
 
