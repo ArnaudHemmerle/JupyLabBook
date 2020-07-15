@@ -4,7 +4,7 @@
 
 FrontendFunctions.py: 0.20
 - Insert command now in reversed alphabetic order.
-
+- Removed a bug in XRF when the user remove a peak.
 
 ### 13/07/2020
 

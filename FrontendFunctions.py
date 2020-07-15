@@ -1032,7 +1032,10 @@ def Choose_treatment(expt):
                 
                 # Remove the empty lines and make array of tuples (name, eV)
                 expt.arr_peaks = [(elem[0],elem[1]) for elem in expt.arr_peaks_full if elem[0]!=None]
-
+                
+                # Remove the lines which were deleted manually
+                expt.arr_peaks = [elem for elem in expt.arr_peaks if elem[0]!='']
+                
             button_validate = widgets.Button(description="Validate Peaks")
             button_validate.on_click(on_button_validate_clicked)
 
