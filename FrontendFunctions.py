@@ -1012,15 +1012,15 @@ def Choose_treatment(expt):
 
         def on_button_identify_peaks_clicked(b):
             
-            sheet = ipysheet.easy.sheet(columns=2, rows=20 ,column_headers = ['Name','Position'])
+            sheet = ipysheet.easy.sheet(columns=3, rows=20 ,column_headers = ['Name','Position','Use?(y/n)'])
             
             # Fill the sheet with previous values
             try: to_fill = expt.arr_peaks_full
-            except: to_fill = np.array([[None,None] for i in range(20)])
+            except: to_fill = np.array([[None,None,None] for i in range(20)])
                 
             # ipysheet does not work correctly with None entries
             # It is necessary to fill first the cells with something
-            for i in range(2):
+            for i in range(3):
                 ipysheet.easy.column(i,  to_fill[:,i])
 
             def on_button_validate_clicked(b):
@@ -1031,30 +1031,33 @@ def Choose_treatment(expt):
                 expt.arr_peaks_full = ipysheet.numpy_loader.to_array(ipysheet.easy.current())
                 
                 # Remove the empty lines and make array of tuples (name, eV)
-                expt.arr_peaks = [(elem[0],elem[1]) for elem in expt.arr_peaks_full if elem[0]!=None]
+                expt.arr_peaks = [(elem[0],elem[1],elem[2]) for elem in expt.arr_peaks_full if elem[0]!=None]
                 
-                # Remove the lines which were deleted manually
-                expt.arr_peaks = [elem for elem in expt.arr_peaks if elem[0]!='']
+                # Send only the lines with y in the third column
+                expt.arr_peaks = [elem[0:2] for elem in expt.arr_peaks if elem[2]=='y']
                 
-                # Extract and plot the XRF with the peaks when validate is clicked
-                CF.Extract_XRF(nxs_filename=expt.scans[0].nxs,
-                               working_dir=expt.working_dir,
-                               recording_dir=expt.recording_dir,
-                               logz=w_XRF_logz.value,
-                               list_elems=w_elems_str.value,
-                               first_channel=w_first_channel.value,
-                               last_channel=w_last_channel.value,
-                               use_eV=w_use_eV.value,
-                               gain=w_gain.value,
-                               eV0=w_eV0.value,
-                               arr_peaks=expt.arr_peaks,
-                               show_data_stamps=False,
-                               verbose=False,
-                               absorbers='',
-                               fast=w_fastextract.value,
-                               plot_spectrogram=False,
-                               plot_first_last=False,
-                               plot_sum=True)
+                for scan in expt.scans:                                                              
+                
+                    print("Peaks on scan %s"%scan.nxs)
+                    # Extract and plot the XRF with the peaks when validate is clicked
+                    CF.Extract_XRF(nxs_filename=scan.nxs,
+                                   working_dir=expt.working_dir,
+                                   recording_dir=expt.recording_dir,
+                                   logz=w_XRF_logz.value,
+                                   list_elems=w_elems_str.value,
+                                   first_channel=w_first_channel.value,
+                                   last_channel=w_last_channel.value,
+                                   use_eV=w_use_eV.value,
+                                   gain=w_gain.value,
+                                   eV0=w_eV0.value,
+                                   arr_peaks=expt.arr_peaks,
+                                   show_data_stamps=False,
+                                   verbose=False,
+                                   absorbers='',
+                                   fast=w_fastextract.value,
+                                   plot_spectrogram=False,
+                                   plot_first_last=False,
+                                   plot_sum=True)
                           
                 
             button_validate = widgets.Button(description="Validate Peaks")
