@@ -3,9 +3,10 @@
 ### 16/07/2020
 
 FrontendFunctions.py: 0.20
-- Insert command now in reversed alphabetic order.
-- Removed a bug in XRF when the user remove a peak.
-- Show the peaks in the widget XRF when user clicks on validate peaks.
+- Insert command now in reversed alphabetic order.  
+- Removed a bug in XRF when the user remove a peak.  
+- Show the peaks in the widget XRF when user clicks on validate peaks.  
+- XRF: User can plot a peak or not with y/n. Possibility to identify peaks with multiple scans.
 
 ### 13/07/2020
 
