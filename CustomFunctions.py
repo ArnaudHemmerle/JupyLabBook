@@ -1129,6 +1129,7 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
             if verbose: print('\t. Gamma motor data found, mean value %3.4g deg'%(gamma))
         else:
             gamma = fgamma
+            print("")
             print(PN._RED,'\t. No gamma found! gamma = %g'%gamma, PN._RESET)
         if (i_delta != None) and (force_gamma_delta==False):
             delta = np.mean(data[i_delta])
