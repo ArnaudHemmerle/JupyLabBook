@@ -1036,6 +1036,27 @@ def Choose_treatment(expt):
                 # Remove the lines which were deleted manually
                 expt.arr_peaks = [elem for elem in expt.arr_peaks if elem[0]!='']
                 
+                # Extract and plot the XRF with the peaks when validate is clicked
+                CF.Extract_XRF(nxs_filename=expt.scans[0].nxs,
+                               working_dir=expt.working_dir,
+                               recording_dir=expt.recording_dir,
+                               logz=w_XRF_logz.value,
+                               list_elems=w_elems_str.value,
+                               first_channel=w_first_channel.value,
+                               last_channel=w_last_channel.value,
+                               use_eV=w_use_eV.value,
+                               gain=w_gain.value,
+                               eV0=w_eV0.value,
+                               arr_peaks=expt.arr_peaks,
+                               show_data_stamps=False,
+                               verbose=False,
+                               absorbers='',
+                               fast=w_fastextract.value,
+                               plot_spectrogram=False,
+                               plot_first_last=False,
+                               plot_sum=True)
+                          
+                
             button_validate = widgets.Button(description="Validate Peaks")
             button_validate.on_click(on_button_validate_clicked)
 

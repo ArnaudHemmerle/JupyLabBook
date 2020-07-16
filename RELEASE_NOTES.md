@@ -1,10 +1,11 @@
 # Release notes
 
-### 15/07/2020
+### 16/07/2020
 
 FrontendFunctions.py: 0.20
 - Insert command now in reversed alphabetic order.
 - Removed a bug in XRF when the user remove a peak.
+- Show the peaks in the widget XRF when user clicks on validate peaks.
 
 ### 13/07/2020
 
