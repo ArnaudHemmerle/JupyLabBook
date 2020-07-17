@@ -1,5 +1,11 @@
 # Release notes
 
+### 17/07/2020
+
+JupyLabBook.ipynb:
+- Add a test in the first cell to avoid erasing all the info when running it.
+
+
 ### 16/07/2020
 
 FrontendFunctions.py: 0.20
