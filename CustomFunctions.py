@@ -547,6 +547,7 @@ def Extract_channel_Qc(nxs_filename='SIRIUS_test.nxs', working_dir='', recording
 
 def Groupe(mat, binsize=10):
     tmp=[]
+    
     for i in range(mat.shape[0]):
         x=[]
         y=[]
@@ -845,7 +846,7 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
             np.savetxt(savename+'.mat'+str(binsize), mat)
             # Save the Qz
             if computeqz:
-                np.savetxt(savename+'_qz'+str(binsize)+'.dat'+str(binsize), qz)
+                np.savetxt(savename+'_qz.dat'+str(binsize), qz)
                 if verbose: print('\t. Qz values saved in:')
                 if verbose: print('\t'+savename+'_qz'+str(binsize)+'.dat')
             if verbose:
