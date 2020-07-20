@@ -1,5 +1,16 @@
 # Release notes
 
+### 20/07/2020
+
+CustomFunctions.py: 0.21
+- Major update in GIXS/GIXD: keep only the approximate qxy, leave all other options for analysis.
+- Automatic zoom in GIXS/Plot_pilatus when the x or y range is wrong.
+
+FrontendFunctions.py: 0.21
+- Major update in GIXS/GIXD: keep only the approximate qxy, leave all other options for analysis.
+- Possibility not to add scan numbers in print_scripts by leaving the box empty.
+
+
 ### 17/07/2020
 
 JupyLabBook.ipynb:
