@@ -16,7 +16,7 @@ import io
 from contextlib import redirect_stdout
 
 
-__version__ = '0.21'
+__version__ = '1.0'
 
 """
 Here are defined the custom functions used for analysis of data in the JupyLabBook.
@@ -563,7 +563,7 @@ def Groupe(mat, binsize=10):
 
 def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='',
                  logx=False, logy=False, logz=False,
-                 channel0=600, thetazfactor=0.01, wavelength=0.155, thetac=0.0028, thetai=0.002,
+                 channel0=600, thetazfactor=0.01, wavelength=0.155, thetac=0.0028,
                  binsize=10, computeqz=True, nblevels=50, moytocreate=(10, 20, 40),
                  show_data_stamps=False, verbose=False, absorbers='', cmap='jet'):
     
@@ -753,7 +753,7 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
             qz=2.0*np.pi*np.sin(thetaz)/wavelength
         else:
             qz=ch
-
+        
         # Plot the matrix
         if logz:
             ax2.contourf(datx[istart:istop], qz, np.log(mat.transpose()))

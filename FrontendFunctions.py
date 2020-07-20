@@ -14,7 +14,7 @@ import CustomFunctions as CF
 import math
 import ipysheet
 
-__version__ = '0.21'
+__version__ = '1.0'
 
 """
 -Here are defined all the functions relevant to the front end of JupyLabBook,
@@ -517,11 +517,6 @@ def Choose_treatment(expt):
         try: value = expt.thetac
         except: value = 0.0028
         w_thetac = widgets.FloatText(value=value, style=style, layout=short_layout, description='thetac (rad)')
-        
-        # thetai
-        try: value = expt.thetai
-        except: value = 0.002
-        w_thetai = widgets.FloatText(value=value, style=style, layout=short_layout, description='thetai (rad)')
 
         # binsize
         try: value = expt.binsize
@@ -567,7 +562,7 @@ def Choose_treatment(expt):
         display(widgets.HBox([w_show_data_stamps, w_verbose, w_show_absorbers,
                               w_GIXD_logx, w_GIXD_logy, w_GIXD_logz, w_GIXD_cmap]))        
         display(widgets.HBox([w_binsize, w_nblevels, w_moytocreate_str, w_channel0, w_computeqz]))
-        display(widgets.HBox([w_wavelength, w_thetai, w_thetac, w_thetazfactor]))
+        display(widgets.HBox([w_wavelength, w_thetac, w_thetazfactor]))
                 
         
         def on_button_plot_clicked(b):
@@ -580,7 +575,6 @@ def Choose_treatment(expt):
             expt.thetazfactor = w_thetazfactor.value
             expt.wavelength = w_wavelength.value
             expt.thetac = w_thetac.value
-            expt.thetai = w_thetai.value
             expt.binsize = w_binsize.value
             expt.computeqz = w_computeqz.value
             expt.nblevels = w_nblevels.value
@@ -610,7 +604,6 @@ def Choose_treatment(expt):
                             'thetazfactor='+str(expt.thetazfactor)+','+
                             'wavelength='+str(expt.wavelength)+','+
                             'thetac='+str(expt.thetac)+','+
-                            'thetai='+str(expt.thetai)+','+
                             'binsize='+str(expt.binsize)+','+
                             'computeqz='+str(expt.computeqz)+','+
                             'nblevels='+str(expt.nblevels)+','+
