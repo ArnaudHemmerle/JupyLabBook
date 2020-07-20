@@ -1753,7 +1753,7 @@ def Print_script(expt):
         def on_button_insert_script_clicked(b):
             """
             Display a script in a markdown cell.
-            Add scan numbers.
+            Add scan numbers if asked.
             """ 
 
             # Get and insert the script
@@ -1767,51 +1767,61 @@ def Print_script(expt):
             # Split the different lines
             script_split = script_init.split('\n')
             
-            ###################################
-            # Add scan number
-            ###################################
             
-            # List of names which triggers an increment of the scan number
-            list_trig = ['cont_regh', 'scan']
-            count = w_index_first_scan.value
-            is_loop = False
-            for i in range(len(script_split)):
+            # Check if the value of first script is a number
+            # If not, do not add the counting
+            
+            if np.char.isnumeric(w_index_first_scan.value):
 
-                if is_loop:
+                
+                ###################################
+                # Add scan number
+                ###################################
 
-                    # Fist run on the loop to collect info
-                    loop_length = 0
-                    nb_scan_in_loop = 0
-                    is_first_run = True
-                    for k in range(i,len(script_split)):
-                        if is_first_run: 
-                            if ('    ' in script_split[k]) or ('\t' in script_split[k]):
-                                loop_length +=1
+                # List of names which triggers an increment of the scan number
+                list_trig = ['cont_regh', 'scan']
+
+                count = int(w_index_first_scan.value)
+
+                is_loop = False
+                for i in range(len(script_split)):
+
+                    if is_loop:
+
+                        # Fist run on the loop to collect info
+                        loop_length = 0
+                        nb_scan_in_loop = 0
+                        is_first_run = True
+                        for k in range(i,len(script_split)):
+                            if is_first_run: 
+                                if ('    ' in script_split[k]) or ('\t' in script_split[k]):
+                                    loop_length +=1
+                                    if any(elem in script_split[k] for elem in list_trig):
+                                        nb_scan_in_loop+=1
+                                else:
+                                    is_first_run = False
+
+                        # Attribute the scan numbers
+                        for j in range(repet_nb-1):
+                            for k in range(i,i+loop_length):
                                 if any(elem in script_split[k] for elem in list_trig):
-                                    nb_scan_in_loop+=1
-                            else:
-                                is_first_run = False
+                                        script_split[k] = script_split[k]+' #'+str(count)
+                                        count+=1
 
-                    # Attribute the scan numbers
-                    for j in range(repet_nb-1):
-                        for k in range(i,i+loop_length):
-                            if any(elem in script_split[k] for elem in list_trig):
-                                    script_split[k] = script_split[k]+' #'+str(count)
-                                    count+=1
+                        is_loop = False
 
-                    is_loop = False
+                    # Detect a loop
+                    if ('in range' in script_split[i]):
+                        repet_nb = int(''.join([str(s) for s in script_split[i] if s.isdigit()]))
+                        is_loop = True
 
-                # Detect a loop
-                if ('in range' in script_split[i]):
-                    repet_nb = int(''.join([str(s) for s in script_split[i] if s.isdigit()]))
-                    is_loop = True
+                    # Regular scan not in a loop
+                    if any(elem in script_split[i] for elem in list_trig):
+                        script_split[i] = script_split[i]+' #'+str(count)
+                        count+=1
 
-                # Regular scan not in a loop
-                if any(elem in script_split[i] for elem in list_trig):
-                    script_split[i] = script_split[i]+' #'+str(count)
-                    count+=1
-
-            ##################################
+                ##################################
+            
             
             # Re-create the script with added scan numbers
             script_modif ='\n'.join(script_split)
@@ -1831,7 +1841,7 @@ def Print_script(expt):
 
         
         # Get number of the first scan
-        w_index_first_scan = widgets.IntText(value=0,
+        w_index_first_scan = widgets.Text(value='',
                                              style = {'description_width': 'initial'},
                                              layout = widgets.Layout(width='200px'),
                                              description='Index first scan')
