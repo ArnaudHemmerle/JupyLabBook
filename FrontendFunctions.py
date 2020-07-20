@@ -14,7 +14,7 @@ import CustomFunctions as CF
 import math
 import ipysheet
 
-__version__ = '0.20'
+__version__ = '0.21'
 
 """
 -Here are defined all the functions relevant to the front end of JupyLabBook,
@@ -562,14 +562,7 @@ def Choose_treatment(expt):
         try: value = expt.GIXD_cmap
         except: value = 'jet'
         w_GIXD_cmap = widgets.Select(value=value, style=style, rows=5, description='cmap',
-                                options=['viridis', 'jet', 'Greys', 'cividis', 'hot'])
-
-        
-        # plot_GIXD/plot_true_GIXD
-        try: value = expt.GIXD_plot_type
-        except: value = 'GIXD'
-        w_GIXD_plot_type = widgets.Select(value=value, style=style, rows=2,
-                                          options=['GIXD', 'GIXD w/o approx.'], description='Plot type')
+                                options=['viridis', 'jet', 'Greys', 'cividis', 'hot'])        
             
         display(widgets.HBox([w_show_data_stamps, w_verbose, w_show_absorbers,
                               w_GIXD_logx, w_GIXD_logy, w_GIXD_logz, w_GIXD_cmap]))        
@@ -596,16 +589,9 @@ def Choose_treatment(expt):
             expt.verbose = w_verbose.value
             expt.show_absorbers = w_show_absorbers.value
             expt.GIXD_cmap = w_GIXD_cmap.value
-            expt.GIXD_plot_type = w_GIXD_plot_type.value
-            
-            # Pass plot type to param    
-            expt.plot_true_GIXD = True if w_GIXD_plot_type.value == 'GIXD w/o approx.' else False
             
             # Convert moytocreate_str into a list
             list_moytocreate = [int(expt.moytocreate_str.split(',')[i]) for i in range(len(expt.moytocreate_str.split(',')))]
-            
-            # Pass plot type to param    
-            expt.plot_true_GIXD = True if w_GIXD_plot_type.value == 'GIXD w/o approx.' else False
                         
             for scan in expt.scans:
                 
@@ -632,8 +618,7 @@ def Choose_treatment(expt):
                             'show_data_stamps='+str(expt.show_data_stamps)+','+
                             'verbose='+str(expt.verbose)+','+
                             'absorbers='+'\''+str(absorbers)+'\''+','+
-                            'cmap=\''+str(expt.GIXD_cmap)+'\','+
-                            'plot_true_GIXD='+str(expt.plot_true_GIXD)+')',
+                            'cmap=\''+str(expt.GIXD_cmap)+'\')',
                             position='below', celltype='code', is_print = True)
 
                 if len(expt.scans)>1:
@@ -645,7 +630,7 @@ def Choose_treatment(expt):
 
         button_plot = widgets.Button(description="Plot")
         button_plot.on_click(on_button_plot_clicked)
-        display(widgets.HBox([w_GIXD_plot_type,button_plot]))
+        display(button_plot)
 
         
 
@@ -841,13 +826,7 @@ def Choose_treatment(expt):
         w_GIXS_cmap = widgets.Select(value=value, style=style, rows=5, description='cmap',
                                 options=['viridis', 'jet', 'Greys', 'cividis', 'hot'])
      
-        
-        # plot_twotheta_alphaf/plot_qxy_qz/plot_qxy_q
-        try: value = expt.GIXS_plot_type
-        except: value = 'qxy/qz'
-        w_GIXS_plot_type = widgets.Select(value=value, style=style, rows=3,
-                                          options=['angles', 'qxy/qz', 'qxy/q'], description='Plot type')
-            
+                 
         display(widgets.HBox([w_show_data_stamps, w_verbose, w_show_absorbers, w_GIXS_logz, w_GIXS_cmap, w_pixel_size]))        
         display(widgets.HBox([w_wavelength, w_distance, w_thetai, w_pixel_PONI_x, w_pixel_PONI_y]))
         display(widgets.HBox([w_force_gamma_delta, w_fgamma, w_fdelta]))
@@ -875,12 +854,6 @@ def Choose_treatment(expt):
             expt.verbose = w_verbose.value
             expt.show_absorbers = w_show_absorbers.value
             expt.GIXS_cmap = w_GIXS_cmap.value
-            expt.GIXS_plot_type = w_GIXS_plot_type.value
-            
-            # Pass plot type to params    
-            expt.plot_twotheta_alphaf = True if w_GIXS_plot_type.value == 'angles' else False
-            expt.plot_qxy_qz = True if w_GIXS_plot_type.value == 'qxy/qz' else False
-            expt.plot_qxy_q = True if w_GIXS_plot_type.value == 'qxy/q' else False
 
             
             for scan in expt.scans:
@@ -910,10 +883,7 @@ def Choose_treatment(expt):
                         'fdelta='+str(expt.fdelta)+','+
                         'verbose='+str(expt.verbose)+','+ 
                         'absorbers='+'\''+str(absorbers)+'\''+','+
-                        'cmap=\''+str(expt.GIXS_cmap)+'\','+
-                        'plot_twotheta_alphaf='+str(expt.plot_twotheta_alphaf)+','+
-                        'plot_qxy_qz='+str(expt.plot_qxy_qz)+','+
-                        'plot_qxy_q='+str(expt.plot_qxy_q)+')',
+                        'cmap=\''+str(expt.GIXS_cmap)+'\''+')',
                         position='below', celltype='code', is_print = True)
 
                 if len(expt.scans)>1:
@@ -925,7 +895,7 @@ def Choose_treatment(expt):
             
         button_plot = widgets.Button(description="Plot")
         button_plot.on_click(on_button_plot_clicked)
-        display(widgets.HBox([w_GIXS_plot_type,button_plot]))
+        display(button_plot)
 
     def on_button_XRF_clicked(b):
         

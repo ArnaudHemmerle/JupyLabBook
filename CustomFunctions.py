@@ -16,7 +16,7 @@ import io
 from contextlib import redirect_stdout
 
 
-__version__ = '0.20'
+__version__ = '0.21'
 
 """
 Here are defined the custom functions used for analysis of data in the JupyLabBook.
@@ -564,7 +564,7 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
                  logx=False, logy=False, logz=False,
                  channel0=600, thetazfactor=0.01, wavelength=0.155, thetac=0.0028, thetai=0.002,
                  binsize=10, computeqz=True, nblevels=50, moytocreate=(10, 20, 40),
-                 show_data_stamps=False, verbose=False, absorbers='', cmap='jet', plot_true_GIXD=False):
+                 show_data_stamps=False, verbose=False, absorbers='', cmap='jet'):
     
     """
     Extract, plot, and save the GIXD scan. 
@@ -779,63 +779,6 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
         S_suptitle=nxs_filename[nxs_filename.rfind('/')+1:]
         fig.suptitle(S_suptitle, fontsize='x-large')
 
-
-        if plot_true_GIXD:
-            """
-            Plot the true Qx, Qy, and Qz without the approx. of alphai~0 and qx~0.
-            The change from theta to alpha seems redondant, but allows a better understanding of the GISAXS-like geometry.
-            Note that the data saved in the .moy/.mat files are NOT the ones used in the true GIXD plots.
-            Most of the time the qx~0 is valid, but one should check that it is the case once per geometry used.
-            """
-            # Plot true GIXD
-            twotheta = np.array(data[column_delta][istart:istop])*np.pi/180.
-            xx, yy = np.meshgrid(twotheta, ch)
-
-            # Conversion factor alphaf - channel (in rad/chan)
-            alpha_factor = thetazfactor
-            # Critical angle in rad
-            alphac = thetac
-            # Channel of Vineyard's peak
-            channelc = channel0
-            # alphaf (exit angle towards the detector)
-            alphaf = alphac + mean_gamma*np.pi/180. + (channelc-yy)*alpha_factor
-            # alphai (incident angle)
-            alphai = thetai
-
-            # True qx, qy, qz in nm^-1
-            k0 = 2*np.pi/wavelength
-            qx = k0*(np.cos(alphaf)*np.cos(twotheta)-np.cos(alphai))
-            qy = k0*np.cos(alphaf)*np.sin(twotheta)
-            qz = k0*(np.sin(alphaf)+np.sin(alphai))
-            qxy = np.sqrt(np.square(qx)+np.square(qy))
-            #q = np.sqrt(np.square(qxy)+np.square(qz))
-
-            fig=plt.figure(figsize=(12,5))
-            fig.subplots_adjust(hspace=0.4, wspace=0.4, bottom=0.16)
-            ax1=fig.add_subplot(121)
-            ax1.pcolormesh(twotheta*180./np.pi, alphaf*180./np.pi, mat.transpose(), cmap=cmap, rasterized=True)
-            ax1.set_xlabel('2 theta (deg)', fontsize='large')
-            ax1.set_ylabel('alpha_f (deg)', fontsize='large')
-
-            ax2=fig.add_subplot(122)
-            ax2.pcolormesh(qxy, qz, mat.transpose(), cmap=cmap, rasterized=True)
-            ax2.set_xlabel('qxy (nm^-1)', fontsize='large')
-            ax2.set_ylabel('qz (nm^-1)', fontsize='large')
-            fig.suptitle('GIXD w/o approx.', fontsize='x-large')
-
-            if column_pi is not None:
-                fig.text(.04, .05, r'$\pi = %3.4gmN.m^{-1}$'%(mean_pi),
-                         fontsize='large', color='red')
-            if column_gamma is not None:
-                fig.text(.96, .05, r'$\gamma = %3.4g deg$'%(mean_gamma),
-                         fontsize='large', color='red', horizontalalignment='right')
-
-
-            if verbose:
-                print('\t. For more details on the geometry, see:')
-                print('\t \t -Fig.2 in doi:10.1107/S0909049512022017')
-                print('\t \t -Slide 4 in http://gisaxs.com/files/Strzalka.pdf')
-
         # Create Save Name
         savename=working_dir+nxs_filename[:nxs_filename.rfind('.nxs')]+'_1D'
 
@@ -1038,8 +981,7 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
                  pixel_PONI_x=490, pixel_PONI_y=975, pixel_size=0.172,
                  xmin=0., xmax=1., ymin=0., ymax=1.,
                  show_data_stamps=False, force_gamma_delta=False, fgamma=0., fdelta=0.,
-                 verbose=False, absorbers='', cmap='viridis',
-                 plot_twotheta_alphaf=False, plot_qxy_qz=False, plot_qxy_q=False):
+                 verbose=False, absorbers='', cmap='viridis'):
     
     """
     Extract, plot, and save the GIXS scan. 
@@ -1156,140 +1098,124 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
 
         # 2*theta in rad
         twotheta = np.arctan(pixel_size*(xx-pixel_direct_x)/distance)
-
+        
         # alpha_f in rad
         deltay0 = distance*np.tan(alphai*np.pi/180.)
         alphaf = np.arctan( (pixel_size*(pixel_direct_y-yy)-deltay0)/distance)
         
-        # True qx, qy, qz in nm^-1
+        # q in nm^-1
         k0 = 2*np.pi/wavelength
-        qx = k0*(np.cos(alphaf)*np.cos(twotheta)-np.cos(alphai))
-        qy = k0*np.cos(alphaf)*np.sin(twotheta)
         qz = k0*(np.sin(alphaf)+np.sin(alphai))
-        qxy = np.sqrt(np.square(qx)+np.square(qy))
-        q = np.sqrt(np.square(qxy)+np.square(qz))
-              
-      
-        if plot_twotheta_alphaf:
-            
-            fig = plt.figure(figsize=(7,7))
-            fig.subplots_adjust(top=0.95)
-            fig.suptitle(nxs_filename.split('\\')[-1], fontsize='x-large')
-            
-            #Show the full image integrated over the scan
-            ax0 = fig.add_subplot(111)          
-            ax0.pcolormesh(twotheta*180./np.pi, alphaf*180./np.pi, images_sum, cmap = cmap,
-                           norm = colors.LogNorm(), rasterized=True)
-            ax0.set_xlabel('2 theta (deg)', fontsize='large')
-            ax0.set_ylabel('alpha_f (deg)', fontsize='large')
+        qxy_approx = 2*k0*np.sin(twotheta/2.)
+
+        # True values of q (not used here)
+        #qx = k0*(np.cos(alphaf)*np.cos(twotheta)-np.cos(alphai))
+        #qy = k0*np.cos(alphaf)*np.sin(twotheta)
+        #qxy = np.sqrt(np.square(qx)+np.square(qy))
+        #q = np.sqrt(np.square(qxy)+np.square(qz))        
+        
+        #################################
+        ############ PLOT ###############
+        
+        fig = plt.figure(figsize=(15,15))
+        fig.subplots_adjust(top=0.95)
+        fig.suptitle(nxs_filename.split('\\')[-1], fontsize='x-large')
+
+        # Divide the grid in 2x2
+        outer = gridspec.GridSpec(2, 2, wspace=0.2)
+
+        # Divide the left row in 2x1
+        inner = gridspec.GridSpecFromSubplotSpec(2, 1,
+                        subplot_spec=outer[0], hspace=0.5)
 
 
-        if plot_qxy_qz:
-   
+        #############################################
+        # Plot a profile along y (integrated over x)
+        ax1 = fig.add_subplot(inner[0])
 
-            fig = plt.figure(figsize=(15,15))
-            fig.subplots_adjust(top=0.95)
-            fig.suptitle(nxs_filename.split('\\')[-1], fontsize='x-large')
+        # Put all the negative pixels to zero before integration            
+        integrated_qxy = np.where(images_sum>0, images_sum, 0.).sum(axis=1)
+        pixel_y_array = np.arange(0,len(integrated_qxy))
+        alphaf_array = np.arctan( (pixel_size*(pixel_direct_y-pixel_y_array)-deltay0)/distance)
+        qz_array = 2*np.pi/wavelength*(np.sin(alphaf_array)+np.sin(alphai))
 
-            #Divide the grid in 2x2
-            outer = gridspec.GridSpec(2, 2, wspace=0.2)
-
-            #Divide the left row in 2x1
-            inner = gridspec.GridSpecFromSubplotSpec(2, 1,
-                            subplot_spec=outer[0], hspace=0.5)
-
-
-            #Plot a profile along y (integrated over x)
-            ax1 = fig.add_subplot(inner[0])
-            
-            # Put all the negative pixels to zero before integration            
-            integrated_qxy = np.where(images_sum>0, images_sum, 0.).sum(axis=1)
-            pixel_y_array = np.arange(0,len(integrated_qxy))
-            alphaf_array = np.arctan( (pixel_size*(pixel_direct_y-pixel_y_array)-deltay0)/distance)
-            qz_array = 2*np.pi/wavelength*(np.sin(alphaf_array)+np.sin(alphai))
-            
-            ax1.set_xlim(ymin,ymax)
-
+        if logz: ax1.set_yscale('log')
+        ax1.set(xlabel = 'qz (nm^-1)', ylabel = 'integration along qxy')
+       
+        try:
+            # Compute best limits
             temp = integrated_qxy[(qz_array<ymax) & (ymin<qz_array)]
             ymin_plot = np.min(temp[temp>0])   
             ymax_plot = np.max(integrated_qxy[(qz_array<ymax) & (ymin<qz_array)])
-            ax1.set_ylim(0.8*ymin_plot,1.2*ymax_plot)   
-            
-            if logz: ax1.set_yscale('log')
-            ax1.set(xlabel = 'qz (nm^-1)', ylabel = 'integration along qxy')
+            ax1.set_xlim(ymin,ymax)
+            ax1.set_ylim(0.8*ymin_plot,1.2*ymax_plot) 
             ax1.plot(qz_array, integrated_qxy)
+        except:
+            # Go back to automatic limits if bad limits given
+            ax1.plot(qz_array, integrated_qxy)
+            
+        ###################################################
+        # Plot a profile along x (integrated over y)
+        ax2 = fig.add_subplot(inner[1])
+
+        # Put all the negative pixels to zero before integration
+        integrated_qz = np.where(images_sum>0, images_sum, 0.).sum(axis=0)
+
+        pixel_x_array = np.arange(0,len(integrated_qz))
+        twotheta_array = np.arctan(pixel_size*(pixel_x_array-pixel_direct_x)/distance)
+        # Carefull, approx. qxy=4*pi/lambda*sin(2*theta/2)
+        qxy_array = 4*np.pi/wavelength*np.sin(twotheta_array/2.)
+                 
+        if logz: ax2.set_yscale('log')
+        ax2.set(xlabel = 'qxy (nm^-1)', ylabel = 'integration along qz')
         
-            
-            #Plot a profile along x (integrated over y)
-            ax2 = fig.add_subplot(inner[1])
-            
-            # Put all the negative pixels to zero before integration
-            integrated_qz = np.where(images_sum>0, images_sum, 0.).sum(axis=0)
-            
-            pixel_x_array = np.arange(0,len(integrated_qz))
-            twotheta_array = np.arctan(pixel_size*(pixel_x_array-pixel_direct_x)/distance)
-            # Carefull, approx. qxy=4*pi/lambda*sin(2*theta/2)
-            qxy_array = 4*np.pi/wavelength*np.sin(twotheta_array/2.)
-            
-            ax2.set_xlim(xmin,xmax)          
+        try:
+            # Compute best limits
             temp = integrated_qz[(qxy_array<xmax) & (xmin<qxy_array)]
             ymin_plot = np.min(temp[temp>0])   
-            ymax_plot = np.max(integrated_qz[(qxy_array<xmax) & (xmin<qxy_array)])
-            ax2.set_ylim(0.8*ymin_plot,1.2*ymax_plot)                       
-            
-            if logz: ax2.set_yscale('log')
-            ax2.set(xlabel = 'qxy (nm^-1)', ylabel = 'integration along qz')
+            ymax_plot = np.max(integrated_qz[(qxy_array<xmax) & (xmin<qxy_array)])  
+            ax2.set_xlim(xmin,xmax) 
+            ax2.set_ylim(0.8*ymin_plot,1.2*ymax_plot)    
             ax2.plot(qxy_array, integrated_qz)            
-
-            #Divide the right row in 1x1
-            inner = gridspec.GridSpecFromSubplotSpec(1, 1,
-                            subplot_spec=outer[1], wspace=0.1, hspace=0.1)
-
-            #Show the full image integrated over the scan
-            ax2 = fig.add_subplot(inner[0])
-
-            ax2.pcolormesh(qxy, qz, images_sum, cmap = cmap,
-                           norm = colors.LogNorm(), rasterized=True)
-            ax2.set_xlabel('qxy (nm^-1)', fontsize='large')
-            ax2.set_ylabel('qz (nm^-1)', fontsize='large')
-
-            np.savetxt(savename+'_integrated_qz.dat', np.transpose([qxy_array, integrated_qz]),
-                       delimiter = '\t', comments='', header ='Qxy'+'\t'+'QzIntegrated')
-            np.savetxt(savename+'_integrated_qxy.dat', np.transpose([qz_array, integrated_qxy]),
-                       delimiter = '\t', comments='', header ='Qz'+'\t'+'QxyIntegrated')
-
+        except:
+            # Go back to automatic limits if bad limits given
+            ax2.plot(qxy_array, integrated_qz) 
             
-            if verbose: 
-                print('\t. Integrated qz vs (approx.) qxy:')
-                print("\t", savename+'_integrated_qz.dat')
-                print(" ")
-                print('\t. Integrated (approx.) qxy vs qz:')
-                print("\t", savename+'_integrated_qxy.dat')
-                print(" ")  
- 
-        if plot_qxy_q:
-            
-            fig = plt.figure(figsize=(7,7))
-            fig.subplots_adjust(top=0.95)
-            fig.suptitle(nxs_filename.split('\\')[-1], fontsize='x-large')
-            
-            #Show the full image integrated over the scan
-            ax0 = fig.add_subplot(111)     
-           
-            ax0.pcolormesh(qxy, q, images_sum, cmap = cmap,
-                           norm = colors.LogNorm(), rasterized=True)
-            ax0.set_xlabel('qxy (nm^-1)', fontsize='large')
-            ax0.set_ylabel('q (nm^-1)', fontsize='large')
+        #Divide the right row in 1x1
+        inner = gridspec.GridSpecFromSubplotSpec(1, 1,
+                        subplot_spec=outer[1], wspace=0.1, hspace=0.1)
 
+        #####################################################
+        # Show the full image integrated over the scan
+        ax2 = fig.add_subplot(inner[0])
+
+        ax2.pcolormesh(qxy_approx, qz, images_sum, cmap = cmap,
+                       norm = colors.LogNorm(), rasterized=True)
+        ax2.set_xlabel('qxy (nm^-1)', fontsize='large')
+        ax2.set_ylabel('qz (nm^-1)', fontsize='large')       
+        
         plt.show()
         plt.close()    
             
+
+        ######################################################
+        # Save the profiles and the raw image
+        np.savetxt(savename+'_integrated_qz.dat', np.transpose([qxy_array, integrated_qz]),
+                   delimiter = '\t', comments='', header ='Qxy'+'\t'+'QzIntegrated')
+        np.savetxt(savename+'_integrated_qxy.dat', np.transpose([qz_array, integrated_qxy]),
+                   delimiter = '\t', comments='', header ='Qz'+'\t'+'QxyIntegrated')
         np.savetxt(savename+'_pilatus_sum.mat', images_sum)
 
         im = Image.fromarray(images_sum)
         im.save(savename+'_pilatus_sum.tiff')
 
-        if verbose: 
+        if verbose:
+            print('\t. Integrated qz vs (approx.) qxy:')
+            print("\t", savename+'_integrated_qz.dat')
+            print(" ")
+            print('\t. Integrated (approx.) qxy vs qz:')
+            print("\t", savename+'_integrated_qxy.dat')
+            print(" ")  
             print('\t. Original matrix saved in:')
             print("\t", savename+'.mat')
             print(" ")
@@ -1629,46 +1555,62 @@ def Extract_pilatus_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recordin
         xx, yy = np.meshgrid(pixels_x, pixels_y)
 
               
+        ##############################################
+        ################## PLOT ######################
         fig = plt.figure(figsize=(15,15))
 
-        #Divide the grid in 2x2
+        # Divide the grid in 2x2
         outer = gridspec.GridSpec(2, 2, wspace=0.2)
 
-        #Divide the left row in 2x1
+        # Divide the left row in 2x1
         inner = gridspec.GridSpecFromSubplotSpec(2, 1,
                         subplot_spec=outer[0], hspace=0.5)
 
-        #Plot a profile along y (integrated over x)
+        ############################################
+        # Plot a profile along y (integrated over x)
         ax1 = fig.add_subplot(inner[0])
         # Put all the negative pixels to zero before integration
         integrated_x = np.where(images_sum>0, images_sum, 0.).sum(axis=1)
- 
-        ax1.set_xlim(ymin,ymax)
-        temp = integrated_x[int(ymin):int(ymax)]
-        ax1.set_ylim(np.min(temp[temp>0])*0.8,np.max(integrated_x[int(ymin):int(ymax)])*1.2)
-        
+         
         if logz: ax1.set_yscale('log')
         ax1.set(xlabel = 'vertical pixel (y)', ylabel = 'integration along x')
-        ax1.plot(integrated_x)
+        
+        try:
+            # Compute best limits
+            ax1.set_xlim(ymin,ymax)
+            temp = integrated_x[int(ymin):int(ymax)]
+            ax1.set_ylim(np.min(temp[temp>0])*0.8,np.max(integrated_x[int(ymin):int(ymax)])*1.2)
+            ax1.plot(integrated_x)
+        except:
+            # Go back to automatic limits if bad limits given
+            ax1.plot(integrated_x)
 
-        #Plot a profile along x (integrated over y)
+        ############################################
+        # Plot a profile along x (integrated over y)
         ax2 = fig.add_subplot(inner[1])
         # Put all the negative pixels to zero before integration
         integrated_y = np.where(images_sum>0, images_sum, 0.).sum(axis=0)
         
-        ax2.set_xlim(xmin,xmax)
-        temp = integrated_y[int(xmin):int(xmax)]
-        ax2.set_ylim(np.min(temp[temp>0])*0.8,np.max(integrated_y[int(xmin):int(xmax)])*1.2)
-        
+       
         if logz: ax2.set_yscale('log')
         ax2.set(xlabel = 'horizontal pixel (x)', ylabel = 'integration along y')
-        ax2.plot(integrated_y)
+        
+        try:
+            # Compute best limits
+            ax2.set_xlim(xmin,xmax)
+            temp = integrated_y[int(xmin):int(xmax)]
+            ax2.set_ylim(np.min(temp[temp>0])*0.8,np.max(integrated_y[int(xmin):int(xmax)])*1.2)
+            ax2.plot(integrated_y)
+        except:
+            # Go back to automatic limits if bad limits given
+            ax2.plot(integrated_y)
 
         #Divide the right row in 1x1
         inner = gridspec.GridSpecFromSubplotSpec(1, 1,
                         subplot_spec=outer[1], wspace=0.1, hspace=0.1)
 
-        #Show the full image integrated over the scan
+        ############################################
+        # Show the full image integrated over the scan
         ax0 = fig.add_subplot(inner[0])
         if logz:
             ax0.pcolormesh(xx, yy, images_sum, cmap = cmap, norm = colors.LogNorm(), rasterized=True)
