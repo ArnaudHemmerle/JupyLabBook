@@ -1881,7 +1881,9 @@ def Print_commands(expt):
         # Extract the formatted commands
         rlog_lines = Extract_commands(pathToFile)
         
-        w_select_commands = widgets.SelectMultiple(options=rlog_lines[::-1],rows=30,layout=widgets.Layout(width='800px'))
+        w_select_commands = widgets.SelectMultiple(options=rlog_lines,rows=30,
+                                                   layout=widgets.Layout(width='800px'),
+                                                   value=[rlog_lines[-1]])
 
         display(w_select_commands)
 
@@ -1892,8 +1894,6 @@ def Print_commands(expt):
 
             code = '```python\n'+''.join(w_select_commands.value)+'```'
 
-            Create_cell(code='### List of commands', position ='above', celltype='markdown', is_print=True)
-            
             Create_cell(code=code, position ='above', celltype='markdown', is_print=True)
 
             Delete_current_cell()
