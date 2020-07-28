@@ -923,7 +923,7 @@ def Choose_treatment(expt):
         try: value = expt.plot_first_last
         except: value = True
         w_plot_first_last = widgets.Checkbox(value=value, style=style,
-                                             layout = short_layout, description='Plot first&last spectrum')
+                                             layout = short_layout, description='Plot first&last spectrums')
         
         # plot_sum
         try: value = expt.plot_sum
@@ -1023,7 +1023,7 @@ def Choose_treatment(expt):
                                    plot_sum=True)
                           
                 
-            button_validate = widgets.Button(description="Validate Peaks")
+            button_validate = widgets.Button(description="Validate peaks")
             button_validate.on_click(on_button_validate_clicked)
 
             display(button_validate)

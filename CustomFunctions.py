@@ -848,7 +848,7 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
             if computeqz:
                 np.savetxt(savename+'_qz.dat'+str(binsize), qz)
                 if verbose: print('\t. Qz values saved in:')
-                if verbose: print('\t'+savename+'_qz'+str(binsize)+'.dat')
+                if verbose: print('\t'+savename+'_qz.dat'+str(binsize))
             if verbose:
                 print('\t. Binned matrix saved in:')
                 print("\t", savename+'.mat'+str(binsize))
@@ -1401,7 +1401,7 @@ def Extract_XRF(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir=''
                                         bbox_to_anchor=(1.01, 1.), loc='upper left',  borderaxespad=0.) 
                 plt.gca().add_artist(axvlegends)  
 
-            ax1.legend(handles=[line1], fontsize='large', loc='upper right')     
+            ax1.legend(handles=[line1], fontsize='large', loc='upper left')     
             plt.show()
 
         if plot_first_last:    
@@ -1434,7 +1434,7 @@ def Extract_XRF(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir=''
                                         bbox_to_anchor=(1.01, 1.), loc='upper left',  borderaxespad=0.)
                 plt.gca().add_artist(axvlegends)  
             
-            ax1.legend(handles=[line1, line2], fontsize='large', loc='upper right')    
+            ax1.legend(handles=[line1, line2], fontsize='large', loc='upper left')    
             plt.show()
 
 
