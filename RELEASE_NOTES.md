@@ -1,5 +1,15 @@
 # Release notes
 
+### 29/07/2020
+
+Release of the version 1.0. From now on, releases will be more sparse and priority will be given to minimization of changes between versions.
+
+CustomFunctions.py: 1.0  
+FrontendFunctions.py: 1.0
+
+- A user manual is now available in the repo.
+- Few typos/display corrections.
+
 ### 20/07/2020
 
 CustomFunctions.py: 0.21
@@ -68,19 +78,19 @@ FrontendFunctions.py: 0.17
 
 ### 08/07/2020
 
-FrontendFunctions.py: 0.16
+FrontendFunctions.py: 0.16  
 CustomFunctions.py: 0.16
 - Add the possibility to put xmin and xmax in the profile in Extract_Pilatus.
 
 ### 08/07/2020
-
-FrontendFunctions.py: 0.15
+  
+FrontendFunctions.py: 0.15  
 CustomFunctions.py: 0.15
 - Add the possibility to force the value of gamma and delta in GIXS.
 
 ### 08/07/2020
 
-FrontendFunctions.py: 0.14
+FrontendFunctions.py: 0.14  
 CustomFunctions.py: 0.14
 - Save all data in the working directory.
 
