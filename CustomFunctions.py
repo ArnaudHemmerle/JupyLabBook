@@ -980,7 +980,7 @@ def Plot_isotherm(nxs_filename='SIRIUS_test.nxs', working_dir = '', recording_di
 def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='',
                  logz=True, wavelength=0.155, thetai=0.002, distance=2722,
                  pixel_PONI_x=490, pixel_PONI_y=975, pixel_size=0.172,
-                 xmin=0., xmax=1., ymin=0., ymax=1.,
+                 qxymin=0., qxymax=1., qzmin=0., qzmax=1.,
                  show_data_stamps=False, force_gamma_delta=False, fgamma=0., fdelta=0.,
                  verbose=False, absorbers='', cmap='viridis'):
     
@@ -1145,11 +1145,11 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
        
         try:
             # Compute best limits
-            temp = integrated_qxy[(qz_array<ymax) & (ymin<qz_array)]
-            ymin_plot = np.min(temp[temp>0])   
-            ymax_plot = np.max(integrated_qxy[(qz_array<ymax) & (ymin<qz_array)])
-            ax1.set_xlim(ymin,ymax)
-            ax1.set_ylim(0.8*ymin_plot,1.2*ymax_plot) 
+            temp = integrated_qxy[(qz_array<qzmax) & (qzmin<qz_array)]
+            qzmin_plot = np.min(temp[temp>0])   
+            qzmax_plot = np.max(integrated_qxy[(qz_array<qzmax) & (qzmin<qz_array)])
+            ax1.set_xlim(qzmin,qzmax)
+            ax1.set_ylim(0.8*qzmin_plot,1.2*qzmax_plot) 
             ax1.plot(qz_array, integrated_qxy)
         except:
             # Go back to automatic limits if bad limits given
@@ -1172,11 +1172,11 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
         
         try:
             # Compute best limits
-            temp = integrated_qz[(qxy_array<xmax) & (xmin<qxy_array)]
-            ymin_plot = np.min(temp[temp>0])   
-            ymax_plot = np.max(integrated_qz[(qxy_array<xmax) & (xmin<qxy_array)])  
-            ax2.set_xlim(xmin,xmax) 
-            ax2.set_ylim(0.8*ymin_plot,1.2*ymax_plot)    
+            temp = integrated_qz[(qxy_array<qxymax) & (qxymin<qxy_array)]
+            qzmin_plot = np.min(temp[temp>0])   
+            qzmax_plot = np.max(integrated_qz[(qxy_array<qxymax) & (qxymin<qxy_array)])  
+            ax2.set_xlim(qxymin,qxymax) 
+            ax2.set_ylim(0.8*qzmin_plot,1.2*qzmax_plot)    
             ax2.plot(qxy_array, integrated_qz)            
         except:
             # Go back to automatic limits if bad limits given
