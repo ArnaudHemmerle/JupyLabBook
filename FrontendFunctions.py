@@ -761,17 +761,17 @@ def Choose_treatment(expt):
         # force_gamma_delta 
         try: value = expt.force_gamma_delta
         except: value = False
-        w_force_gamma_delta = widgets.Checkbox(value=value, style=style, layout=short_layout, description='Force Gamma&Delta')        
+        w_force_gamma_delta = widgets.Checkbox(value=value, style=style, layout=short_layout, description='Force gamma&delta')        
 
         # fgamma
         try: value = expt.fgamma
         except: value = 0.
-        w_fgamma = widgets.FloatText(value=value, style=style, layout=short_layout, description='Forced Gamma')        
+        w_fgamma = widgets.FloatText(value=value, style=style, layout=short_layout, description='Forced gamma (deg)')        
 
         # fdelta
         try: value = expt.fdelta
         except: value = 0.
-        w_fdelta = widgets.FloatText(value=value, style=style, layout=short_layout, description='Forced Delta')         
+        w_fdelta = widgets.FloatText(value=value, style=style, layout=short_layout, description='Forced delta (deg)')         
         
         # pixel_size 
         try: value = expt.pixel_size
