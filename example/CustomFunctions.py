@@ -16,7 +16,7 @@ import io
 from contextlib import redirect_stdout
 
 
-__version__ = '0.21'
+__version__ = '1.0'
 
 """
 Here are defined the custom functions used for analysis of data in the JupyLabBook.
@@ -547,6 +547,7 @@ def Extract_channel_Qc(nxs_filename='SIRIUS_test.nxs', working_dir='', recording
 
 def Groupe(mat, binsize=10):
     tmp=[]
+    
     for i in range(mat.shape[0]):
         x=[]
         y=[]
@@ -562,7 +563,7 @@ def Groupe(mat, binsize=10):
 
 def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='',
                  logx=False, logy=False, logz=False,
-                 channel0=600, thetazfactor=0.01, wavelength=0.155, thetac=0.0028, thetai=0.002,
+                 channel0=600, thetazfactor=0.01, wavelength=0.155, thetac=0.0028,
                  binsize=10, computeqz=True, nblevels=50, moytocreate=(10, 20, 40),
                  show_data_stamps=False, verbose=False, absorbers='', cmap='jet'):
     
@@ -752,7 +753,7 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
             qz=2.0*np.pi*np.sin(thetaz)/wavelength
         else:
             qz=ch
-
+        
         # Plot the matrix
         if logz:
             ax2.contourf(datx[istart:istop], qz, np.log(mat.transpose()))
@@ -845,9 +846,9 @@ def Extract_GIXD(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
             np.savetxt(savename+'.mat'+str(binsize), mat)
             # Save the Qz
             if computeqz:
-                np.savetxt(savename+'_qz'+str(binsize)+'.dat'+str(binsize), qz)
+                np.savetxt(savename+'_qz.dat'+str(binsize), qz)
                 if verbose: print('\t. Qz values saved in:')
-                if verbose: print('\t'+savename+'_qz'+str(binsize)+'.dat')
+                if verbose: print('\t'+savename+'_qz.dat'+str(binsize))
             if verbose:
                 print('\t. Binned matrix saved in:')
                 print("\t", savename+'.mat'+str(binsize))
@@ -979,7 +980,7 @@ def Plot_isotherm(nxs_filename='SIRIUS_test.nxs', working_dir = '', recording_di
 def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='',
                  logz=True, wavelength=0.155, thetai=0.002, distance=2722,
                  pixel_PONI_x=490, pixel_PONI_y=975, pixel_size=0.172,
-                 xmin=0., xmax=1., ymin=0., ymax=1.,
+                 qxymin=0., qxymax=1., qzmin=0., qzmax=1.,
                  show_data_stamps=False, force_gamma_delta=False, fgamma=0., fdelta=0.,
                  verbose=False, absorbers='', cmap='viridis'):
     
@@ -1144,11 +1145,11 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
        
         try:
             # Compute best limits
-            temp = integrated_qxy[(qz_array<ymax) & (ymin<qz_array)]
-            ymin_plot = np.min(temp[temp>0])   
-            ymax_plot = np.max(integrated_qxy[(qz_array<ymax) & (ymin<qz_array)])
-            ax1.set_xlim(ymin,ymax)
-            ax1.set_ylim(0.8*ymin_plot,1.2*ymax_plot) 
+            temp = integrated_qxy[(qz_array<qzmax) & (qzmin<qz_array)]
+            qzmin_plot = np.min(temp[temp>0])   
+            qzmax_plot = np.max(integrated_qxy[(qz_array<qzmax) & (qzmin<qz_array)])
+            ax1.set_xlim(qzmin,qzmax)
+            ax1.set_ylim(0.8*qzmin_plot,1.2*qzmax_plot) 
             ax1.plot(qz_array, integrated_qxy)
         except:
             # Go back to automatic limits if bad limits given
@@ -1171,11 +1172,11 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
         
         try:
             # Compute best limits
-            temp = integrated_qz[(qxy_array<xmax) & (xmin<qxy_array)]
-            ymin_plot = np.min(temp[temp>0])   
-            ymax_plot = np.max(integrated_qz[(qxy_array<xmax) & (xmin<qxy_array)])  
-            ax2.set_xlim(xmin,xmax) 
-            ax2.set_ylim(0.8*ymin_plot,1.2*ymax_plot)    
+            temp = integrated_qz[(qxy_array<qxymax) & (qxymin<qxy_array)]
+            qzmin_plot = np.min(temp[temp>0])   
+            qzmax_plot = np.max(integrated_qz[(qxy_array<qxymax) & (qxymin<qxy_array)])  
+            ax2.set_xlim(qxymin,qxymax) 
+            ax2.set_ylim(0.8*qzmin_plot,1.2*qzmax_plot)    
             ax2.plot(qxy_array, integrated_qz)            
         except:
             # Go back to automatic limits if bad limits given
@@ -1400,7 +1401,7 @@ def Extract_XRF(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir=''
                                         bbox_to_anchor=(1.01, 1.), loc='upper left',  borderaxespad=0.) 
                 plt.gca().add_artist(axvlegends)  
 
-            ax1.legend(handles=[line1], fontsize='large', loc='upper right')     
+            ax1.legend(handles=[line1], fontsize='large', loc='upper left')     
             plt.show()
 
         if plot_first_last:    
@@ -1433,7 +1434,7 @@ def Extract_XRF(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir=''
                                         bbox_to_anchor=(1.01, 1.), loc='upper left',  borderaxespad=0.)
                 plt.gca().add_artist(axvlegends)  
             
-            ax1.legend(handles=[line1, line2], fontsize='large', loc='upper right')    
+            ax1.legend(handles=[line1, line2], fontsize='large', loc='upper left')    
             plt.show()
 
 

@@ -14,7 +14,7 @@ import CustomFunctions as CF
 import math
 import ipysheet
 
-__version__ = '0.21'
+__version__ = '1.0'
 
 """
 -Here are defined all the functions relevant to the front end of JupyLabBook,
@@ -517,11 +517,6 @@ def Choose_treatment(expt):
         try: value = expt.thetac
         except: value = 0.0028
         w_thetac = widgets.FloatText(value=value, style=style, layout=short_layout, description='thetac (rad)')
-        
-        # thetai
-        try: value = expt.thetai
-        except: value = 0.002
-        w_thetai = widgets.FloatText(value=value, style=style, layout=short_layout, description='thetai (rad)')
 
         # binsize
         try: value = expt.binsize
@@ -567,7 +562,7 @@ def Choose_treatment(expt):
         display(widgets.HBox([w_show_data_stamps, w_verbose, w_show_absorbers,
                               w_GIXD_logx, w_GIXD_logy, w_GIXD_logz, w_GIXD_cmap]))        
         display(widgets.HBox([w_binsize, w_nblevels, w_moytocreate_str, w_channel0, w_computeqz]))
-        display(widgets.HBox([w_wavelength, w_thetai, w_thetac, w_thetazfactor]))
+        display(widgets.HBox([w_wavelength, w_thetac, w_thetazfactor]))
                 
         
         def on_button_plot_clicked(b):
@@ -580,7 +575,6 @@ def Choose_treatment(expt):
             expt.thetazfactor = w_thetazfactor.value
             expt.wavelength = w_wavelength.value
             expt.thetac = w_thetac.value
-            expt.thetai = w_thetai.value
             expt.binsize = w_binsize.value
             expt.computeqz = w_computeqz.value
             expt.nblevels = w_nblevels.value
@@ -610,7 +604,6 @@ def Choose_treatment(expt):
                             'thetazfactor='+str(expt.thetazfactor)+','+
                             'wavelength='+str(expt.wavelength)+','+
                             'thetac='+str(expt.thetac)+','+
-                            'thetai='+str(expt.thetai)+','+
                             'binsize='+str(expt.binsize)+','+
                             'computeqz='+str(expt.computeqz)+','+
                             'nblevels='+str(expt.nblevels)+','+
@@ -768,42 +761,42 @@ def Choose_treatment(expt):
         # force_gamma_delta 
         try: value = expt.force_gamma_delta
         except: value = False
-        w_force_gamma_delta = widgets.Checkbox(value=value, style=style, layout=short_layout, description='Force Gamma&Delta')        
+        w_force_gamma_delta = widgets.Checkbox(value=value, style=style, layout=short_layout, description='Force gamma&delta')        
 
         # fgamma
         try: value = expt.fgamma
         except: value = 0.
-        w_fgamma = widgets.FloatText(value=value, style=style, layout=short_layout, description='Forced Gamma')        
+        w_fgamma = widgets.FloatText(value=value, style=style, layout=short_layout, description='Forced gamma (deg)')        
 
         # fdelta
         try: value = expt.fdelta
         except: value = 0.
-        w_fdelta = widgets.FloatText(value=value, style=style, layout=short_layout, description='Forced Delta')         
+        w_fdelta = widgets.FloatText(value=value, style=style, layout=short_layout, description='Forced delta (deg)')         
         
         # pixel_size 
         try: value = expt.pixel_size
         except: value = 0.172
         w_pixel_size = widgets.FloatText(value=value, style=style, layout=tiny_layout, description='Pixel size (um)')
 
-        # xmin
-        try: value = expt.xmin
+        # qxymin
+        try: value = expt.qxymin
         except: value = 0.
-        w_xmin = widgets.FloatText(value=value, style=style, layout=tiny_layout, description='x min')   
+        w_qxymin = widgets.FloatText(value=value, style=style, layout=short_layout, description='qxy min (nm-1)')   
  
-        # xmax
-        try: value = expt.xmax
+        # qxymax
+        try: value = expt.qxymax
         except: value = 1.
-        w_xmax = widgets.FloatText(value=value, style=style, layout=tiny_layout, description='x max')  
+        w_qxymax = widgets.FloatText(value=value, style=style, layout=short_layout, description='qxy max (nm-1)')  
         
-        # ymin
-        try: value = expt.ymin
+        # qzmin
+        try: value = expt.qzmin
         except: value = 0.
-        w_ymin = widgets.FloatText(value=value, style=style, layout=tiny_layout, description='y min')   
+        w_qzmin = widgets.FloatText(value=value, style=style, layout=short_layout, description='qz min (nm-1)')   
  
-        # ymax
-        try: value = expt.ymax
+        # qzmax
+        try: value = expt.qzmax
         except: value = 1.
-        w_ymax = widgets.FloatText(value=value, style=style, layout=tiny_layout, description='y max')          
+        w_qzmax = widgets.FloatText(value=value, style=style, layout=short_layout, description='qz max (nm-1)')          
         
         # show_data_stamps
         try: value = expt.show_data_stamps
@@ -830,8 +823,8 @@ def Choose_treatment(expt):
         display(widgets.HBox([w_show_data_stamps, w_verbose, w_show_absorbers, w_GIXS_logz, w_GIXS_cmap, w_pixel_size]))        
         display(widgets.HBox([w_wavelength, w_distance, w_thetai, w_pixel_PONI_x, w_pixel_PONI_y]))
         display(widgets.HBox([w_force_gamma_delta, w_fgamma, w_fdelta]))
-        display(widgets.HBox([w_xmin, w_xmax])) 
-        display(widgets.HBox([w_ymin, w_ymax])) 
+        display(widgets.HBox([w_qxymin, w_qxymax])) 
+        display(widgets.HBox([w_qzmin, w_qzmax])) 
         
         def on_button_plot_clicked(b):
             
@@ -843,10 +836,10 @@ def Choose_treatment(expt):
             expt.pixel_PONI_x = w_pixel_PONI_x.value
             expt.pixel_PONI_y = w_pixel_PONI_y.value
             expt.pixel_size = w_pixel_size.value
-            expt.xmin = w_xmin.value
-            expt.xmax = w_xmax.value
-            expt.ymin = w_ymin.value
-            expt.ymax = w_ymax.value
+            expt.qxymin = w_qxymin.value
+            expt.qxymax = w_qxymax.value
+            expt.qzmin = w_qzmin.value
+            expt.qzmax = w_qzmax.value
             expt.force_gamma_delta = w_force_gamma_delta.value
             expt.fgamma = w_fgamma.value
             expt.fdelta = w_fdelta.value
@@ -873,10 +866,10 @@ def Choose_treatment(expt):
                         'pixel_PONI_x='+str(expt.pixel_PONI_x)+','+
                         'pixel_PONI_y='+str(expt.pixel_PONI_y)+','+
                         'pixel_size='+str(expt.pixel_size)+','+  
-                        'xmin='+str(expt.xmin)+','+
-                        'xmax='+str(expt.xmax)+','+
-                        'ymin='+str(expt.ymin)+','+
-                        'ymax='+str(expt.ymax)+','+
+                        'qxymin='+str(expt.qxymin)+','+
+                        'qxymax='+str(expt.qxymax)+','+
+                        'qzmin='+str(expt.qzmin)+','+
+                        'qzmax='+str(expt.qzmax)+','+
                         'show_data_stamps='+str(expt.show_data_stamps)+','+
                         'force_gamma_delta='+str(expt.force_gamma_delta)+','+
                         'fgamma='+str(expt.fgamma)+','+
@@ -930,7 +923,7 @@ def Choose_treatment(expt):
         try: value = expt.plot_first_last
         except: value = True
         w_plot_first_last = widgets.Checkbox(value=value, style=style,
-                                             layout = short_layout, description='Plot first&last spectrum')
+                                             layout = short_layout, description='Plot first&last spectrums')
         
         # plot_sum
         try: value = expt.plot_sum
@@ -1030,7 +1023,7 @@ def Choose_treatment(expt):
                                    plot_sum=True)
                           
                 
-            button_validate = widgets.Button(description="Validate Peaks")
+            button_validate = widgets.Button(description="Validate peaks")
             button_validate.on_click(on_button_validate_clicked)
 
             display(button_validate)
@@ -1888,7 +1881,9 @@ def Print_commands(expt):
         # Extract the formatted commands
         rlog_lines = Extract_commands(pathToFile)
         
-        w_select_commands = widgets.SelectMultiple(options=rlog_lines[::-1],rows=30,layout=widgets.Layout(width='800px'))
+        w_select_commands = widgets.SelectMultiple(options=rlog_lines,rows=30,
+                                                   layout=widgets.Layout(width='800px'),
+                                                   value=[rlog_lines[-1]])
 
         display(w_select_commands)
 
@@ -1899,8 +1894,6 @@ def Print_commands(expt):
 
             code = '```python\n'+''.join(w_select_commands.value)+'```'
 
-            Create_cell(code='### List of commands', position ='above', celltype='markdown', is_print=True)
-            
             Create_cell(code=code, position ='above', celltype='markdown', is_print=True)
 
             Delete_current_cell()
