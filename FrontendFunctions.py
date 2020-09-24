@@ -14,7 +14,7 @@ import CustomFunctions as CF
 import math
 import ipysheet
 
-__version__ = '1.0'
+__version__ = '1.0.1'
 
 """
 -Here are defined all the functions relevant to the front end of JupyLabBook,
@@ -1507,10 +1507,38 @@ def Create_form():
         txt = []
         txt.append('$\LARGE \\textbf{SIRIUS Beamline}:\\textbf{Experiment %s}$'%number.value)
 
-        #Add spaces
-        ptitle = ('\ '.join(title.value.split(' ')))
-        txt.append('$\Large \\color{red}{\\bf %s}$'%ptitle)
+        ########################################
+        # Prepare the title in several parts
+        # Avoid having a line larger than the page
 
+        # Max number of characters allowed by line
+        max_length = 70
+
+       
+        title_split = title.value.split(' ')
+        title_blocks = [] 
+
+        j=0
+        for k in range(0,len(title_split)):
+            title_part = ''
+            for i in range(j,len(title_split)): 
+                if len(title_part)<max_length:
+                    title_part += title_split[i]+' '
+                    j=j+1
+                else:
+                    break
+            title_blocks.append(title_part)        
+
+        for title_block in title_blocks:
+            if title_block != '':        
+                txt.append('$\Large \\color{red}{\\bf %s}$'%('\ '.join(title_block.split(' '))))
+
+        
+        # Former (simpler version), but allows line longer than the page width
+        #ptitle = ('\ '.join(title.value.split(' ')))
+        #txt.append('$\Large \\color{red}{\\bf %s}$'%ptitle)
+        ########################################
+        
         txt.append('* %s %s'%(ttype.description,ttype.value)+'\n'
                     +'* %s %s'%(safety.description,safety.value)+'\n'
                     +'* %s %s'%(date.description,date.value))
