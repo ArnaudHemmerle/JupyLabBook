@@ -2,7 +2,7 @@
 
 ### 25/09/2020
 
-CustomFunctions.py: 1.0.1
+CustomFunctions.py: 1.0.1  
 FrontendFunctions.py: 1.0.1
 
 Corrections for XRF:
@@ -15,7 +15,7 @@ Corrections for XRF:
 
 Release of the version 1.0. From now on, releases will be more sparse and priority will be given to minimization of changes between versions.
 
-CustomFunctions.py: 1.0
+CustomFunctions.py: 1.0  
 FrontendFunctions.py: 1.0
 
 - A user manual is now available in the repo.
