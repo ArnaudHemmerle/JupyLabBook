@@ -2,8 +2,8 @@
 A Jupyter Notebook used as an interactive lab book on the beamline SIRIUS (SOLEIL Synchrotron).
 
 ### Last versions of modules:  
-FrontendFunctions.py: 1.0    
-CustomFunctions.py: 1.0    
+FrontendFunctions.py: 1.0.1    
+CustomFunctions.py: 1.0.1    
 
 # User manual
 
