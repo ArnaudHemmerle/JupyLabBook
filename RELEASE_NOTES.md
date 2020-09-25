@@ -7,6 +7,7 @@ FrontendFunctions.py: 1.0.1
 
 Corrections for XRF:
 - Peak identification is now working with more than one element
+- Peak are ordered in the caption
 - There can be 30 peaks identified (previous limit was 10)
 
 
