@@ -974,18 +974,28 @@ def Choose_treatment(expt):
         display(widgets.HBox([w_use_eV, w_gain, w_eV0]))
 
         def on_button_identify_peaks_clicked(b):
-            
-            sheet = ipysheet.easy.sheet(columns=3, rows=30 ,column_headers = ['Name','Position','Use?(y/n)'])
-            
-            # Fill the sheet with previous values
+
+            # Fill the sheet with previous values or None entries
             try: to_fill = expt.arr_peaks_full
-            except: to_fill = np.array([[None,None,None] for i in range(30)])
+            except: to_fill = np.array([[None,None,None] for i in range(20)])
+ 
+           # Determine the number of rows to dynamically add some empty rows
+            nb_filled_rows = len([elem for elem in to_fill if (elem[0]!=None and elem[0]!='')])
+            nb_empty_rows = len([elem for elem in to_fill if (elem[0]==None or elem[0]=='')])
+            if nb_empty_rows<15:
+                to_fill = np.append([elem for elem in to_fill if (elem[0]!=None and elem[0]!='')],
+                                    np.array([[None,None,None] for i in range(15)]), axis = 0)
                 
-            # ipysheet does not work correctly with None entries
+            sheet = ipysheet.easy.sheet(columns=3, rows=len(to_fill) ,column_headers = ['Name','Position','Use?(y/n)'])
+            
+
+  
+            # ipysheet does not work correctly with no entries
             # It is necessary to fill first the cells with something
             for i in range(3):
                 ipysheet.easy.column(i,  to_fill[:,i])
 
+            
             def on_button_validate_clicked(b):
                 
                 expt.is_identify_peaks = True
