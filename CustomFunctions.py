@@ -16,7 +16,7 @@ import io
 from contextlib import redirect_stdout
 
 
-__version__ = '1.0'
+__version__ = '1.0.1'
 
 """
 Here are defined the custom functions used for analysis of data in the JupyLabBook.
@@ -1389,15 +1389,24 @@ def Extract_XRF(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir=''
             if arr_peaks[0][0]!= None :  
         
                 # Plot the peak positions
-                prop_cycle = plt.rcParams['axes.prop_cycle']
-                colors_axv = prop_cycle.by_key()['color']
-                
+               
+                # Prepare a list of colors and linestyles
+                colors_axv = iter(['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2',
+                                   '#7f7f7f', '#bcbd22', '#17becf']*20)   
+                linestyles_axv = iter(['--', '-.', '-', ':']*40)
+             
+                # Rearrange the peaks to plot them by increasing energy
                 arr_peaks = np.array(arr_peaks)
-                axvlines = []
-                for i in range(len(arr_peaks)):                  
-                    axvlines.append(ax1.axvline(float(arr_peaks[i,1]), label = str(arr_peaks[i,0]), color = colors_axv[i]))
+                arg_position_peaks = np.argsort([float(elem[1]) for elem in arr_peaks])
+                val_position_peaks = arr_peaks[arg_position_peaks][:,1]
+                labels_peaks = arr_peaks[arg_position_peaks][:,0]
                 
-                axvlegends = ax1.legend(handles=axvlines, fontsize=10,
+                axvlines = []
+                for i in range(len(arr_peaks)):
+                    axvlines.append(ax1.axvline(float(val_position_peaks[i]), label = str(labels_peaks[i]),
+                                                color = next(colors_axv), linestyle = next(linestyles_axv)))
+                
+                axvlegends = ax1.legend(handles=axvlines, fontsize=10, ncol = len(arr_peaks)//16+1,
                                         bbox_to_anchor=(1.01, 1.), loc='upper left',  borderaxespad=0.) 
                 plt.gca().add_artist(axvlegends)  
 
@@ -1421,16 +1430,18 @@ def Extract_XRF(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir=''
             
             if arr_peaks[0][0]!= None :  
                 
-                # Plot the peak positions
-                prop_cycle = plt.rcParams['axes.prop_cycle']
-                colors_axv = prop_cycle.by_key()['color']
-                
+                # Rearrange the peaks to plot them by increasing energy
                 arr_peaks = np.array(arr_peaks)
-                axvlines = []
-                for i in range(len(arr_peaks)):                  
-                    axvlines.append(ax1.axvline(float(arr_peaks[i,1]), label = str(arr_peaks[i,0]), color = colors_axv[i]))
+                arg_position_peaks = np.argsort([float(elem[1]) for elem in arr_peaks])
+                val_position_peaks = arr_peaks[arg_position_peaks][:,1]
+                labels_peaks = arr_peaks[arg_position_peaks][:,0]
                 
-                axvlegends = ax1.legend(handles=axvlines, fontsize=10,
+                axvlines = []
+                for i in range(len(arr_peaks)):
+                    axvlines.append(ax1.axvline(float(val_position_peaks[i]), label = str(labels_peaks[i]),
+                                                color = next(colors_axv), linestyle = next(linestyles_axv)))
+                
+                axvlegends = ax1.legend(handles=axvlines, fontsize=10, ncol = len(arr_peaks)//16+1,
                                         bbox_to_anchor=(1.01, 1.), loc='upper left',  borderaxespad=0.)
                 plt.gca().add_artist(axvlegends)  
             

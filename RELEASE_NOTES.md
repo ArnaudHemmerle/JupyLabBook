@@ -1,10 +1,20 @@
 # Release notes
 
+### 25/09/2020
+
+CustomFunctions.py: 1.0.1
+FrontendFunctions.py: 1.0.1
+
+Corrections for XRF:
+- Peak identification is now working with more than one element
+- There can be 30 peaks identified (previous limit was 10)
+
+
 ### 29/07/2020
 
 Release of the version 1.0. From now on, releases will be more sparse and priority will be given to minimization of changes between versions.
 
-CustomFunctions.py: 1.0  
+CustomFunctions.py: 1.0
 FrontendFunctions.py: 1.0
 
 - A user manual is now available in the repo.
@@ -30,9 +40,9 @@ JupyLabBook.ipynb:
 ### 16/07/2020
 
 FrontendFunctions.py: 0.20
-- Insert command now in reversed alphabetic order.  
-- Removed a bug in XRF when the user remove a peak.  
-- Show the peaks in the widget XRF when user clicks on validate peaks.  
+- Insert command now in reversed alphabetic order.
+- Removed a bug in XRF when the user remove a peak.
+- Show the peaks in the widget XRF when user clicks on validate peaks.
 - XRF: User can plot a peak or not with y/n. Possibility to identify peaks with multiple scans.
 
 ### 13/07/2020
@@ -78,26 +88,26 @@ FrontendFunctions.py: 0.17
 
 ### 08/07/2020
 
-FrontendFunctions.py: 0.16  
+FrontendFunctions.py: 0.16
 CustomFunctions.py: 0.16
 - Add the possibility to put xmin and xmax in the profile in Extract_Pilatus.
 
 ### 08/07/2020
-  
-FrontendFunctions.py: 0.15  
+
+FrontendFunctions.py: 0.15
 CustomFunctions.py: 0.15
 - Add the possibility to force the value of gamma and delta in GIXS.
 
 ### 08/07/2020
 
-FrontendFunctions.py: 0.14  
+FrontendFunctions.py: 0.14
 CustomFunctions.py: 0.14
 - Save all data in the working directory.
 
 ### 08/07/2020
 
 FrontendFunctions.py: 0.13
-- Add possibility to print absorbers of a scan. 
+- Add possibility to print absorbers of a scan.
 
 CustomFunctions.py: 0.13
 - Add possibility to print absorbers of a scan.
@@ -120,11 +130,11 @@ CustomFunctions.py: 0.12
 
 FrontendFunctions.py: 0.11
 
-- Add delay on cell creation to avoid creation of several identical cells on fast computers. 
+- Add delay on cell creation to avoid creation of several identical cells on fast computers.
 
 ### 23/06/2020
 
-FrontendFunctions.py: 0.10  
+FrontendFunctions.py: 0.10
 CustomFunctions.py: 0.11
 
 - Add the choice to do a PyNexus fast extract for the extraction of XRF and Isotherms. All the other extractions are set to fast=True by default.

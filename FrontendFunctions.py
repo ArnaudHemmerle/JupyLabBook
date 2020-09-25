@@ -975,11 +975,11 @@ def Choose_treatment(expt):
 
         def on_button_identify_peaks_clicked(b):
             
-            sheet = ipysheet.easy.sheet(columns=3, rows=20 ,column_headers = ['Name','Position','Use?(y/n)'])
+            sheet = ipysheet.easy.sheet(columns=3, rows=30 ,column_headers = ['Name','Position','Use?(y/n)'])
             
             # Fill the sheet with previous values
             try: to_fill = expt.arr_peaks_full
-            except: to_fill = np.array([[None,None,None] for i in range(20)])
+            except: to_fill = np.array([[None,None,None] for i in range(30)])
                 
             # ipysheet does not work correctly with None entries
             # It is necessary to fill first the cells with something
@@ -998,6 +998,10 @@ def Choose_treatment(expt):
                 
                 # Send only the lines with y in the third column
                 expt.arr_peaks = [elem[0:2] for elem in expt.arr_peaks if elem[2]=='y']
+
+                # Convert elems_str into a list
+                list_elems = [int(w_elems_str.value.split(',')[i]) for i in range(len(w_elems_str.value.split(',')))]
+                
                 
                 for scan in expt.scans:                                                              
                 
@@ -1007,7 +1011,7 @@ def Choose_treatment(expt):
                                    working_dir=expt.working_dir,
                                    recording_dir=expt.recording_dir,
                                    logz=w_XRF_logz.value,
-                                   list_elems=w_elems_str.value,
+                                   list_elems=list_elems,
                                    first_channel=w_first_channel.value,
                                    last_channel=w_last_channel.value,
                                    use_eV=w_use_eV.value,
