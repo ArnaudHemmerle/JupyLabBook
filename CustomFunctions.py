@@ -16,7 +16,7 @@ import io
 from contextlib import redirect_stdout
 
 
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 
 """
 Here are defined the custom functions used for analysis of data in the JupyLabBook.
@@ -1069,14 +1069,14 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
 
         if (i_gamma != None) and (force_gamma_delta==False):
             gamma = np.mean(data[i_gamma])
-            if verbose: print('\t. Gamma motor data found, mean value %3.4g deg'%(gamma))
+            print(PN._RED,'\t. Gamma found. gamma = %3.4g deg'%(gamma), PN._RESET)
         else:
             gamma = fgamma
             print("")
             print(PN._RED,'\t. No gamma found! gamma = %g'%gamma, PN._RESET)
         if (i_delta != None) and (force_gamma_delta==False):
             delta = np.mean(data[i_delta])
-            if verbose: print('\t. Delta motor data found, mean value %3.4g deg'%(delta))
+            print(PN._RED,'\t. Delta found. delta = %3.4g deg'%(delta), PN._RESET)
         else:
             delta = fdelta
             print(PN._RED,'\t. No delta found! delta = %g'%delta, PN._RESET)
@@ -1095,7 +1095,7 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
         alphai = thetai    
 
         pixel_direct_x = pixel_PONI_x-distance/pixel_size*np.tan(delta*np.pi/180.)
-        pixel_direct_y = pixel_PONI_y-distance/pixel_size*np.tan(gamma*np.pi/180.)
+        pixel_direct_y = pixel_PONI_y+distance/pixel_size*np.tan(gamma*np.pi/180.)
 
         # 2*theta in rad
         twotheta = np.arctan(pixel_size*(xx-pixel_direct_x)/distance)

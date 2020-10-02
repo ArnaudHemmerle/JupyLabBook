@@ -3,7 +3,7 @@ A Jupyter Notebook used as an interactive lab book on the beamline SIRIUS (SOLEI
 
 ### Last versions of modules:  
 FrontendFunctions.py: 1.0.1    
-CustomFunctions.py: 1.0.1    
+CustomFunctions.py: 1.0.2    
 
 # User manual
 
