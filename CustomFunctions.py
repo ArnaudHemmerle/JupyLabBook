@@ -16,7 +16,7 @@ import io
 from contextlib import redirect_stdout
 
 
-__version__ = '1.0.2'
+__version__ = '1.0.3'
 
 """
 Here are defined the custom functions used for analysis of data in the JupyLabBook.
@@ -1190,7 +1190,7 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
         # Show the full image integrated over the scan
         ax2 = fig.add_subplot(inner[0])
 
-        ax2.pcolormesh(qxy_approx, qz, images_sum, cmap = cmap,
+        ax2.pcolormesh(qxy_approx, qz, images_sum, cmap = cmap, shading = 'auto',
                        norm = colors.LogNorm(), rasterized=True)
         ax2.set_xlabel('qxy (nm^-1)', fontsize='large')
         ax2.set_ylabel('qz (nm^-1)', fontsize='large')       
@@ -1368,9 +1368,11 @@ def Extract_XRF(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir=''
                 ax1.set_ylabel('channel', fontsize='large')          
 
             if logz:
-                ax1.pcolormesh(xx, yy, spectrums.transpose(), cmap='viridis', norm = colors.LogNorm(), rasterized=True)
+                ax1.pcolormesh(xx, yy, spectrums.transpose(), cmap='viridis',  shading = 'auto',
+                               norm = colors.LogNorm(), rasterized=True)
             else:
-                ax1.pcolormesh(xx, yy, spectrums.transpose(), cmap='viridis', rasterized=True)
+                ax1.pcolormesh(xx, yy, spectrums.transpose(), cmap='viridis',  shading = 'auto',
+                               rasterized=True)
 
             plt.show()
 
@@ -1625,9 +1627,11 @@ def Extract_pilatus_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recordin
         # Show the full image integrated over the scan
         ax0 = fig.add_subplot(inner[0])
         if logz:
-            ax0.pcolormesh(xx, yy, images_sum, cmap = cmap, norm = colors.LogNorm(), rasterized=True)
+            ax0.pcolormesh(xx, yy, images_sum, cmap = cmap, shading = 'auto',
+                           norm = colors.LogNorm(), rasterized=True)
         else:
-            ax0.pcolormesh(xx, yy, images_sum, cmap = cmap, rasterized=True)
+            ax0.pcolormesh(xx, yy, images_sum, cmap = cmap, shading = 'auto',
+                           rasterized=True)
         ax0.set(xlabel = 'horizontal pixel (x)', ylabel ='vertical pixel (y)')
         ax0.invert_yaxis()
         fig.subplots_adjust(top=0.95)

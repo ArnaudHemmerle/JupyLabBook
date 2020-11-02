@@ -1,5 +1,10 @@
 # Release notes
 
+### 02/11/2020
+
+CustomFunctions.py: 1.0.3  
+Corrections to remove warnings from matplotlib 3.3.2 (pcolormersh and adding matplotlib inline)  
+
 ### 02/10/2020
 
 CustomFunctions.py: 1.0.2
