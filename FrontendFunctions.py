@@ -100,7 +100,7 @@ def Find_command_in_logs(scan, expt):
     scan.command = 'No command found'
     
     for log_file in expt.list_logs_files:
-        with open(expt.logs_dir+log_file) as f:
+        with open(expt.logs_dir+log_file, encoding="utf8", errors='ignore') as f:
             for line in f:
                 if "#" not in line: temp = line
                 if scan.id in line:
@@ -121,7 +121,7 @@ def Find_absorbers_in_logs(scan, expt):
     absorbers = 'No abs found' 
     
     for log_file in expt.list_logs_files:
-        with open(expt.logs_dir+log_file) as f:
+        with open(expt.logs_dir+log_file, encoding="utf8", errors='ignore') as f:
             for line in f:
                 if "Aborbers" in line: 
                     temp = line.split(': ')[-1]
@@ -1635,7 +1635,7 @@ def Print_wm(expt):
         # Construct the list of wm in the log
         list_wm = []
         log_file =  w_select_log.value
-        with open(expt.logs_dir+log_file) as f:
+        with open(expt.logs_dir+log_file, encoding="utf8", errors='ignore') as f:
             for line in f:
                 if "# " in line: temp = line
                 if ("wm " in line and "pwm" not in line and "ERROR" not in line):
@@ -1999,7 +1999,7 @@ def Extract_commands(pathToFile):
     date_list = ['# Mon', '# Tue', '# Wed', '# Thu', '# Fri', '# Sat', '# Sun']
     date = ''
 
-    with open(pathToFile, 'r') as f:
+    with open(pathToFile, 'r', encoding="utf8", errors='ignore') as f:
         log_lines = f.readlines()
 
     rlog_lines = np.empty([], dtype ='<U1000')
