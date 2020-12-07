@@ -1,5 +1,10 @@
 # Release notes
 
+### 07/12/2020
+
+FrontendFunctions.py: 1.1.0  
+Add the option to insert an image.  
+
 ### 02/11/2020
 
 CustomFunctions.py: 1.0.3  

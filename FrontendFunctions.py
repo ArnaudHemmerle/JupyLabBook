@@ -14,7 +14,7 @@ import CustomFunctions as CF
 import math
 import ipysheet
 
-__version__ = '1.0.1'
+__version__ = '1.1.0'
 
 """
 -Here are defined all the functions relevant to the front end of JupyLabBook,
@@ -301,6 +301,13 @@ def Choose_action(expt):
         Insert a script as a markdown cell.
         """ 
         Print_script(expt)
+        
+    def on_button_image_clicked(b):
+        """
+        Insert an image in a markdown cell.
+        """ 
+        Insert_image(expt)        
+        
     
     # Display the widgets
    
@@ -343,6 +350,10 @@ def Choose_action(expt):
     # Click to insert a script
     button_script = widgets.Button(description="Insert script")
     button_script.on_click(on_button_script_clicked)
+    
+    # Click to insert an image
+    button_image = widgets.Button(description="Insert image")
+    button_image.on_click(on_button_image_clicked)
 
     buttons0 = widgets.HBox([button_treat, button_refresh])
     display(buttons0)
@@ -359,7 +370,7 @@ def Choose_action(expt):
     buttons1 = widgets.HBox([button_form, button_calibthetaz, button_convert_logs, button_export])
     display(buttons1)
 
-    buttons2 = widgets.HBox([button_markdown, button_script, button_wm, button_commands])
+    buttons2 = widgets.HBox([button_markdown, button_script, button_wm, button_commands, button_image])
     display(buttons2)
     
 
@@ -1891,6 +1902,80 @@ def Print_script(expt):
     button_validate_path.on_click(on_button_validate_path_clicked)
     display(widgets.HBox([w_path_to_dir, button_validate_path]))
 
+    
+    
+    
+def Insert_image(expt):
+    """
+    Insert an image in the notebook.
+    """
+
+    # Check if there is already a path for images directories
+    # If not, use the recording directory
+    try:
+        path_to_img_default = expt.path_to_img
+    except:
+        path_to_img_default = expt.recording_dir
+
+    # Widget to write path
+    w_path_to_img = widgets.Text(
+            value=path_to_img_default,
+            description='Images directory:',
+            layout=widgets.Layout(width='800px', height='40px'),
+            style={'description_width': 'initial'})
+
+    def on_button_validate_path_clicked(b):
+        """
+        Validate the path of the images folder. Open selection for the image.
+        """
+
+        if not os.path.exists(w_path_to_img.value):
+            print(PN._RED+"Wrong folder name."+PN._RESET)
+            print("")
+            return
+
+        # Pass the current value of the directory to the default one
+        expt.path_to_img = w_path_to_img.value
+
+        # Define the list of img files in the directory
+        list_img_files = [file for file in sorted(os.listdir(expt.path_to_img))][::-1]
+
+        if len(list_img_files) < 1:
+            print(PN._RED+"There is no image in this folder."+PN._RESET)
+            print("")
+            return                
+
+        # Widget to select image
+        w_select_img = widgets.Dropdown(
+             options=list_img_files,
+             value=list_img_files[-1],
+             layout=widgets.Layout(width='300px'),
+             style={'description_width': 'Image:'})
+
+        def on_button_insert_image_clicked(b):
+            """
+            Insert an image in a markdown cell.
+            """ 
+
+            # Get and insert the image
+            path_to_img = w_path_to_img.value+w_select_img.value
+
+            Create_cell(code='![]('+ path_to_img+')', position ='above', celltype='markdown', is_print=True)
+            
+            Delete_current_cell()
+        
+            Create_cell(code='FF.Choose_action(expt)',
+                        position ='at_bottom', celltype='code', is_print=False)  
+
+        button_insert_image = widgets.Button(description="Insert image")
+        button_insert_image.on_click(on_button_insert_image_clicked)
+
+        display(widgets.HBox([w_select_img, button_insert_image]))
+
+    button_validate_path = widgets.Button(description="Validate path")
+    button_validate_path.on_click(on_button_validate_path_clicked)
+    display(widgets.HBox([w_path_to_img, button_validate_path]))
+    
     
 ############################################################
 ################## PRINTING COMMANDS #######################    

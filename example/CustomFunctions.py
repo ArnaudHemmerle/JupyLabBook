@@ -16,7 +16,7 @@ import io
 from contextlib import redirect_stdout
 
 
-__version__ = '1.0'
+__version__ = '1.0.3'
 
 """
 Here are defined the custom functions used for analysis of data in the JupyLabBook.
@@ -1069,14 +1069,14 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
 
         if (i_gamma != None) and (force_gamma_delta==False):
             gamma = np.mean(data[i_gamma])
-            if verbose: print('\t. Gamma motor data found, mean value %3.4g deg'%(gamma))
+            print(PN._RED,'\t. Gamma found. gamma = %3.4g deg'%(gamma), PN._RESET)
         else:
             gamma = fgamma
             print("")
             print(PN._RED,'\t. No gamma found! gamma = %g'%gamma, PN._RESET)
         if (i_delta != None) and (force_gamma_delta==False):
             delta = np.mean(data[i_delta])
-            if verbose: print('\t. Delta motor data found, mean value %3.4g deg'%(delta))
+            print(PN._RED,'\t. Delta found. delta = %3.4g deg'%(delta), PN._RESET)
         else:
             delta = fdelta
             print(PN._RED,'\t. No delta found! delta = %g'%delta, PN._RESET)
@@ -1095,7 +1095,7 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
         alphai = thetai    
 
         pixel_direct_x = pixel_PONI_x-distance/pixel_size*np.tan(delta*np.pi/180.)
-        pixel_direct_y = pixel_PONI_y-distance/pixel_size*np.tan(gamma*np.pi/180.)
+        pixel_direct_y = pixel_PONI_y+distance/pixel_size*np.tan(gamma*np.pi/180.)
 
         # 2*theta in rad
         twotheta = np.arctan(pixel_size*(xx-pixel_direct_x)/distance)
@@ -1190,7 +1190,7 @@ def Extract_GIXS(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir='
         # Show the full image integrated over the scan
         ax2 = fig.add_subplot(inner[0])
 
-        ax2.pcolormesh(qxy_approx, qz, images_sum, cmap = cmap,
+        ax2.pcolormesh(qxy_approx, qz, images_sum, cmap = cmap, shading = 'auto',
                        norm = colors.LogNorm(), rasterized=True)
         ax2.set_xlabel('qxy (nm^-1)', fontsize='large')
         ax2.set_ylabel('qz (nm^-1)', fontsize='large')       
@@ -1368,9 +1368,11 @@ def Extract_XRF(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir=''
                 ax1.set_ylabel('channel', fontsize='large')          
 
             if logz:
-                ax1.pcolormesh(xx, yy, spectrums.transpose(), cmap='viridis', norm = colors.LogNorm(), rasterized=True)
+                ax1.pcolormesh(xx, yy, spectrums.transpose(), cmap='viridis',  shading = 'auto',
+                               norm = colors.LogNorm(), rasterized=True)
             else:
-                ax1.pcolormesh(xx, yy, spectrums.transpose(), cmap='viridis', rasterized=True)
+                ax1.pcolormesh(xx, yy, spectrums.transpose(), cmap='viridis',  shading = 'auto',
+                               rasterized=True)
 
             plt.show()
 
@@ -1389,15 +1391,24 @@ def Extract_XRF(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir=''
             if arr_peaks[0][0]!= None :  
         
                 # Plot the peak positions
-                prop_cycle = plt.rcParams['axes.prop_cycle']
-                colors_axv = prop_cycle.by_key()['color']
-                
+               
+                # Prepare a list of colors and linestyles
+                colors_axv = iter(['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2',
+                                   '#7f7f7f', '#bcbd22', '#17becf']*20)   
+                linestyles_axv = iter(['--', '-.', '-', ':']*40)
+             
+                # Rearrange the peaks to plot them by increasing energy
                 arr_peaks = np.array(arr_peaks)
-                axvlines = []
-                for i in range(len(arr_peaks)):                  
-                    axvlines.append(ax1.axvline(float(arr_peaks[i,1]), label = str(arr_peaks[i,0]), color = colors_axv[i]))
+                arg_position_peaks = np.argsort([float(elem[1]) for elem in arr_peaks])
+                val_position_peaks = arr_peaks[arg_position_peaks][:,1]
+                labels_peaks = arr_peaks[arg_position_peaks][:,0]
                 
-                axvlegends = ax1.legend(handles=axvlines, fontsize=10,
+                axvlines = []
+                for i in range(len(arr_peaks)):
+                    axvlines.append(ax1.axvline(float(val_position_peaks[i]), label = str(labels_peaks[i]),
+                                                color = next(colors_axv), linestyle = next(linestyles_axv)))
+                
+                axvlegends = ax1.legend(handles=axvlines, fontsize=10, ncol = len(arr_peaks)//16+1,
                                         bbox_to_anchor=(1.01, 1.), loc='upper left',  borderaxespad=0.) 
                 plt.gca().add_artist(axvlegends)  
 
@@ -1421,16 +1432,18 @@ def Extract_XRF(nxs_filename='SIRIUS_test.nxs', working_dir='', recording_dir=''
             
             if arr_peaks[0][0]!= None :  
                 
-                # Plot the peak positions
-                prop_cycle = plt.rcParams['axes.prop_cycle']
-                colors_axv = prop_cycle.by_key()['color']
-                
+                # Rearrange the peaks to plot them by increasing energy
                 arr_peaks = np.array(arr_peaks)
-                axvlines = []
-                for i in range(len(arr_peaks)):                  
-                    axvlines.append(ax1.axvline(float(arr_peaks[i,1]), label = str(arr_peaks[i,0]), color = colors_axv[i]))
+                arg_position_peaks = np.argsort([float(elem[1]) for elem in arr_peaks])
+                val_position_peaks = arr_peaks[arg_position_peaks][:,1]
+                labels_peaks = arr_peaks[arg_position_peaks][:,0]
                 
-                axvlegends = ax1.legend(handles=axvlines, fontsize=10,
+                axvlines = []
+                for i in range(len(arr_peaks)):
+                    axvlines.append(ax1.axvline(float(val_position_peaks[i]), label = str(labels_peaks[i]),
+                                                color = next(colors_axv), linestyle = next(linestyles_axv)))
+                
+                axvlegends = ax1.legend(handles=axvlines, fontsize=10, ncol = len(arr_peaks)//16+1,
                                         bbox_to_anchor=(1.01, 1.), loc='upper left',  borderaxespad=0.)
                 plt.gca().add_artist(axvlegends)  
             
@@ -1614,9 +1627,11 @@ def Extract_pilatus_sum(nxs_filename='SIRIUS_test.nxs', working_dir='', recordin
         # Show the full image integrated over the scan
         ax0 = fig.add_subplot(inner[0])
         if logz:
-            ax0.pcolormesh(xx, yy, images_sum, cmap = cmap, norm = colors.LogNorm(), rasterized=True)
+            ax0.pcolormesh(xx, yy, images_sum, cmap = cmap, shading = 'auto',
+                           norm = colors.LogNorm(), rasterized=True)
         else:
-            ax0.pcolormesh(xx, yy, images_sum, cmap = cmap, rasterized=True)
+            ax0.pcolormesh(xx, yy, images_sum, cmap = cmap, shading = 'auto',
+                           rasterized=True)
         ax0.set(xlabel = 'horizontal pixel (x)', ylabel ='vertical pixel (y)')
         ax0.invert_yaxis()
         fig.subplots_adjust(top=0.95)

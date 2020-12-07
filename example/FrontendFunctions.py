@@ -14,7 +14,7 @@ import CustomFunctions as CF
 import math
 import ipysheet
 
-__version__ = '1.0'
+__version__ = '1.1.0'
 
 """
 -Here are defined all the functions relevant to the front end of JupyLabBook,
@@ -100,7 +100,7 @@ def Find_command_in_logs(scan, expt):
     scan.command = 'No command found'
     
     for log_file in expt.list_logs_files:
-        with open(expt.logs_dir+log_file) as f:
+        with open(expt.logs_dir+log_file, encoding="utf8", errors='ignore') as f:
             for line in f:
                 if "#" not in line: temp = line
                 if scan.id in line:
@@ -121,7 +121,7 @@ def Find_absorbers_in_logs(scan, expt):
     absorbers = 'No abs found' 
     
     for log_file in expt.list_logs_files:
-        with open(expt.logs_dir+log_file) as f:
+        with open(expt.logs_dir+log_file, encoding="utf8", errors='ignore') as f:
             for line in f:
                 if "Aborbers" in line: 
                     temp = line.split(': ')[-1]
@@ -301,6 +301,13 @@ def Choose_action(expt):
         Insert a script as a markdown cell.
         """ 
         Print_script(expt)
+        
+    def on_button_image_clicked(b):
+        """
+        Insert an image in a markdown cell.
+        """ 
+        Insert_image(expt)        
+        
     
     # Display the widgets
    
@@ -343,6 +350,10 @@ def Choose_action(expt):
     # Click to insert a script
     button_script = widgets.Button(description="Insert script")
     button_script.on_click(on_button_script_clicked)
+    
+    # Click to insert an image
+    button_image = widgets.Button(description="Insert image")
+    button_image.on_click(on_button_image_clicked)
 
     buttons0 = widgets.HBox([button_treat, button_refresh])
     display(buttons0)
@@ -359,7 +370,7 @@ def Choose_action(expt):
     buttons1 = widgets.HBox([button_form, button_calibthetaz, button_convert_logs, button_export])
     display(buttons1)
 
-    buttons2 = widgets.HBox([button_markdown, button_script, button_wm, button_commands])
+    buttons2 = widgets.HBox([button_markdown, button_script, button_wm, button_commands, button_image])
     display(buttons2)
     
 
@@ -974,18 +985,28 @@ def Choose_treatment(expt):
         display(widgets.HBox([w_use_eV, w_gain, w_eV0]))
 
         def on_button_identify_peaks_clicked(b):
-            
-            sheet = ipysheet.easy.sheet(columns=3, rows=20 ,column_headers = ['Name','Position','Use?(y/n)'])
-            
-            # Fill the sheet with previous values
+
+            # Fill the sheet with previous values or None entries
             try: to_fill = expt.arr_peaks_full
             except: to_fill = np.array([[None,None,None] for i in range(20)])
+ 
+           # Determine the number of rows to dynamically add some empty rows
+            nb_filled_rows = len([elem for elem in to_fill if (elem[0]!=None and elem[0]!='')])
+            nb_empty_rows = len([elem for elem in to_fill if (elem[0]==None or elem[0]=='')])
+            if nb_empty_rows<15:
+                to_fill = np.append([elem for elem in to_fill if (elem[0]!=None and elem[0]!='')],
+                                    np.array([[None,None,None] for i in range(15)]), axis = 0)
                 
-            # ipysheet does not work correctly with None entries
+            sheet = ipysheet.easy.sheet(columns=3, rows=len(to_fill) ,column_headers = ['Name','Position','Use?(y/n)'])
+            
+
+  
+            # ipysheet does not work correctly with no entries
             # It is necessary to fill first the cells with something
             for i in range(3):
                 ipysheet.easy.column(i,  to_fill[:,i])
 
+            
             def on_button_validate_clicked(b):
                 
                 expt.is_identify_peaks = True
@@ -998,6 +1019,10 @@ def Choose_treatment(expt):
                 
                 # Send only the lines with y in the third column
                 expt.arr_peaks = [elem[0:2] for elem in expt.arr_peaks if elem[2]=='y']
+
+                # Convert elems_str into a list
+                list_elems = [int(w_elems_str.value.split(',')[i]) for i in range(len(w_elems_str.value.split(',')))]
+                
                 
                 for scan in expt.scans:                                                              
                 
@@ -1007,7 +1032,7 @@ def Choose_treatment(expt):
                                    working_dir=expt.working_dir,
                                    recording_dir=expt.recording_dir,
                                    logz=w_XRF_logz.value,
-                                   list_elems=w_elems_str.value,
+                                   list_elems=list_elems,
                                    first_channel=w_first_channel.value,
                                    last_channel=w_last_channel.value,
                                    use_eV=w_use_eV.value,
@@ -1507,10 +1532,38 @@ def Create_form():
         txt = []
         txt.append('$\LARGE \\textbf{SIRIUS Beamline}:\\textbf{Experiment %s}$'%number.value)
 
-        #Add spaces
-        ptitle = ('\ '.join(title.value.split(' ')))
-        txt.append('$\Large \\color{red}{\\bf %s}$'%ptitle)
+        ########################################
+        # Prepare the title in several parts
+        # Avoid having a line larger than the page
 
+        # Max number of characters allowed by line
+        max_length = 70
+
+       
+        title_split = title.value.split(' ')
+        title_blocks = [] 
+
+        j=0
+        for k in range(0,len(title_split)):
+            title_part = ''
+            for i in range(j,len(title_split)): 
+                if len(title_part)<max_length:
+                    title_part += title_split[i]+' '
+                    j=j+1
+                else:
+                    break
+            title_blocks.append(title_part)        
+
+        for title_block in title_blocks:
+            if title_block != '':        
+                txt.append('$\Large \\color{red}{\\bf %s}$'%('\ '.join(title_block.split(' '))))
+
+        
+        # Former (simpler version), but allows line longer than the page width
+        #ptitle = ('\ '.join(title.value.split(' ')))
+        #txt.append('$\Large \\color{red}{\\bf %s}$'%ptitle)
+        ########################################
+        
         txt.append('* %s %s'%(ttype.description,ttype.value)+'\n'
                     +'* %s %s'%(safety.description,safety.value)+'\n'
                     +'* %s %s'%(date.description,date.value))
@@ -1593,7 +1646,7 @@ def Print_wm(expt):
         # Construct the list of wm in the log
         list_wm = []
         log_file =  w_select_log.value
-        with open(expt.logs_dir+log_file) as f:
+        with open(expt.logs_dir+log_file, encoding="utf8", errors='ignore') as f:
             for line in f:
                 if "# " in line: temp = line
                 if ("wm " in line and "pwm" not in line and "ERROR" not in line):
@@ -1850,6 +1903,80 @@ def Print_script(expt):
     display(widgets.HBox([w_path_to_dir, button_validate_path]))
 
     
+    
+    
+def Insert_image(expt):
+    """
+    Insert an image in the notebook.
+    """
+
+    # Check if there is already a path for images directories
+    # If not, use the recording directory
+    try:
+        path_to_img_default = expt.path_to_img
+    except:
+        path_to_img_default = expt.recording_dir
+
+    # Widget to write path
+    w_path_to_img = widgets.Text(
+            value=path_to_img_default,
+            description='Images directory:',
+            layout=widgets.Layout(width='800px', height='40px'),
+            style={'description_width': 'initial'})
+
+    def on_button_validate_path_clicked(b):
+        """
+        Validate the path of the images folder. Open selection for the image.
+        """
+
+        if not os.path.exists(w_path_to_img.value):
+            print(PN._RED+"Wrong folder name."+PN._RESET)
+            print("")
+            return
+
+        # Pass the current value of the directory to the default one
+        expt.path_to_img = w_path_to_img.value
+
+        # Define the list of img files in the directory
+        list_img_files = [file for file in sorted(os.listdir(expt.path_to_img))][::-1]
+
+        if len(list_img_files) < 1:
+            print(PN._RED+"There is no image in this folder."+PN._RESET)
+            print("")
+            return                
+
+        # Widget to select image
+        w_select_img = widgets.Dropdown(
+             options=list_img_files,
+             value=list_img_files[-1],
+             layout=widgets.Layout(width='300px'),
+             style={'description_width': 'Image:'})
+
+        def on_button_insert_image_clicked(b):
+            """
+            Insert an image in a markdown cell.
+            """ 
+
+            # Get and insert the image
+            path_to_img = w_path_to_img.value+w_select_img.value
+
+            Create_cell(code='![]('+ path_to_img+')', position ='above', celltype='markdown', is_print=True)
+            
+            Delete_current_cell()
+        
+            Create_cell(code='FF.Choose_action(expt)',
+                        position ='at_bottom', celltype='code', is_print=False)  
+
+        button_insert_image = widgets.Button(description="Insert image")
+        button_insert_image.on_click(on_button_insert_image_clicked)
+
+        display(widgets.HBox([w_select_img, button_insert_image]))
+
+    button_validate_path = widgets.Button(description="Validate path")
+    button_validate_path.on_click(on_button_validate_path_clicked)
+    display(widgets.HBox([w_path_to_img, button_validate_path]))
+    
+    
 ############################################################
 ################## PRINTING COMMANDS #######################    
 ############################################################
@@ -1957,7 +2084,7 @@ def Extract_commands(pathToFile):
     date_list = ['# Mon', '# Tue', '# Wed', '# Thu', '# Fri', '# Sat', '# Sun']
     date = ''
 
-    with open(pathToFile, 'r') as f:
+    with open(pathToFile, 'r', encoding="utf8", errors='ignore') as f:
         log_lines = f.readlines()
 
     rlog_lines = np.empty([], dtype ='<U1000')
