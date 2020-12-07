@@ -1,4 +1,4 @@
-Here you can find an example of JupyLabBook ran at its version 1.0.
+Here you can find an example of JupyLabBook ran at its version 1.1
 
 You can simply look at the pdf file to see what a typical output looks like, or at the html file to see the code as well.
 
