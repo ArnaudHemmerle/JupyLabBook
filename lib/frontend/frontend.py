@@ -240,7 +240,7 @@ def Choose_action(expt):
                     '[-5,     611],'+'\n'+
                     '[-6,     539],'+'\n'+
                     '])'+'\n'+
-                    'expt.thetazfactor=CF.Calib_thetaz(calib_thetaz_data)',
+                    'expt.thetazfactor=GIXD.Calib_thetaz(calib_thetaz_data)',
                     position='below', celltype='code', is_print = True)
         
         Create_cell(code='## Calibration thetaz', position='below', celltype='markdown', is_print = True)
@@ -499,12 +499,22 @@ def Choose_treatment(expt):
 
     def on_button_GIXD_clicked(b):
 
-        # logx
+        # plot
+        try: value = expt.plot
+        except: value = True
+        w_plot = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Plot')
+        
+        # save
+        try: value = expt.save
+        except: value = True
+        w_save = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Save')
+        
+        # GIXD_logx
         try: value = expt.GIXD_logx
         except: value = False
         w_GIXD_logx = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='log x')
         
-        # logy
+        # GIXD_logy
         try: value = expt.GIXD_logy
         except: value = False
         w_GIXD_logy = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='log y')
@@ -517,13 +527,13 @@ def Choose_treatment(expt):
         # channel0
         try: value = expt.channel0
         except: value = 640
-        w_channel0 = widgets.FloatText(value=value, style=style, layout=short_layout, description='Vineyard (chan)')
+        w_channel0 = widgets.FloatText(value=value, style=style, layout=short_layout, description='Vineyard (channel)')
 
         # thetazfactor
         try: value = expt.thetazfactor
         except: value = 0.000243
         w_thetazfactor = widgets.FloatText(value=value, style=style, layout=large_layout,
-                                           description='thetazfactor (rad/chan)')
+                                           description='thetazfactor (rad/channel)')
         
         # wavelength
         try: value = expt.wavelength
@@ -568,7 +578,7 @@ def Choose_treatment(expt):
         # show_absorbers
         try: value = expt.show_absorbers
         except: value = False
-        w_show_absorbers = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print abs')        
+        w_show_absorbers = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print absorbers')        
         
         # GIXD_cmap
         try: value = expt.GIXD_cmap
@@ -576,7 +586,7 @@ def Choose_treatment(expt):
         w_GIXD_cmap = widgets.Select(value=value, style=style, rows=5, description='cmap',
                                 options=['viridis', 'jet', 'Greys', 'cividis', 'hot'])        
             
-        display(widgets.HBox([w_show_data_stamps, w_verbose, w_show_absorbers,
+        display(widgets.HBox([w_plot, w_save, w_show_data_stamps, w_verbose, w_show_absorbers,
                               w_GIXD_logx, w_GIXD_logy, w_GIXD_logz, w_GIXD_cmap]))        
         display(widgets.HBox([w_binsize, w_nblevels, w_moytocreate_str, w_channel0, w_computeqz]))
         display(widgets.HBox([w_wavelength, w_thetac, w_thetazfactor]))
@@ -585,6 +595,9 @@ def Choose_treatment(expt):
         def on_button_plot_clicked(b):
 
             # Pass current values as default values
+            expt.plot = w_plot.value
+            expt.save = w_save.value
+            expt.GIXD_logy = w_GIXD_logy.value
             expt.GIXD_logx = w_GIXD_logx.value
             expt.GIXD_logy = w_GIXD_logy.value
             expt.GIXD_logz = w_GIXD_logz.value
@@ -612,25 +625,34 @@ def Choose_treatment(expt):
                 else:
                     absorbers = ''
                              
-                Create_cell(code='CF.Extract_GIXD(nxs_filename=\''+scan.nxs+'\','+
-                            'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
-                            'logx='+str(expt.GIXD_logx)+','+
-                            'logy='+str(expt.GIXD_logy)+','+
-                            'logz='+str(expt.GIXD_logz)+','+
-                            'channel0='+str(expt.channel0)+','+
-                            'thetazfactor='+str(expt.thetazfactor)+','+
-                            'wavelength='+str(expt.wavelength)+','+
-                            'thetac='+str(expt.thetac)+','+
-                            'binsize='+str(expt.binsize)+','+
-                            'computeqz='+str(expt.computeqz)+','+
-                            'nblevels='+str(expt.nblevels)+','+
-                            'moytocreate='+str(list_moytocreate)+','+
-                            'show_data_stamps='+str(expt.show_data_stamps)+','+
-                            'verbose='+str(expt.verbose)+','+
-                            'absorbers='+'\''+str(absorbers)+'\''+','+
-                            'cmap=\''+str(expt.GIXD_cmap)+'\')',
+                Create_cell(code=
+                            'x, y, xlabel, ylabel, column_x, '+
+                            'daty, datyTop, datyBottom, datyFirstQuarter, '+
+                            'mat, mat_binned, ch_binned, '+
+                            'mean_pi, mean_area, mean_gamma =\\\n'+
+                            'GIXD.Treat(nxs_filename=\''+scan.nxs+'\', '+
+                            'recording_dir=expt.recording_dir, '+
+                            'channel0='+str(expt.channel0)+', '+
+                            'thetazfactor='+str(expt.thetazfactor)+', '+
+                            'wavelength='+str(expt.wavelength)+', '+
+                            'thetac='+str(expt.thetac)+', '+
+                            'binsize='+str(expt.binsize)+', '+
+                            'computeqz='+str(expt.computeqz)+', '+
+                            'absorbers='+'\''+str(absorbers)+'\''+', '+
+                            'logx='+str(expt.GIXD_logx)+', '+
+                            'logy='+str(expt.GIXD_logy)+', '+
+                            'logz='+str(expt.GIXD_logz)+', '+
+                            'nblevels='+str(expt.nblevels)+', '+
+                            'cmap=\''+str(expt.GIXD_cmap)+'\''+', '+
+                            'working_dir=expt.working_dir, '+ 
+                            'moytocreate='+str(list_moytocreate)+', '+
+                            'show_data_stamps='+str(expt.show_data_stamps)+', '+
+                            'plot='+str(expt.plot)+', '+
+                            'save='+str(expt.save)+', '+
+                            'verbose='+str(expt.verbose)+')',
                             position='below', celltype='code', is_print = True)
 
+     
                 if len(expt.scans)>1:
                     Create_cell(code='### '+scan.id+': '+scan.command,
                             position ='below', celltype='markdown', is_print=True)
@@ -1207,11 +1229,13 @@ def Choose_treatment(expt):
         
     def on_button_vineyard_clicked(b):
         scan = expt.scans[0]
-        Create_cell(code='expt.channel0 = CF.Extract_channel_Qc(nxs_filename=\''+scan.nxs+'\','+
-                    'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
-                    'logx=False, logy=False, logz=False)',
+        Create_cell(code='expt.channel0 = GIXD.Extract_channel0(nxs_filename=\''+scan.nxs+'\','+
+                    'recording_dir=expt.recording_dir, binsize=10, logx=False, '+
+                    'logy=False, logz=False, nblevels=50, cmap=\'jet\', '+
+                    'show_data_stamps = True, verbose=True)',
                     position='below', celltype='code', is_print = True)
  
+    
         # Do as if the button next was clicked
         on_button_next_clicked(b)  
 
