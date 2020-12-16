@@ -112,7 +112,7 @@ def Choose(expt):
         """
         #clear_output(wait=False)
         
-        utils.Create_cell(code='FE.Choose_treatment(expt)',
+        utils.Create_cell(code='FE.treatment.Choose(expt)',
                     position ='below', celltype='code', is_print=False)
 
         if len(expt.scans)==1:
@@ -330,39 +330,6 @@ def Export_nb_to_pdf(nb_name):
                 
     return export_done
 
-def Set_interactive_1D(scan):
-    '''
-    Extract the sensors from the nxs file and set an interactive 1D plot.
-
-    Parameters
-    ----------
-    scan : object
-        object from the class Scan
-    '''    
-    
-    nexus = PN.PyNexusFile(scan.path, fast=True)
-    stamps0D, data0D = nexus.extractData('0D')
-    nexus.close()
-    sensor_list = [stamps0D[i][0] if stamps0D[i][1]== None else stamps0D[i][1] for i in range(len(stamps0D))]
-
-
-    def plot_interactive_1D(xLabel, yLabel):
-        
-        xArg = sensor_list.index(xLabel)
-        yArg = sensor_list.index(yLabel)
-
-        fig=plt.figure()
-        ax=fig.add_subplot(111)
-        ax.plot(data0D[xArg], data0D[yArg], 'o-')
-        ax.set_xlabel(xLabel, fontsize=16)
-        ax.set_ylabel(yLabel, fontsize=16)
-        plt.show()
-
-        scan.xLabel = xLabel
-        scan.yLabel = yLabel
-
-    widgets.interact(plot_interactive_1D, xLabel=sensor_list, yLabel=sensor_list)
-    
 
     
 def Create_form():

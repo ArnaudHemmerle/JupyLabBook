@@ -1,12 +1,23 @@
+from . import utils
+from lib.extraction.common import PyNexus as PN
+
+import ipywidgets as widgets
+import ipysheet
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 """Frontend library for all the widgets concerning the treatments in the notebook."""
 
-def Choose_treatment(expt):
-    """
-    Take object from the class Experiment.
-    Allow the user to choose the treatment to be applied, via widgets.
-    """
+def Choose(expt):
+    '''
+    Choose the treatment to be applied to the selected scan.
+
+    Parameters
+    ----------
+    expt : object
+        object from the class Experiment
+    '''
     
     # Styling options for widgets
     style = {'description_width': 'initial'}
@@ -146,8 +157,8 @@ def Choose_treatment(expt):
                 else:
                     absorbers = ''
                              
-                Create_cell(code=
-                            'x, y, xlabel, ylabel, column_x, '+
+                utils.Create_cell(code=
+                            'x, y, '+
                             'daty, datyTop, datyBottom, datyFirstQuarter, '+
                             'mat, mat_binned, ch_binned, '+
                             'mean_pi, mean_area, mean_gamma =\\\n'+
@@ -175,7 +186,7 @@ def Choose_treatment(expt):
 
      
                 if len(expt.scans)>1:
-                    Create_cell(code='### '+scan.id+': '+scan.command,
+                    utils.Create_cell(code='### '+scan.id+': '+scan.command,
                             position ='below', celltype='markdown', is_print=True)
 
             # Do as if the button next was clicked
@@ -184,10 +195,19 @@ def Choose_treatment(expt):
         button_plot = widgets.Button(description="Plot")
         button_plot.on_click(on_button_plot_clicked)
         display(button_plot)
-
         
 
     def on_button_pilatus_clicked(b):
+
+        # plot
+        try: value = expt.plot
+        except: value = True
+        w_plot = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Plot')
+        
+        # save
+        try: value = expt.save
+        except: value = True
+        w_save = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Save')
         
         # pilatus_logz
         try: value = expt.pilatus_logz
@@ -207,7 +227,7 @@ def Choose_treatment(expt):
         # show_absorbers
         try: value = expt.show_absorbers
         except: value = False
-        w_show_absorbers = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print abs')
+        w_show_absorbers = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print absorbers')
         
         # pilatus_cmap
         try: value = expt.pilatus_cmap
@@ -235,13 +255,16 @@ def Choose_treatment(expt):
         except: value = 1042
         w_ymax = widgets.FloatText(value=value, style=style, layout=tiny_layout, description='y max (pix)')   
 
-        display(widgets.HBox([w_show_data_stamps, w_verbose, w_show_absorbers, w_pilatus_logz, w_pilatus_cmap]))  
+        display(widgets.HBox([w_plot, w_save, w_show_data_stamps, w_verbose, w_show_absorbers,
+                              w_pilatus_logz, w_pilatus_cmap]))  
         display(widgets.HBox([w_xmin, w_xmax])) 
         display(widgets.HBox([w_ymin, w_ymax])) 
 
         def on_button_plot_clicked(b):
 
             # Pass current values as default values
+            expt.plot = w_plot.value
+            expt.save = w_save.value
             expt.pilatus_logz = w_pilatus_logz.value
             expt.show_data_stamps = w_show_data_stamps.value
             expt.verbose = w_verbose.value
@@ -258,23 +281,28 @@ def Choose_treatment(expt):
                 if expt.show_absorbers:
                     absorbers = Find_absorbers_in_logs(scan, expt)
                 else:
-                    absorbers = ''                
-
-                Create_cell(code='CF.Extract_pilatus_sum(nxs_filename=\''+scan.nxs+'\','+ 
-                           'working_dir=expt.working_dir, recording_dir=expt.recording_dir, '+
-                            'logz='+str(expt.pilatus_logz)+','+
-                            'xmin='+str(expt.xmin)+','+
-                            'xmax='+str(expt.xmax)+','+
-                            'ymin='+str(expt.ymin)+','+
-                            'ymax='+str(expt.ymax)+','+                            
-                            'show_data_stamps='+str(expt.show_data_stamps)+','+
-                            'verbose='+str(expt.verbose)+','+
-                            'absorbers='+'\''+str(absorbers)+'\''+','+
-                            'cmap=\''+str(expt.pilatus_cmap)+'\''+')',
+                    absorbers = ''   
+                    
+            
+                utils.Create_cell(code='images_sum, integrated_x, integrated_y =\\\n'+
+                            'PilatusSum.Treat(nxs_filename=\''+scan.nxs+'\' ,'+ 
+                            'recording_dir=expt.recording_dir, '+
+                            'xmin='+str(expt.xmin)+', '+
+                            'xmax='+str(expt.xmax)+', '+
+                            'ymin='+str(expt.ymin)+', '+
+                            'ymax='+str(expt.ymax)+', '+                                      
+                            'absorbers='+'\''+str(absorbers)+'\''+', '+
+                            'logz='+str(expt.pilatus_logz)+', '+  
+                            'cmap=\''+str(expt.pilatus_cmap)+'\''+', '+
+                            'working_dir=expt.working_dir, '+     
+                            'show_data_stamps='+str(expt.show_data_stamps)+', '+
+                            'plot='+str(expt.plot)+', '+
+                            'save='+str(expt.save)+', '+
+                            'verbose='+str(expt.verbose)+')',
                             position='below', celltype='code', is_print = True)
 
                 if len(expt.scans)>1:
-                    Create_cell(code='### '+scan.id+': '+scan.command,
+                    utils.Create_cell(code='### '+scan.id+': '+scan.command,
                             position ='below', celltype='markdown', is_print=True)     
 
             # Do as if the button next was clicked
@@ -371,7 +399,7 @@ def Choose_treatment(expt):
         # show_absorbers
         try: value = expt.show_absorbers
         except: value = False
-        w_show_absorbers = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print abs')
+        w_show_absorbers = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Print absorbers')
         
         # GIXS_cmap
         try: value = expt.GIXS_cmap
@@ -417,7 +445,7 @@ def Choose_treatment(expt):
                 else:
                     absorbers = ''                
                 
-                Create_cell(code='CF.Extract_GIXS(nxs_filename=\''+scan.nxs+'\','+ 
+                utils.Create_cell(code='CF.Extract_GIXS(nxs_filename=\''+scan.nxs+'\','+ 
                        'working_dir=expt.working_dir, recording_dir=expt.recording_dir,'+
                         'logz='+str(expt.GIXS_logz)+','+
                         'wavelength='+str(expt.wavelength)+','+
@@ -440,7 +468,7 @@ def Choose_treatment(expt):
                         position='below', celltype='code', is_print = True)
 
                 if len(expt.scans)>1:
-                    Create_cell(code='### '+scan.id+': '+scan.command,
+                    utils.Create_cell(code='### '+scan.id+': '+scan.command,
                                 position ='below', celltype='markdown', is_print=True)            
 
             # Do as if the button next was clicked
@@ -467,7 +495,7 @@ def Choose_treatment(expt):
         # show_absorbers
         try: value = expt.show_absorbers
         except: value = False
-        w_show_absorbers = widgets.Checkbox(value=value, style=style, layout = short_layout, description='Print abs')
+        w_show_absorbers = widgets.Checkbox(value=value, style=style, layout = short_layout, description='Print absorbers')
         
         # fastextract
         try: value = expt.fastextract
@@ -634,7 +662,7 @@ def Choose_treatment(expt):
                 else:
                     absorbers = ''
                                             
-                Create_cell(code='CF.Extract_XRF('+
+                utils.Create_cell(code='CF.Extract_XRF('+
                            'nxs_filename=\''+scan.nxs+'\','+ 
                            'working_dir=expt.working_dir,recording_dir=expt.recording_dir,'+
                            'logz='+str(expt.XRF_logz)+','+
@@ -656,7 +684,7 @@ def Choose_treatment(expt):
                            position='below', celltype='code', is_print = True)  
 
                 if len(expt.scans)>1:
-                    Create_cell(code='### '+scan.id+': '+scan.command,
+                    utils.Create_cell(code='### '+scan.id+': '+scan.command,
                             position ='below', celltype='markdown', is_print=True)  
 
             # Do as if the button next was clicked
@@ -699,7 +727,7 @@ def Choose_treatment(expt):
 
             for scan in expt.scans:
 
-                Create_cell(code='CF.Plot_isotherm(nxs_filename=\''+scan.nxs+'\','+
+                utils.Create_cell(code='CF.Plot_isotherm(nxs_filename=\''+scan.nxs+'\','+
                             'working_dir=expt.working_dir,recording_dir=expt.recording_dir,'+
                             'show_data_stamps='+str(w_show_data_stamps.value)+
                             ', verbose='+str(w_verbose.value)+', '+
@@ -707,7 +735,7 @@ def Choose_treatment(expt):
                             position='below', celltype='code', is_print = True)
 
                 if len(expt.scans)>1:
-                    Create_cell(code='### '+scan.id+': '+scan.command,
+                    utils.Create_cell(code='### '+scan.id+': '+scan.command,
                             position ='below', celltype='markdown', is_print=True)
 
             # Do as if the button next was clicked
@@ -722,7 +750,7 @@ def Choose_treatment(expt):
     # Actions relevant for single scan analysis only
     def on_button_1D_clicked(b):            
         scan = expt.scans[0]
-        Create_cell(code='CF.Plot_1D(nxs_filename=\''+scan.nxs+'\','+
+        utils.Create_cell(code='CF.Plot_1D(nxs_filename=\''+scan.nxs+'\','+
                     'working_dir=expt.working_dir,recording_dir=expt.recording_dir,'+
                     'xLabel=\''+scan.xLabel+'\', yLabel=\''+scan.yLabel+'\')',
                     position='below', celltype='code', is_print = True)
@@ -732,7 +760,7 @@ def Choose_treatment(expt):
         
     def on_button_fit_erf_clicked(b):
         scan = expt.scans[0]
-        Create_cell(code='CF.GaussianRepartition_fit(nxs_filename=\''+scan.nxs+'\', recording_dir = expt.recording_dir,'+
+        utils.Create_cell(code='CF.GaussianRepartition_fit(nxs_filename=\''+scan.nxs+'\', recording_dir = expt.recording_dir,'+
                         'xLabel=\''+scan.xLabel+'\', yLabel=\''+scan.yLabel+'\')',
                     position='below', celltype='code', is_print = True)  
 
@@ -741,7 +769,7 @@ def Choose_treatment(expt):
         
     def on_button_fit_gau_clicked(b):
         scan = expt.scans[0]
-        Create_cell(code='CF.Gaussian_fit(nxs_filename=\''+scan.nxs+'\', recording_dir = expt.recording_dir,'+
+        utils.Create_cell(code='CF.Gaussian_fit(nxs_filename=\''+scan.nxs+'\', recording_dir = expt.recording_dir,'+
                         'xLabel=\''+scan.xLabel+'\', yLabel=\''+scan.yLabel+'\')',
                     position='below', celltype='code', is_print = True)   
         
@@ -750,7 +778,7 @@ def Choose_treatment(expt):
         
     def on_button_vineyard_clicked(b):
         scan = expt.scans[0]
-        Create_cell(code='expt.channel0 = GIXD.Extract_channel0(nxs_filename=\''+scan.nxs+'\','+
+        utils.Create_cell(code='expt.channel0 = GIXD.Extract_channel0(nxs_filename=\''+scan.nxs+'\','+
                     'recording_dir=expt.recording_dir, binsize=10, logx=False, '+
                     'logy=False, logz=False, nblevels=50, cmap=\'jet\', '+
                     'show_data_stamps = True, verbose=True)',
@@ -764,20 +792,20 @@ def Choose_treatment(expt):
     def on_button_next_clicked(b):
         #clear_output(wait=False)
         
-        Delete_current_cell()
+        utils.Delete_current_cell()
         
-        Create_cell(code='FE.Choose_action(expt)',
+        utils.Create_cell(code='FE.action.Choose(expt)',
                     position ='at_bottom', celltype='code', is_print=False)        
         
     def on_button_markdown_clicked(b):
         """
         Insert a markdown cell below the current cell.
         """ 
-        Delete_current_cell()
+        utils.Delete_current_cell()
         
-        Create_cell(code='', position ='below', celltype='markdown', is_print=True, is_execute=False)
+        utils.Create_cell(code='', position ='below', celltype='markdown', is_print=True, is_execute=False)
     
-        Create_cell(code='FE.Choose_treatment(expt)', position ='at_bottom', celltype='code', is_print=False)
+        utils.Create_cell(code='FE.treatment.Choose(expt)', position ='at_bottom', celltype='code', is_print=False)
        
     # Display the widgets    
     # ADD HERE A CALL TO YOUR BUTTON
@@ -840,11 +868,23 @@ def Choose_treatment(expt):
     
 
 def Find_absorbers_in_logs(scan, expt):
-    """
-    Find the absorbers of the scan in the logs.
-    """
+    '''
+    Find absorbers in the logs.
+
+    Parameters
+    ----------
+    scan : object
+        object from the class Scan
+    expt : object
+        object from the class Experiment
+        
+    Returns
+    -------
+    str
+        absorbers       
+    '''
     scan_found = False
-    absorbers = 'No abs found' 
+    absorbers = 'No absorber found' 
     
     for log_file in expt.list_logs_files:
         with open(expt.logs_dir+log_file, encoding="utf8", errors='ignore') as f:
@@ -863,3 +903,38 @@ def Find_absorbers_in_logs(scan, expt):
             break   
             
     return absorbers
+
+def Set_interactive_1D(scan):
+    '''
+    Extract the sensors from the nxs file and set an interactive 1D plot.
+
+    Parameters
+    ----------
+    scan : object
+        object from the class Scan
+    '''    
+    
+    nexus = PN.PyNexusFile(scan.path, fast=True)
+    stamps0D, data0D = nexus.extractData('0D')
+    nexus.close()
+    sensor_list = [stamps0D[i][0] if stamps0D[i][1]== None else stamps0D[i][1] for i in range(len(stamps0D))]
+
+
+    def plot_interactive_1D(xLabel, yLabel):
+        
+        xArg = sensor_list.index(xLabel)
+        yArg = sensor_list.index(yLabel)
+
+        fig=plt.figure()
+        ax=fig.add_subplot(111)
+        ax.plot(data0D[xArg], data0D[yArg], 'o-')
+        ax.set_xlabel(xLabel, fontsize=16)
+        ax.set_ylabel(yLabel, fontsize=16)
+        plt.show()
+
+        scan.xLabel = xLabel
+        scan.yLabel = yLabel
+
+    widgets.interact(plot_interactive_1D, xLabel=sensor_list, yLabel=sensor_list)
+    
+

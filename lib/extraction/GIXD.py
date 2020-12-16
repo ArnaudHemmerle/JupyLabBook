@@ -72,12 +72,6 @@ def Treat(nxs_filename, recording_dir,
     array_like
         y, an array containing either qz (nm^-1) values, if computeqz is True,
         or vertical channels if not        
-    str
-        xlabel, indicating whether x corresponds to qxy or delta (useful for plot)            
-    str
-        ylabel, indicating whether y corresponds to qz or channels (useful for plot)           
-    int
-        column_x, the column corresponding to the x values in stamps0D (useful for save)            
     array_like
         daty, rods integrated over the whole vertical axis of the detector            
     array_like
@@ -111,8 +105,6 @@ def Treat(nxs_filename, recording_dir,
         when gamma not found and computeqz is True
     '''
 
-
-    # Extract
     x, y, xlabel, ylabel, column_x,\
     daty, datyTop, datyBottom, datyFirstQuarter,\
     mat, mat_binned, ch_binned, \
@@ -136,7 +128,7 @@ def Treat(nxs_filename, recording_dir,
              computeqz, verbose)
 
 
-    return x, y, xlabel, ylabel, column_x,\
+    return x, y,\
            daty, datyTop, datyBottom, datyFirstQuarter,\
            mat, mat_binned, ch_binned, \
            mean_pi, mean_area, mean_gamma
@@ -371,7 +363,7 @@ def Extract(nxs_filename, recording_dir,
             image=image[ROI[1]:ROI[1]+ROI[3], ROI[0]:ROI[0]+ROI[2]]
             
             # Replace the intensity of the dead zones with a value of 0
-            image=np.where(image<0, 0, image)
+            image=np.where(image<0., 0., image)
             
             # Rod (integration along the horizontal axis)
             rod=image.sum(axis=1)
@@ -905,7 +897,7 @@ def Extract_channel0(nxs_filename='SIRIUS_test.nxs', recording_dir='',
             image=image[ROI[1]:ROI[1]+ROI[3], ROI[0]:ROI[0]+ROI[2]]
             
             # Replace the intensity of the dead zones with a value of 0
-            image=np.where(image<0, 0, image)
+            image=np.where(image<0., 0., image)
             
             # Rod (integration along the horizontal axis)
             rod=image.sum(axis=1)
