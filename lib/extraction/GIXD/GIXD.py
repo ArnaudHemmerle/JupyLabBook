@@ -1056,7 +1056,7 @@ def Calib_thetaz(calib_thetaz_data):
         thetazfactor, factor for conversion from channel to radian in the vertical direction (rad/channel)
     '''
     
-    fig=plt.figure(1)
+    fig=plt.figure(1, figsize=(10,5))
     ax=fig.add_subplot(111)
     xfit=calib_thetaz_data[:,0]
     yfit=calib_thetaz_data[:,1]
@@ -1073,6 +1073,8 @@ def Calib_thetaz(calib_thetaz_data):
     fig.text(0.2, .75, "%3.5g degrees per channel"%(1.0/B))
     fig.text(0.2, .7, "%3.5g radians per channel"%((np.pi/B)/180.0))
 
+    plt.show()
+    
     thetazfactor = (np.pi/B)/180.0
     
     return thetazfactor
