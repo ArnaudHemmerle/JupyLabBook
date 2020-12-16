@@ -205,6 +205,8 @@ def Extract(nxs_filename, recording_dir,
 
     Raises
     ------
+    SystemExit('Nexus not found')
+        when Nexus file not found
     SystemExit('Pilatus not found')
         when Pilatus is not found
     SystemExit('No sensor found')
@@ -218,6 +220,7 @@ def Extract(nxs_filename, recording_dir,
     if not os.path.isfile(nxs_path):
         print(PN._RED+'Scan %s seems not to exist in recording directory'%(nxs_filename)+PN._RESET)
         print(('\t\t recording directory : '+recording_dir))
+        sys.exit('Nexus not found')
         
     else:
         
@@ -235,7 +238,7 @@ def Extract(nxs_filename, recording_dir,
             nexus=PN.PyNexusFile(nxs_path, fast=True)
         except:
             print(PN._RED,'\t Nexus file seems not to exist or is not correct',PN._RESET)
-            return
+            sys.exit('Nexus not found')
         
         nbpts=np.int(nexus.get_nbpts())
         if verbose: print("\t. Number of data points: ", nbpts)
@@ -738,6 +741,8 @@ def Extract_channel0(nxs_filename='SIRIUS_test.nxs', recording_dir='',
 
     Raises
     ------
+    SystemExit('Nexus not found')
+        when Nexus file is not found
     SystemExit('Pilatus not found')
         when Pilatus is not found
     SystemExit('No sensor found')
@@ -752,6 +757,7 @@ def Extract_channel0(nxs_filename='SIRIUS_test.nxs', recording_dir='',
     if not os.path.isfile(nxs_path):
         print(PN._RED+'Scan %s seems not to exist in recording directory'%(nxs_filename)+PN._RESET)
         print(('\t\t recording directory : '+recording_dir))
+        sys.exit('Nexus not found')
         
     else:
         
@@ -769,7 +775,7 @@ def Extract_channel0(nxs_filename='SIRIUS_test.nxs', recording_dir='',
             nexus=PN.PyNexusFile(nxs_path, fast=True)
         except:
             print(PN._RED,'\t Nexus file seems not to exist or is not correct',PN._RESET)
-            return
+            sys.exit('Nexus not found')
         
         nbpts=np.int(nexus.get_nbpts())
         if verbose: print("\t. Number of data points: ", nbpts)
