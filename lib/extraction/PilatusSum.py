@@ -63,6 +63,8 @@ def Treat(nxs_filename, recording_dir,
 
     Raises
     ------
+    SystemExit('Nexus not found')
+        when Nexus file not found
     SystemExit('Pilatus not found')
         when Pilatus is not found
     '''
@@ -83,7 +85,7 @@ def Treat(nxs_filename, recording_dir,
          
 
 def Extract(nxs_filename, recording_dir,
-            show_data_stamps=False, verbose=False):
+            show_data_stamps, verbose):
     '''
     Extract the Pilatus images from the scan and return the sum.
 

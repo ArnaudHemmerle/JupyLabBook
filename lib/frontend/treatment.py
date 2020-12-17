@@ -314,7 +314,15 @@ def Choose(expt):
        
     def on_button_GIXS_clicked(b):
         
-        # Checkboxes for options       
+         # plot
+        try: value = expt.plot
+        except: value = True
+        w_plot = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Plot')
+        
+        # save
+        try: value = expt.save
+        except: value = True
+        w_save = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Save')            
 
         # GIXS_logz
         try: value = expt.GIXS_logz
@@ -408,7 +416,8 @@ def Choose(expt):
                                 options=['viridis', 'jet', 'Greys', 'cividis', 'hot'])
      
                  
-        display(widgets.HBox([w_show_data_stamps, w_verbose, w_show_absorbers, w_GIXS_logz, w_GIXS_cmap, w_pixel_size]))        
+        display(widgets.HBox([w_plot, w_save, w_show_data_stamps, w_verbose, w_show_absorbers,
+                              w_GIXS_logz, w_GIXS_cmap, w_pixel_size]))        
         display(widgets.HBox([w_wavelength, w_distance, w_thetai, w_pixel_PONI_x, w_pixel_PONI_y]))
         display(widgets.HBox([w_force_gamma_delta, w_fgamma, w_fdelta]))
         display(widgets.HBox([w_qxymin, w_qxymax])) 
@@ -417,6 +426,8 @@ def Choose(expt):
         def on_button_plot_clicked(b):
             
             # Pass current values as default values
+            expt.plot = w_plot.value
+            expt.save = w_save.value
             expt.GIXS_logz = w_GIXS_logz.value
             expt.wavelength = w_wavelength.value
             expt.thetai = w_thetai.value
@@ -444,27 +455,31 @@ def Choose(expt):
                     absorbers = Find_absorbers_in_logs(scan, expt)
                 else:
                     absorbers = ''                
-                
-                utils.Create_cell(code='CF.Extract_GIXS(nxs_filename=\''+scan.nxs+'\','+ 
-                       'working_dir=expt.working_dir, recording_dir=expt.recording_dir,'+
-                        'logz='+str(expt.GIXS_logz)+','+
+    
+                utils.Create_cell(code='images_sum, integrated_qxy, integrated_qz, qxy_array, qz_array=\\\n'+ 
+                        'GIXS.Treat(nxs_filename=\''+scan.nxs+'\','+ 
+                        'recording_dir=expt.recording_dir,'+
                         'wavelength='+str(expt.wavelength)+','+
                         'thetai='+str(expt.thetai)+','+
                         'distance='+str(expt.distance)+','+
                         'pixel_PONI_x='+str(expt.pixel_PONI_x)+','+
                         'pixel_PONI_y='+str(expt.pixel_PONI_y)+','+
                         'pixel_size='+str(expt.pixel_size)+','+  
+                        'force_gamma_delta='+str(expt.force_gamma_delta)+','+
+                        'fgamma='+str(expt.fgamma)+','+
+                        'fdelta='+str(expt.fdelta)+','+
                         'qxymin='+str(expt.qxymin)+','+
                         'qxymax='+str(expt.qxymax)+','+
                         'qzmin='+str(expt.qzmin)+','+
                         'qzmax='+str(expt.qzmax)+','+
+                        'absorbers='+'\''+str(absorbers)+'\''+','+                                  
+                        'logz='+str(expt.GIXS_logz)+','+
+                        'cmap=\''+str(expt.GIXS_cmap)+'\''+','+
+                        'working_dir=expt.working_dir,'+
                         'show_data_stamps='+str(expt.show_data_stamps)+','+
-                        'force_gamma_delta='+str(expt.force_gamma_delta)+','+
-                        'fgamma='+str(expt.fgamma)+','+
-                        'fdelta='+str(expt.fdelta)+','+
-                        'verbose='+str(expt.verbose)+','+ 
-                        'absorbers='+'\''+str(absorbers)+'\''+','+
-                        'cmap=\''+str(expt.GIXS_cmap)+'\''+')',
+                        'plot='+str(expt.plot)+', '+
+                        'save='+str(expt.save)+', '+
+                        'verbose='+str(expt.verbose)+')',
                         position='below', celltype='code', is_print = True)
 
                 if len(expt.scans)>1:

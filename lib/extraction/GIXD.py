@@ -137,7 +137,7 @@ def Treat(nxs_filename, recording_dir,
 def Extract(nxs_filename, recording_dir,
             channel0, thetazfactor, wavelength, thetac,
             binsize, computeqz,
-            show_data_stamps=False, verbose=False):
+            show_data_stamps, verbose):
 
     '''
     Extract the nexus scan and return useful quantities for GIXD.
@@ -160,9 +160,9 @@ def Extract(nxs_filename, recording_dir,
         size in pixels of the vertical binning (along qz)
     computeqz : bool
         switch from pixels to qz in the vertical direction
-    show_data_stamps : bool, optional
+    show_data_stamps : bool
         print the list of sensors from the nexus file
-    verbose : bool, optional
+    verbose : bool
         verbose mode
 
 

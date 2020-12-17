@@ -10,14 +10,15 @@ from PIL import Image
 import os
 import sys
 
-def Extract(nxs_filename, recording_dir,
-            wavelength, thetai, distance,
-            pixel_PONI_x, pixel_PONI_y, pixel_size,
-            force_gamma_delta, fgamma, fdelta,
-            show_data_stamps=False, verbose=False):
 
+def Treat(nxs_filename, recording_dir,
+          wavelength, thetai, distance,
+          pixel_PONI_x, pixel_PONI_y, pixel_size,
+          force_gamma_delta=False, fgamma=0., fdelta=0.,
+          qxymin=0., qxymax=1., qzmin=0., qzmax=1., absorbers='', logz=True, cmap='viridis',
+          working_dir='', show_data_stamps=False,  plot=False, save=False, verbose=False):
     '''
-    Extract the nexus scan and return useful quantities for GIXD.
+    Call functions for extracting, plotting, and saving a GIXS scan.
 
     Parameters
     ----------
@@ -25,18 +26,126 @@ def Extract(nxs_filename, recording_dir,
         nexus filename
     recording_dir : str
         directory where the nexus file is stored
-    channel0 : float
-        vertical channel corresponding to the Vineyard's peak
-    thetazfactor : float
-        factor for conversion from channel to radian in the vertical direction (rad/channel)
     wavelength : float
         wavelength in nm
-    thetac : float
-        critical angle in rad
-    binsize : int
-        size in pixels of the vertical binning (along qz)
-    computeqz : bool
-        switch from pixels to qz in the vertical direction
+    thetai : float
+        incident angle on the sample in rad
+    distance : float
+        distance from the detector to the center of the sample in mm
+    pixel_PONI_x : float
+        horizontal coordinate of the Point Of Normal Incidence in pixels. Measured on the
+        direct beam at delta=0 and gamma=0
+    pixel_PONI_y : float
+        vertical coordinate of the Point Of Normal Incidence in pixels. Measured on the
+        direct beam at delta=0 and gamma=0    
+    pixel_size : float
+        pixel size in microns
+    force_gamma_delta : bool, optional
+        enforce the value of gamma and delta 
+    fgamma : float, optional
+        value of gamma (deg) to be used if force_gamma_delta is True or if gamma is absent from the sensor list
+    fdelta : float, optional
+        value of delta (deg) to be used if force_gamma_delta is True or if delta is absent from the sensor list       
+    qxymin : float, optional
+        min limit of the vertical profile plot (integrated over the horizontal axis)
+    qxymax : float, optional
+        max limit of the vertical profile plot (integrated over the horizontal axis)
+    qzmin : float, optional
+        min limit of the horizontal profile plot (integrated over the vertical axis)
+    qzmax : float, optional
+        max limit of the horizontal profile plot (integrated over the vertical axis)
+    absorbers : str, optional
+        text to display indicating which absorber was used
+    logz : bool, optional
+        log on the image
+    cmap : str, optional
+        colormap of the image
+    working_dir : str, optional
+        directory where the treated files will be stored
+    show_data_stamps : bool, optional
+        print the list of sensors from the nexus file
+    plot : bool, optional
+        plot the GIXD
+    save : bool, optional
+        save the GIXD
+    verbose : bool, optional
+        verbose mode
+
+    Returns
+    -------
+    array_like
+        images_sum, the Pilatus image integrated over the scan (usually time)
+    array_like
+        integrated_qxy, an array containing the profile integrated along the horizontal axis  
+    array_like
+        integrated_qz, an array containing the profile integrated along the vertical axis
+    array_like
+        qxy_array, an array containing the list of qxy
+    array_like
+        qz_array, an array containing the list of qz
+
+
+    Raises
+    ------
+    SystemExit('Nexus not found')
+        when Nexus file not found
+    SystemExit('Pilatus not found')
+        when Pilatus is not found
+    '''
+    images_sum, qxy, qz, integrated_qxy, integrated_qz, qxy_array, qz_array, prt_gamma, prt_delta = \
+    Extract(nxs_filename, recording_dir, wavelength, thetai, distance,
+            pixel_PONI_x, pixel_PONI_y, pixel_size, force_gamma_delta, fgamma, fdelta,
+            show_data_stamps, verbose)
+
+    if plot:
+        Plot(images_sum, qxy, qz,
+             integrated_qxy, integrated_qz, qxy_array, qz_array,
+             nxs_filename, absorbers, logz, cmap,
+             qxymin, qxymax, qzmin, qzmax, prt_gamma, prt_delta)
+
+    if save:
+        Save(images_sum,
+             integrated_qxy, integrated_qz, qxy_array, qz_array,
+             nxs_filename, working_dir, verbose)
+        
+    return images_sum, integrated_qxy, integrated_qz, qxy_array, qz_array   
+
+
+def Extract(nxs_filename, recording_dir,
+            wavelength, thetai, distance,
+            pixel_PONI_x, pixel_PONI_y, pixel_size,
+            force_gamma_delta, fgamma, fdelta,
+            show_data_stamps, verbose):
+
+    '''
+    Extract the nexus scan and return useful quantities for GIXS.
+
+    Parameters
+    ----------
+    nxs_filename : str
+        nexus filename
+    recording_dir : str
+        directory where the nexus file is stored
+    wavelength : float
+        wavelength in nm
+    thetai : float
+        incident angle on the sample in rad
+    distance : float
+        distance from the detector to the center of the sample in mm
+    pixel_PONI_x : float
+        horizontal coordinate of the Point Of Normal Incidence in pixels. Measured on the
+        direct beam at delta=0 and gamma=0
+    pixel_PONI_y : float
+        vertical coordinate of the Point Of Normal Incidence in pixels. Measured on the
+        direct beam at delta=0 and gamma=0    
+    pixel_size : float
+        pixel size in microns
+    force_gamma_delta : bool, optional
+        enforce the value of gamma and delta 
+    fgamma : float, optional
+        value of gamma (deg) to be used if force_gamma_delta is True or if gamma is absent from the sensor list
+    fdelta : float, optional
+        value of delta (deg) to be used if force_gamma_delta is True or if delta is absent from the sensor list       
     show_data_stamps : bool, optional
         print the list of sensors from the nexus file
     verbose : bool, optional
@@ -46,38 +155,23 @@ def Extract(nxs_filename, recording_dir,
     Returns
     -------
     array_like
-        x, an array containing either qxy (nm^-1) values, if qxy is available in the list of sensors,
-        or delta (deg) if not
+        images_sum, the Pilatus image integrated over the scan (usually time)
     array_like
-        y, an array containing either qz (nm^-1) values, if computeqz is True,
-        or vertical channels if not        
+        qxy, the 2D grid of qxy for 2D plots
+    array_like
+        qz, the 2D grid of qz for 2D plots
+    array_like
+        integrated_qxy, an array containing the profile integrated along the horizontal axis  
+    array_like
+        integrated_qz, an array containing the profile integrated along the vertical axis
+    array_like
+        qxy_array, an array containing the list of qxy
+    array_like
+        qz_array, an array containing the list of qz
     str
-        xlabel, indicating whether x corresponds to qxy or delta (useful for plot)            
+        prt_gamma, a label indicating the value of gamma (for plot)
     str
-        ylabel, indicating whether y corresponds to qz or channels (useful for plot)           
-    int
-        column_x, the column corresponding to the x values in stamps0D (useful for save)            
-    array_like
-        daty, rods integrated over the whole vertical axis of the detector            
-    array_like
-        datyTop, rods integrated over the top half vertical axis of the detector            
-    array_like
-        datyBottom, rods integrated over the bottom half vertical axis of the detector     
-    array_like
-        datyFirstQuarter, rods integrated over the bottom quarter vertical axis of the detector                        
-    array_like
-        mat, each line corresponds to a position of delta.
-        It is the matrix corresponding to the image displayed in plot            
-    array_like
-        mat_binned, original matrix after binning            
-    array_like
-        ch_binned, array of channels after binning            
-    float or None
-        mean_pi, the average of the surface pressure (mN/m) over the scan (None if pressure not found)            
-    float or None
-        mean_area, the average of the area per molecule (nm^2) over the scan (None if area not found)        
-    float or None
-        mean_gamma, the average of gamma (deg) over the scan (None if gamma not found)
+        prt_delta, a label indicating the value of delta (for plot)        
 
 
     Raises
@@ -86,10 +180,6 @@ def Extract(nxs_filename, recording_dir,
         when Nexus file is not found
     SystemExit('Pilatus not found')
         when Pilatus is not found
-    SystemExit('No sensor found')
-        when delta and qxy are not found
-    SystemExit('gamma not found')
-        when gamma not found and computeqz is True
     '''
         
     nxs_path = recording_dir+nxs_filename
@@ -174,18 +264,18 @@ def Extract(nxs_filename, recording_dir,
 
         if (i_gamma != None) and (force_gamma_delta==False):
             gamma = np.mean(data[i_gamma])
-            print(PN._RED,'\t. Gamma found. gamma = %3.4g deg'%(gamma), PN._RESET)
+            prt_gamma = '\t. Gamma found. gamma = %3.4g deg'%(gamma)        
         else:
             gamma = fgamma
-            print("")
-            print(PN._RED,'\t. No gamma found! gamma = %g'%gamma, PN._RESET)
+            prt_gamma = '\t. Gamma is forced to the value : gamma = %g'%gamma
+            
         if (i_delta != None) and (force_gamma_delta==False):
             delta = np.mean(data[i_delta])
-            print(PN._RED,'\t. Delta found. delta = %3.4g deg'%(delta), PN._RESET)
+            prt_delta = '\t. Delta found. delta = %3.4g deg'%(delta)          
         else:
             delta = fdelta
-            print(PN._RED,'\t. No delta found! delta = %g'%delta, PN._RESET)
-
+            prt_delta = '\t. Delta is forced to the value : delta = %g'%delta
+            
         if verbose: 
             print('\t. For more details on the geometry, see:')
             print('\t \t -Fig.2 in doi:10.1107/S0909049512022017')
@@ -218,7 +308,8 @@ def Extract(nxs_filename, recording_dir,
         # q in nm^-1
         k0 = 2*np.pi/wavelength
         qz = k0*(np.sin(alphaf)+np.sin(alphai))
-        qxy_approx = 2*k0*np.sin(twotheta/2.)
+        # Careful, qxy is here computed in the approx. of small exit angles
+        qxy = 2*k0*np.sin(twotheta/2.)
 
         # True values of q (not used here)
         #qx = k0*(np.cos(alphaf)*np.cos(twotheta)-np.cos(alphai))
@@ -240,25 +331,34 @@ def Extract(nxs_filename, recording_dir,
         # Careful, approx. qxy=4*pi/lambda*sin(2*theta/2)
         qxy_array = 4*np.pi/wavelength*np.sin(twotheta_array/2.)
         
-        return images_sum, qxy_approx, qz,\
-               integrated_qxy, integrated_qz, qxy_array, qz_array
+        return images_sum, qxy, qz,\
+               integrated_qxy, integrated_qz, qxy_array, qz_array,\
+               prt_gamma, prt_delta
     
     
-def Plot(images_sum, qxy_approx, qz,
+def Plot(images_sum, qxy, qz,
          integrated_qxy, integrated_qz, qxy_array, qz_array,
          nxs_filename, absorbers, logz, cmap,
-         qxymin, qxymax, qzmin, qzmax):
+         qxymin, qxymax, qzmin, qzmax, prt_gamma, prt_delta):
     '''
     Plot the integrated image and the corresponding profiles.
-    
+
     Parameters
     ----------
     images_sum : array_like
         the 2D image to plot
-    integrated_x : array_like
+    qxy : array_like
+        the 2D grid of qxy
+    qz : array_like
+        the 2D grid of qz
+    integrated_qxy : array_like
         the profile integrated along the horizontal axis  
-    integrated_y : array_like
+    integrated_qz : array_like
         the profile integrated along the vertical axis  
+    qxy_array : array_like
+        the list of qxy
+    qz_array : array_like
+        the list of qz
     nxs_filename : str
         nexus filename
     absorbers : str
@@ -267,19 +367,26 @@ def Plot(images_sum, qxy_approx, qz,
         log on the image
     cmap : str
         colormap of the image
-    xmin : float
+    qxymin : float
         min limit of the vertical profile plot (integrated over the horizontal axis)
-    xmax : float
+    qxymax : float
         max limit of the vertical profile plot (integrated over the horizontal axis)
-    ymin : float
+    qzmin : float
         min limit of the horizontal profile plot (integrated over the vertical axis)
-    ymax : float
+    qzmax : float
         max limit of the horizontal profile plot (integrated over the vertical axis)
+    prt_gamma : str
+        label indicating the value of gamma    
+    prt_delta : str
+        label indicating the value of delta
     '''    
     # Print absorbers
     if absorbers != '':
         print("\t. Absorbers:", str(absorbers))                 
    
+    print(PN._RED, prt_gamma, PN._RESET)
+    print(PN._RED, prt_delta, PN._RESET)
+
     fig = plt.figure(figsize=(15,15))
     fig.subplots_adjust(top=0.95)
     fig.suptitle(nxs_filename.split('\\')[-1], fontsize='x-large')
@@ -339,9 +446,68 @@ def Plot(images_sum, qxy_approx, qz,
     # Show the full image integrated over the scan
     ax2 = fig.add_subplot(inner[0])
 
-    ax2.pcolormesh(qxy_approx, qz, images_sum, cmap = cmap, shading = 'auto',
+    ax2.pcolormesh(qxy, qz, images_sum, cmap = cmap, shading = 'auto',
                    norm = colors.LogNorm(), rasterized=True)
     ax2.set_xlabel('qxy (nm^-1)', fontsize='large')
     ax2.set_ylabel('qz (nm^-1)', fontsize='large')       
 
     plt.show()   
+    
+def Save(images_sum,
+         integrated_qxy, integrated_qz, qxy_array, qz_array,
+         nxs_filename, working_dir, verbose):    
+    '''
+    Save.
+    XXX_pilatus_sum.mat: the matrix corresponding to the image displayed, in ascii.
+    XXX_pilatus_sum.tiff: the matrix corresponding to the image displayed, in tiff.
+
+    XXX_integrated_qxy.dat: horizontal integration of the whole detector as a function of qz (nm-1).
+    XXX_integrated_qz.dat: vertical integration of the whole detector as a function of qxy (nm-1).
+
+    Parameters
+    ----------
+    images_sum : array_like
+        the 2D image to plot
+    integrated_qyx : array_like
+        the profile integrated along the horizontal axis  
+    integrated_qz : array_like
+        the profile integrated along the vertical axis  
+    qxy_array : array_like
+        the list of qxy
+    qz_array : array_like
+        the list of qz    
+    nxs_filename : str
+        nexus filename
+    working_dir : str
+        directory where the treated files will be stored
+    verbose : bool
+        verbose mode
+    '''
+
+    savename = working_dir + nxs_filename[:nxs_filename.rfind('.nxs')]
+
+
+    ######################################################
+    # Save the profiles and the raw image
+    np.savetxt(savename+'_integrated_qz.dat', np.transpose([qxy_array, integrated_qz]),
+               delimiter = '\t', comments='', header ='Qxy'+'\t'+'QzIntegrated')
+    np.savetxt(savename+'_integrated_qxy.dat', np.transpose([qz_array, integrated_qxy]),
+               delimiter = '\t', comments='', header ='Qz'+'\t'+'QxyIntegrated')
+    np.savetxt(savename+'_pilatus_sum.mat', images_sum)
+
+    im = Image.fromarray(images_sum)
+    im.save(savename+'_pilatus_sum.tiff')
+
+    if verbose:
+        print('\t. Integrated qz vs qxy:')
+        print("\t", savename+'_integrated_qz.dat')
+        print(" ")
+        print('\t. Integrated qxy vs qz:')
+        print("\t", savename+'_integrated_qxy.dat')
+        print(" ")  
+        print('\t. Original matrix saved in:')
+        print("\t", savename+'.mat')
+        print(" ")
+        print('\t. Tiff saved in:')
+        print("\t", savename+'.tiff')
+        print(" ")
