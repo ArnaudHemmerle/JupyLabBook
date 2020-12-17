@@ -4,8 +4,6 @@ from lib.extraction.common import PyNexus as PN
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
-import matplotlib.colors as colors
 import os
 import sys
 import io
