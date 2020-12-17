@@ -457,26 +457,26 @@ def Choose(expt):
                     absorbers = ''                
     
                 utils.Create_cell(code='images_sum, integrated_qxy, integrated_qz, qxy_array, qz_array=\\\n'+ 
-                        'GIXS.Treat(nxs_filename=\''+scan.nxs+'\','+ 
-                        'recording_dir=expt.recording_dir,'+
-                        'wavelength='+str(expt.wavelength)+','+
-                        'thetai='+str(expt.thetai)+','+
-                        'distance='+str(expt.distance)+','+
-                        'pixel_PONI_x='+str(expt.pixel_PONI_x)+','+
-                        'pixel_PONI_y='+str(expt.pixel_PONI_y)+','+
-                        'pixel_size='+str(expt.pixel_size)+','+  
-                        'force_gamma_delta='+str(expt.force_gamma_delta)+','+
-                        'fgamma='+str(expt.fgamma)+','+
-                        'fdelta='+str(expt.fdelta)+','+
-                        'qxymin='+str(expt.qxymin)+','+
-                        'qxymax='+str(expt.qxymax)+','+
-                        'qzmin='+str(expt.qzmin)+','+
-                        'qzmax='+str(expt.qzmax)+','+
-                        'absorbers='+'\''+str(absorbers)+'\''+','+                                  
-                        'logz='+str(expt.GIXS_logz)+','+
-                        'cmap=\''+str(expt.GIXS_cmap)+'\''+','+
-                        'working_dir=expt.working_dir,'+
-                        'show_data_stamps='+str(expt.show_data_stamps)+','+
+                        'GIXS.Treat(nxs_filename=\''+scan.nxs+'\', '+ 
+                        'recording_dir=expt.recording_dir, '+
+                        'wavelength='+str(expt.wavelength)+', '+
+                        'thetai='+str(expt.thetai)+', '+
+                        'distance='+str(expt.distance)+', '+
+                        'pixel_PONI_x='+str(expt.pixel_PONI_x)+', '+
+                        'pixel_PONI_y='+str(expt.pixel_PONI_y)+', '+
+                        'pixel_size='+str(expt.pixel_size)+', '+  
+                        'force_gamma_delta='+str(expt.force_gamma_delta)+', '+
+                        'fgamma='+str(expt.fgamma)+', '+
+                        'fdelta='+str(expt.fdelta)+', '+
+                        'qxymin='+str(expt.qxymin)+', '+
+                        'qxymax='+str(expt.qxymax)+', '+
+                        'qzmin='+str(expt.qzmin)+', '+
+                        'qzmax='+str(expt.qzmax)+', '+
+                        'absorbers='+'\''+str(absorbers)+'\''+', '+                                  
+                        'logz='+str(expt.GIXS_logz)+', '+
+                        'cmap=\''+str(expt.GIXS_cmap)+'\''+', '+
+                        'working_dir=expt.working_dir, '+
+                        'show_data_stamps='+str(expt.show_data_stamps)+', '+
                         'plot='+str(expt.plot)+', '+
                         'save='+str(expt.save)+', '+
                         'verbose='+str(expt.verbose)+')',
@@ -714,7 +714,17 @@ def Choose(expt):
         display(widgets.HBox([button_identify_peaks, button_plot]))
     
     def on_button_isotherm_clicked(b):
-            
+        
+         # plot
+        try: value = expt.plot
+        except: value = True
+        w_plot = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Plot')
+        
+        # save
+        try: value = expt.save
+        except: value = True
+        w_save = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Save')            
+        
         # show_data_stamps
         try: value = expt.show_data_stamps
         except: value = False
@@ -731,23 +741,28 @@ def Choose(expt):
         w_fastextract = widgets.Checkbox(value=value, style=style, layout=tiny_layout, description='Fast extract')
 
         
-        display(widgets.HBox([w_show_data_stamps, w_verbose, w_fastextract]))   
+        display(widgets.HBox([w_plot, w_save, w_show_data_stamps, w_verbose, w_fastextract]))   
         
         def on_button_plot_clicked(b):
 
             # Pass current values as default values
+            expt.plot = w_plot.value
+            expt.save = w_save.value
             expt.show_data_stamps = w_show_data_stamps.value
             expt.verbose = w_verbose.value
             expt.fastextract = w_fastextract.value
 
             for scan in expt.scans:
-
-                utils.Create_cell(code='CF.Plot_isotherm(nxs_filename=\''+scan.nxs+'\','+
-                            'working_dir=expt.working_dir,recording_dir=expt.recording_dir,'+
-                            'show_data_stamps='+str(w_show_data_stamps.value)+
-                            ', verbose='+str(w_verbose.value)+', '+
-                            'fast='+str(w_fastextract.value)+')',
-                            position='below', celltype='code', is_print = True)
+                
+                utils.Create_cell(code='area, pressure, time =\\\n'+
+                                  'Isotherm.Treat(nxs_filename=\''+scan.nxs+'\', '+
+                                  'recording_dir=expt.recording_dir, working_dir=expt.working_dir, '+
+                                  'fast='+str(w_fastextract.value)+', '+
+                                  'show_data_stamps='+str(w_show_data_stamps.value)+', '+
+                                  'plot='+str(expt.plot)+', '+
+                                  'save='+str(expt.save)+', '+
+                                  'verbose='+str(w_verbose.value)+')',
+                                 position='below', celltype='code', is_print = True)
 
                 if len(expt.scans)>1:
                     utils.Create_cell(code='### '+scan.id+': '+scan.command,

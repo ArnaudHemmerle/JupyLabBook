@@ -336,7 +336,8 @@ def Extract(nxs_filename, recording_dir,
                 sys.exit('gamma not found')
 
         # Load images
-        stamps, images=nexus.extractData('2D')
+        stamps, images=nexus.extractData('2D')        
+        nexus.close()
         
         # Get positions of the dead pixels
         try:
