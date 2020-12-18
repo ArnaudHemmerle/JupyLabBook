@@ -248,23 +248,40 @@ def ResidualsNormFunction(params, x, y):
     return y-NormalFunction(x, mu, sigma, A,B, C)
 
 def GaussianFit(nxs_filename, recording_dir,
-                xLabel='', yLabel='', xlog=False, ylog=False, verbose=False):
+                xLabel='', yLabel='', verbose=False):
     
-    """ 
-    Fit the scan by a Gaussian function.
-    
-    Input parameters:
-        nxs_filename : scan to fit, SIRIUS_year_month_day_index.nxs
-        recording_dir : recording directory
-        x : alias of the x-axis to use
-        y : alias of the y-axis to use
-        xlog : x-axis in log scale
-        ylog : y-axis in log scale
-        verbose : give details of the fit result
-        
-    Output :
-        None
-    """
+    '''
+    Fit sensor_x vs sensor_y with a Gaussian.
+
+    Parameters
+    ----------
+    nxs_filename : str
+        nexus filename
+    recording_dir : str
+        directory where the nexus file is stored
+    xLabel : str
+        exact name of the x sensor, as it appears in the data stamps
+    yLabel : str
+        exact name of the y sensor, as it appears in the data stamps        
+    verbose : bool, optional
+        verbose mode
+
+    Returns
+    -------
+    array_like
+        xData, an array containing the list of x values
+    array_like
+        yData, an array containing the list of y values
+    array_like
+        yFit, an array containing the list of fitted y values
+
+    Raises
+    ------
+    SystemExit('Nexus not found')
+        when Nexus file not found
+    SystemExit('Sensor not found')
+        when sensor not found
+    '''
     
     xData, yData = Extract(nxs_filename, recording_dir, xLabel, yLabel, show_data_stamps=False, verbose=verbose)
 
@@ -284,21 +301,26 @@ def GaussianFit(nxs_filename, recording_dir,
                    ('sigma',np.abs(xData.max()-xData.min())/3., True, 0.0, xData.max()-xData.min(), None),
                    ('mu', (xData.min()+xData.max())/2., True, xData.min(), xData.max(), None),
                    )
-    # Plot first guess
-    #ax.plot(xData,NormalFunction(xData,fitparams['mu'], fitparams['sigma'], fitparams['Linear_Cste'], fitparams['Linear_Coeff'], fitparams['Amplitude']), 'k--', lw=1)
+    
     # Fit initialisation and fit
     fitter = lm.Minimizer(ResidualsNormFunction, fitparams, fcn_args=(xData, yData))
-    result=fitter.minimize()
+    result=fitter.minimize()   
+
     # Print result if asked via verbose
     if verbose:
-        print(lm.fit_report(result))
-        
+        print(lm.fit_report(result))    
+
+    yFit = NormalFunction(xData,result.params['mu'], result.params['sigma'],
+                          result.params['Linear_Cste'], result.params['Linear_Coeff'], result.params['Amplitude'])
+    
+                
+    # Plot first guess
+    #ax.plot(xData,NormalFunction(xData,fitparams['mu'], fitparams['sigma'], fitparams['Linear_Cste'], fitparams['Linear_Coeff'], fitparams['Amplitude']), 'k--', lw=1)
         
     # plot the fitted data
     ax.plot(xData, yData, 'o-', label=nxs_filename[nxs_filename.rfind('_')+1:nxs_filename.rfind('.')])
     # plot the fit result
-    ax.plot(xData,NormalFunction(xData,result.params['mu'], result.params['sigma'], result.params['Linear_Cste'],
-                                result.params['Linear_Coeff'], result.params['Amplitude']), 'r-', lw=2)
+    ax.plot(xData, yFit, 'r-', lw=2)
     ax.legend(fontsize=16)
     ax.set_xlabel(xLabel, fontsize=16)
     ax.set_ylabel(yLabel, fontsize=16)
@@ -308,6 +330,7 @@ def GaussianFit(nxs_filename, recording_dir,
     
     plt.show()
 
+    return xData, yData, yFit
     
 
 def NormRepFunction(x, mu, sigma, Amp, Cst, sens):
@@ -327,22 +350,39 @@ def ResidualsNormRepFunction(params, x, y, sens):
     
     
 def GaussianRepartitionFit(nxs_filename, recording_dir,
-                            xLabel='', yLabel='', xlog=False, ylog=False, verbose=False):
-    """ 
-    Fit the scan by the repartition function of a Normal distribution (Gaussian Beam).
-    
-    Input parameters:
-        nxs_filename : scan to fit, SIRIUS_year_month_day_index.nxs
-        recording_dir : recording directory
-        x : alias of the x-axis to use
-        y : alias of the y-axis to use
-        xlog : x-axis in log scale
-        ylog : y-axis in log scale
-        verbose : give details of the fit result
-        
-    Output :
-        None
-    """  
+                            xLabel='', yLabel='', verbose=False):
+    '''
+    Fit sensor_x vs sensor_y with an Erf function.
+
+    Parameters
+    ----------
+    nxs_filename : str
+        nexus filename
+    recording_dir : str
+        directory where the nexus file is stored
+    xLabel : str
+        exact name of the x sensor, as it appears in the data stamps
+    yLabel : str
+        exact name of the y sensor, as it appears in the data stamps        
+    verbose : bool, optional
+        verbose mode
+
+    Returns
+    -------
+    array_like
+        xData, an array containing the list of x values
+    array_like
+        yData, an array containing the list of y values
+    array_like
+        yFit, an array containing the list of fitted y values
+
+    Raises
+    ------
+    SystemExit('Nexus not found')
+        when Nexus file not found
+    SystemExit('Sensor not found')
+        when sensor not found
+    '''
     
     xData, yData = Extract(nxs_filename, recording_dir, xLabel, yLabel, show_data_stamps=False, verbose=verbose)
         
@@ -367,23 +407,28 @@ def GaussianRepartitionFit(nxs_filename, recording_dir,
                    ('mu', (xData.min()+xData.max())/2., True, xData.min(), xData.max(), None),
                    )
     
+    # Fit initialisation and fit
+    fitter = lm.Minimizer(ResidualsNormRepFunction, fitparams, fcn_args=(xData, yData, sens))
+    result=fitter.minimize()
+    # Print result if asked via verbose
+    if verbose:
+        print(lm.fit_report(result))    
+        
+    yFit = NormRepFunction(xData,result.params['mu'], result.params['sigma'],
+                           result.params['Amplitude'], result.params['Constant_Coeff'], sens)
+    
+
     # Create the graph
     fig=plt.figure(1)
     ax=fig.add_subplot(111)
     
     # Plot first guess
     #ax.plot(xData,NormRepFunction(xData,fitparams['mu'], fitparams['sigma'], fitparams['Amplitude'], fitparams['Constant_Coeff'], sens), 'k--', lw=1)
-    # Fit initialisation and fit
-    fitter = lm.Minimizer(ResidualsNormRepFunction, fitparams, fcn_args=(xData, yData, sens))
-    result=fitter.minimize()
-    # Print result if asked via verbose
-    if verbose:
-        print(lm.fit_report(result))
+
     # Plot the fitted data
     ax.plot(xData, yData, 'o-', label=nxs_filename[nxs_filename.rfind('_')+1:nxs_filename.rfind('.')])
     # Plot the fit result
-    ax.plot(xData,NormRepFunction(xData,result.params['mu'], result.params['sigma'], result.params['Amplitude'],
-                                 result.params['Constant_Coeff'], sens), 'r-', lw=2)
+    ax.plot(xData, yFit, 'r-', lw=2)
 
     # Plot the associated gaussian function
     ax2=ax.twinx()
@@ -401,4 +446,6 @@ def GaussianRepartitionFit(nxs_filename, recording_dir,
     ax.set_title('Normal Repartition Function Fit', fontsize=14)
     
     plt.show()
+    
+    return xData, yData, yFit
     

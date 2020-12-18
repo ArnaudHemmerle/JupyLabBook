@@ -798,9 +798,12 @@ def Choose(expt):
         
     def on_button_fit_erf_clicked(b):
         scan = expt.scans[0]
-        Utils.Create_cell(code='Sensors1D.GaussianRepartitionFit('+
-                        'nxs_filename=\''+scan.nxs+'\', recording_dir = expt.recording_dir,'+
-                        'xLabel=\''+scan.xLabel+'\', yLabel=\''+scan.yLabel+'\')',
+        Utils.Create_cell(code='xData, yData, yFit =\\\n'+
+                         'Sensors1D.GaussianRepartitionFit('+
+                         'nxs_filename=\''+scan.nxs+'\', recording_dir = expt.recording_dir,'+
+                         'xLabel=\''+scan.xLabel+'\', '+
+                         'yLabel=\''+scan.yLabel+'\', '+
+                         'verbose=False)',
                     position='below', celltype='code', is_print = True)  
 
         # Do as if the button next was clicked
@@ -809,9 +812,12 @@ def Choose(expt):
     def on_button_fit_gau_clicked(b):
         
         scan = expt.scans[0]
-        Utils.Create_cell(code='Sensors1D.GaussianFit('+
+        Utils.Create_cell(code='xData, yData, yFit =\\\n'+
+                         'Sensors1D.GaussianFit('+
                          'nxs_filename=\''+scan.nxs+'\', recording_dir = expt.recording_dir,'+
-                         'xLabel=\''+scan.xLabel+'\', yLabel=\''+scan.yLabel+'\')',
+                         'xLabel=\''+scan.xLabel+'\', '+
+                         'yLabel=\''+scan.yLabel+'\', '+
+                         'verbose=False)',
                     position='below', celltype='code', is_print = True)   
         
         # Do as if the button next was clicked
