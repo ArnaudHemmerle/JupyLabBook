@@ -1,4 +1,4 @@
-from . import utils
+from . import Utils
 from lib.extraction.common import PyNexus as PN
 
 import os
@@ -56,7 +56,7 @@ def Check_and_init(expt):
         print("This file contains the template for generating PDF and should be placed in the same folder as the notebook.")
         print("") 
         
-    utils.Create_cell(code='FE.action.Choose(expt)', position ='at_bottom', celltype='code', is_print=False)    
+    Utils.Create_cell(code='FE.Action.Choose(expt)', position ='at_bottom', celltype='code', is_print=False)    
 
 def Choose(expt):
     '''
@@ -112,14 +112,14 @@ def Choose(expt):
         """
         #clear_output(wait=False)
         
-        utils.Create_cell(code='FE.treatment.Choose(expt)',
+        Utils.Create_cell(code='FE.Treatment.Choose(expt)',
                     position ='below', celltype='code', is_print=False)
 
         if len(expt.scans)==1:
-            utils.Create_cell(code='### '+expt.scans[0].id+': '+expt.scans[0].command,
+            Utils.Create_cell(code='### '+expt.scans[0].id+': '+expt.scans[0].command,
                         position ='below', celltype='markdown', is_print=True)
             
-        utils.Delete_current_cell()
+        Utils.Delete_current_cell()
 
         
     def on_button_refresh_clicked(b):
@@ -127,7 +127,7 @@ def Choose(expt):
         Re-execute the cell to update it.
         """
         
-        utils.Refresh_current_cell()
+        Utils.Refresh_current_cell()
         
     def on_button_convert_logs_clicked(b):
         """
@@ -141,7 +141,7 @@ def Choose(expt):
         """
         #clear_output(wait=False)
         
-        utils.Create_cell(code=
+        Utils.Create_cell(code=
                     'calib_thetaz_data=np.array(['+'\n'+
                     '# gamma  channel'+'\n'+     
                     '[0,      970],'+'\n'+
@@ -155,22 +155,22 @@ def Choose(expt):
                     'expt.thetazfactor=GIXD.Calib_thetaz(calib_thetaz_data)',
                     position='below', celltype='code', is_print = True)
         
-        utils.Create_cell(code='## Calibration thetaz', position='below', celltype='markdown', is_print = True)
+        Utils.Create_cell(code='## Calibration thetaz', position='below', celltype='markdown', is_print = True)
         
 
-        utils.Create_cell(code='FE.action.Choose(expt)', position ='at_bottom', celltype='code', is_print=False)        
+        Utils.Create_cell(code='FE.Action.Choose(expt)', position ='at_bottom', celltype='code', is_print=False)        
 
-        utils.Delete_current_cell()
+        Utils.Delete_current_cell()
         
     def on_button_form_clicked(b):
         """
         Create a form.
         """
         #clear_output(wait=False)
-        utils.Create_cell(code='FE.action.Create_form()',position ='below', celltype='code', is_print=False)
-        utils.Create_cell(code='FE.action.Choose(expt)', position ='at_bottom', celltype='code', is_print=False)        
+        Utils.Create_cell(code='FE.Action.Create_form()',position ='below', celltype='code', is_print=False)
+        Utils.Create_cell(code='FE.Action.Choose(expt)', position ='at_bottom', celltype='code', is_print=False)        
          
-        utils.Delete_current_cell()
+        Utils.Delete_current_cell()
             
     def on_button_wm_clicked(b):
         """
@@ -208,11 +208,11 @@ def Choose(expt):
         Insert a markdown cell below the current cell.
         """ 
         
-        utils.Delete_current_cell()
+        Utils.Delete_current_cell()
         
-        utils.Create_cell(code='', position ='below', celltype='markdown', is_print=True, is_execute=False)
+        Utils.Create_cell(code='', position ='below', celltype='markdown', is_print=True, is_execute=False)
     
-        utils.Create_cell(code='FE.action.Choose(expt)', position ='at_bottom', celltype='code', is_print=False)
+        Utils.Create_cell(code='FE.Action.Choose(expt)', position ='at_bottom', celltype='code', is_print=False)
         
     def on_button_script_clicked(b):
         """
@@ -308,7 +308,7 @@ def Export_nb_to_pdf(nb_name):
     '''
     
     # Save the current state of the notebook (including the widgets)
-    utils.Save_nb()
+    Utils.Save_nb()
     
     t0 = time.time()
     rc = 1
@@ -656,12 +656,12 @@ def Create_form():
         txt.reverse()
         
         for elem in txt:
-            utils.Create_cell(code=elem, position ='below', celltype='markdown', is_print=True)
+            Utils.Create_cell(code=elem, position ='below', celltype='markdown', is_print=True)
         
-        utils.Create_cell(code='# Experimental setup', position ='below', celltype='markdown', is_print=True)
+        Utils.Create_cell(code='# Experimental setup', position ='below', celltype='markdown', is_print=True)
         
         # Remove the widget when done
-        utils.Delete_current_cell()
+        Utils.Delete_current_cell()
         
     button = widgets.Button(description="Print form")
     out = widgets.Output()
@@ -781,14 +781,14 @@ def Print_wm(expt):
 
             for sensor_str in list_sensors_str[::-1]:
                 # Create markdown cells with the tables
-                utils.Create_cell(code=sensor_str, position ='below', celltype='markdown', is_print=True)
+                Utils.Create_cell(code=sensor_str, position ='below', celltype='markdown', is_print=True)
 
             # Put title    
-            utils.Create_cell(code='### '+w_select_wm.value.split('; ')[1], position ='below', celltype='markdown', is_print=True)
+            Utils.Create_cell(code='### '+w_select_wm.value.split('; ')[1], position ='below', celltype='markdown', is_print=True)
             
-            utils.Delete_current_cell()
+            Utils.Delete_current_cell()
         
-            utils.Create_cell(code='FE.action.Choose(expt)',
+            Utils.Create_cell(code='FE.Action.Choose(expt)',
                         position ='at_bottom', celltype='code', is_print=False)  
             
         button = widgets.Button(description="Insert positions")
@@ -934,12 +934,12 @@ def Print_script(expt):
             
             code = '```python\n'+script_modif+'```'
 
-            utils.Create_cell(code='### '+ script_name, position ='above', celltype='markdown', is_print=True)
-            utils.Create_cell(code=code, position ='above', celltype='markdown', is_print=True)
+            Utils.Create_cell(code='### '+ script_name, position ='above', celltype='markdown', is_print=True)
+            Utils.Create_cell(code=code, position ='above', celltype='markdown', is_print=True)
             
-            utils.Delete_current_cell()
+            Utils.Delete_current_cell()
         
-            utils.Create_cell(code='FE.action.Choose(expt)',
+            Utils.Create_cell(code='FE.Action.Choose(expt)',
                         position ='at_bottom', celltype='code', is_print=False)  
 
         
@@ -1022,11 +1022,11 @@ def Insert_image(expt):
             # Get and insert the image
             path_to_img = w_path_to_img.value+w_select_img.value
 
-            utils.Create_cell(code='![]('+ path_to_img+')', position ='above', celltype='markdown', is_print=True)
+            Utils.Create_cell(code='![]('+ path_to_img+')', position ='above', celltype='markdown', is_print=True)
             
-            utils.Delete_current_cell()
+            Utils.Delete_current_cell()
         
-            utils.Create_cell(code='FE.action.Choose(expt)',
+            Utils.Create_cell(code='FE.Action.Choose(expt)',
                         position ='at_bottom', celltype='code', is_print=False)  
 
         button_insert_image = widgets.Button(description="Insert image")
@@ -1090,11 +1090,11 @@ def Print_commands(expt):
 
             code = '```python\n'+''.join(w_select_commands.value)+'```'
 
-            utils.Create_cell(code=code, position ='above', celltype='markdown', is_print=True)
+            Utils.Create_cell(code=code, position ='above', celltype='markdown', is_print=True)
 
-            utils.Delete_current_cell()
+            Utils.Delete_current_cell()
 
-            utils.Create_cell(code='FE.action.Choose(expt)',
+            Utils.Create_cell(code='FE.Action.Choose(expt)',
                         position ='at_bottom', celltype='code', is_print=False)  
 
         # Click to insert a script

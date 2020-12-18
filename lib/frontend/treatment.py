@@ -1,4 +1,4 @@
-from . import utils
+from . import Utils
 from lib.extraction.common import PyNexus as PN
 
 import ipywidgets as widgets
@@ -7,11 +7,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-"""Frontend library for all the widgets concerning the treatments in the notebook."""
+"""Frontend library for all the widgets concerning the Treatments in the notebook."""
 
 def Choose(expt):
     '''
-    Choose the treatment to be applied to the selected scan.
+    Choose the Treatment to be applied to the selected scan.
 
     Parameters
     ----------
@@ -157,7 +157,7 @@ def Choose(expt):
                 else:
                     absorbers = ''
                              
-                utils.Create_cell(code=
+                Utils.Create_cell(code=
                             'x, y, '+
                             'daty, datyTop, datyBottom, datyFirstQuarter, '+
                             'mat, mat_binned, ch_binned, '+
@@ -186,7 +186,7 @@ def Choose(expt):
 
      
                 if len(expt.scans)>1:
-                    utils.Create_cell(code='### '+scan.id+': '+scan.command,
+                    Utils.Create_cell(code='### '+scan.id+': '+scan.command,
                             position ='below', celltype='markdown', is_print=True)
 
             # Do as if the button next was clicked
@@ -284,7 +284,7 @@ def Choose(expt):
                     absorbers = ''   
                     
             
-                utils.Create_cell(code='images_sum, integrated_x, integrated_y =\\\n'+
+                Utils.Create_cell(code='images_sum, integrated_x, integrated_y =\\\n'+
                             'PilatusSum.Treat(nxs_filename=\''+scan.nxs+'\' ,'+ 
                             'recording_dir=expt.recording_dir, '+
                             'xmin='+str(expt.xmin)+', '+
@@ -302,7 +302,7 @@ def Choose(expt):
                             position='below', celltype='code', is_print = True)
 
                 if len(expt.scans)>1:
-                    utils.Create_cell(code='### '+scan.id+': '+scan.command,
+                    Utils.Create_cell(code='### '+scan.id+': '+scan.command,
                             position ='below', celltype='markdown', is_print=True)     
 
             # Do as if the button next was clicked
@@ -456,7 +456,7 @@ def Choose(expt):
                 else:
                     absorbers = ''                
     
-                utils.Create_cell(code='images_sum, integrated_qxy, integrated_qz, qxy_array, qz_array=\\\n'+ 
+                Utils.Create_cell(code='images_sum, integrated_qxy, integrated_qz, qxy_array, qz_array=\\\n'+ 
                         'GIXS.Treat(nxs_filename=\''+scan.nxs+'\', '+ 
                         'recording_dir=expt.recording_dir, '+
                         'wavelength='+str(expt.wavelength)+', '+
@@ -483,7 +483,7 @@ def Choose(expt):
                         position='below', celltype='code', is_print = True)
 
                 if len(expt.scans)>1:
-                    utils.Create_cell(code='### '+scan.id+': '+scan.command,
+                    Utils.Create_cell(code='### '+scan.id+': '+scan.command,
                                 position ='below', celltype='markdown', is_print=True)            
 
             # Do as if the button next was clicked
@@ -677,7 +677,7 @@ def Choose(expt):
                 else:
                     absorbers = ''
                                             
-                utils.Create_cell(code='CF.Extract_XRF('+
+                Utils.Create_cell(code='CF.Extract_XRF('+
                            'nxs_filename=\''+scan.nxs+'\','+ 
                            'working_dir=expt.working_dir,recording_dir=expt.recording_dir,'+
                            'logz='+str(expt.XRF_logz)+','+
@@ -699,7 +699,7 @@ def Choose(expt):
                            position='below', celltype='code', is_print = True)  
 
                 if len(expt.scans)>1:
-                    utils.Create_cell(code='### '+scan.id+': '+scan.command,
+                    Utils.Create_cell(code='### '+scan.id+': '+scan.command,
                             position ='below', celltype='markdown', is_print=True)  
 
             # Do as if the button next was clicked
@@ -754,7 +754,7 @@ def Choose(expt):
 
             for scan in expt.scans:
                 
-                utils.Create_cell(code='area, pressure, time =\\\n'+
+                Utils.Create_cell(code='area, pressure, time =\\\n'+
                                   'Isotherm.Treat(nxs_filename=\''+scan.nxs+'\', '+
                                   'recording_dir=expt.recording_dir, working_dir=expt.working_dir, '+
                                   'fast='+str(w_fastextract.value)+', '+
@@ -765,7 +765,7 @@ def Choose(expt):
                                  position='below', celltype='code', is_print = True)
 
                 if len(expt.scans)>1:
-                    utils.Create_cell(code='### '+scan.id+': '+scan.command,
+                    Utils.Create_cell(code='### '+scan.id+': '+scan.command,
                             position ='below', celltype='markdown', is_print=True)
 
             # Do as if the button next was clicked
@@ -780,9 +780,17 @@ def Choose(expt):
     # Actions relevant for single scan analysis only
     def on_button_1D_clicked(b):            
         scan = expt.scans[0]
-        utils.Create_cell(code='CF.Plot_1D(nxs_filename=\''+scan.nxs+'\','+
-                    'working_dir=expt.working_dir,recording_dir=expt.recording_dir,'+
-                    'xLabel=\''+scan.xLabel+'\', yLabel=\''+scan.yLabel+'\')',
+        
+        Utils.Create_cell(code='xData, yData =\\\n'+
+                          'Sensors1D.Treat(nxs_filename=\''+scan.nxs+'\', '+
+                          'recording_dir=expt.recording_dir, '+
+                          'xLabel=\''+scan.xLabel+'\', '+
+                          'yLabel=\''+scan.yLabel+'\', '+
+                          'working_dir=expt.working_dir, '+
+                          'show_data_stamps=False, '+
+                          'plot=True, '+
+                          'save=True, '+
+                          'verbose=False)',
                     position='below', celltype='code', is_print = True)
         
         # Do as if the button next was clicked
@@ -790,7 +798,8 @@ def Choose(expt):
         
     def on_button_fit_erf_clicked(b):
         scan = expt.scans[0]
-        utils.Create_cell(code='CF.GaussianRepartition_fit(nxs_filename=\''+scan.nxs+'\', recording_dir = expt.recording_dir,'+
+        Utils.Create_cell(code='Sensors1D.GaussianRepartitionFit('+
+                        'nxs_filename=\''+scan.nxs+'\', recording_dir = expt.recording_dir,'+
                         'xLabel=\''+scan.xLabel+'\', yLabel=\''+scan.yLabel+'\')',
                     position='below', celltype='code', is_print = True)  
 
@@ -798,9 +807,11 @@ def Choose(expt):
         on_button_next_clicked(b)        
         
     def on_button_fit_gau_clicked(b):
+        
         scan = expt.scans[0]
-        utils.Create_cell(code='CF.Gaussian_fit(nxs_filename=\''+scan.nxs+'\', recording_dir = expt.recording_dir,'+
-                        'xLabel=\''+scan.xLabel+'\', yLabel=\''+scan.yLabel+'\')',
+        Utils.Create_cell(code='Sensors1D.GaussianFit('+
+                         'nxs_filename=\''+scan.nxs+'\', recording_dir = expt.recording_dir,'+
+                         'xLabel=\''+scan.xLabel+'\', yLabel=\''+scan.yLabel+'\')',
                     position='below', celltype='code', is_print = True)   
         
         # Do as if the button next was clicked
@@ -808,7 +819,7 @@ def Choose(expt):
         
     def on_button_vineyard_clicked(b):
         scan = expt.scans[0]
-        utils.Create_cell(code='expt.channel0 = GIXD.Extract_channel0(nxs_filename=\''+scan.nxs+'\','+
+        Utils.Create_cell(code='expt.channel0 = GIXD.Extract_channel0(nxs_filename=\''+scan.nxs+'\','+
                     'recording_dir=expt.recording_dir, binsize=10, logx=False, '+
                     'logy=False, logz=False, nblevels=50, cmap=\'jet\', '+
                     'show_data_stamps = True, verbose=True)',
@@ -822,20 +833,20 @@ def Choose(expt):
     def on_button_next_clicked(b):
         #clear_output(wait=False)
         
-        utils.Delete_current_cell()
+        Utils.Delete_current_cell()
         
-        utils.Create_cell(code='FE.action.Choose(expt)',
+        Utils.Create_cell(code='FE.Action.Choose(expt)',
                     position ='at_bottom', celltype='code', is_print=False)        
         
     def on_button_markdown_clicked(b):
         """
         Insert a markdown cell below the current cell.
         """ 
-        utils.Delete_current_cell()
+        Utils.Delete_current_cell()
         
-        utils.Create_cell(code='', position ='below', celltype='markdown', is_print=True, is_execute=False)
+        Utils.Create_cell(code='', position ='below', celltype='markdown', is_print=True, is_execute=False)
     
-        utils.Create_cell(code='FE.treatment.Choose(expt)', position ='at_bottom', celltype='code', is_print=False)
+        Utils.Create_cell(code='FE.Treatment.Choose(expt)', position ='at_bottom', celltype='code', is_print=False)
        
     # Display the widgets    
     # ADD HERE A CALL TO YOUR BUTTON
@@ -872,7 +883,7 @@ def Choose(expt):
     button_markdown = widgets.Button(description="Insert comment")
     button_markdown.on_click(on_button_markdown_clicked)
 
-    # Buttons for general treatment
+    # Buttons for general Treatment
     buttons0 = widgets.HBox([button_markdown, button_next])
     display(buttons0)    
     
@@ -887,7 +898,7 @@ def Choose(expt):
         for scan in expt.scans:
               print('%s: %s'%(scan.nxs,scan.command))
         
-    # Buttons for specific treatment
+    # Buttons for specific Treatment
     buttons1 = widgets.HBox([button_vineyard, button_fit_gau, button_fit_erf, button_1D])
     display(buttons1)
     

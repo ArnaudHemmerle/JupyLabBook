@@ -208,7 +208,7 @@ def Plot(area, pressure, time, nxs_filename):
     
 def Save(nxs_filename, recording_dir, fast, working_dir, verbose):
     '''
-    Use the PyNexus library to convert the Nexus into a .dat file.
+    Use the PyNexus library to convert the Nexus file into a .dat file.
 
     Parameters
     ----------

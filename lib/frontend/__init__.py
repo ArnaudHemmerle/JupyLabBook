@@ -1,3 +1,3 @@
-from . import action
-from . import treatment
-from . import utils
+from . import Action
+from . import Treatment
+from . import Utils
