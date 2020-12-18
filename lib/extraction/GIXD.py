@@ -1065,12 +1065,15 @@ def Calib_thetaz(calib_thetaz_data):
     ax.plot(x, Linear(x, A, B), 'r-', lw=2)
     
     ax.set_title('1D detector channel calibration')
-    ax.set_xlabel('Gamma (deg)')
-    ax.set_ylabel('Channels')
+    ax.set_xlabel('Gamma (deg)', fontsize=16)
+    ax.set_ylabel('Channels', fontsize=16)
 
-    fig.text(0.2, .8, "%3.5g channels per degree"%(B))
-    fig.text(0.2, .75, "%3.5g degrees per channel"%(1.0/B))
-    fig.text(0.2, .7, "%3.5g radians per channel"%((np.pi/B)/180.0))
+    ax.tick_params(labelsize=16)
+    ax.yaxis.offsetText.set_fontsize(16)
+
+    fig.text(0.2, .8, "%3.5g channels per degree"%(B), fontsize=14)
+    fig.text(0.2, .75, "%3.5g degrees per channel"%(1.0/B), fontsize=14)
+    fig.text(0.2, .7, "%3.5g radians per channel"%((np.pi/B)/180.0), fontsize=14)
 
     plt.show()
     

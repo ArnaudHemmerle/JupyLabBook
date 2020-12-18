@@ -178,11 +178,13 @@ def Plot(xData, yData, xLabel, yLabel):
 
     '''    
     
-    fig=plt.figure()
+    fig=plt.figure(1, figsize=(12,5))
     ax=fig.add_subplot(111)
     ax.plot(xData, yData, 'o-')
     ax.set_xlabel(xLabel, fontsize=16)
     ax.set_ylabel(yLabel, fontsize=16)
+    ax.tick_params(labelsize=16)
+    ax.yaxis.offsetText.set_fontsize(16)
     plt.show()
 
     
@@ -286,7 +288,7 @@ def GaussianFit(nxs_filename, recording_dir,
     xData, yData = Extract(nxs_filename, recording_dir, xLabel, yLabel, show_data_stamps=False, verbose=verbose)
 
     # Create the graph
-    fig=plt.figure(1)
+    fig=plt.figure(1, figsize=(12,5))
     ax=fig.add_subplot(111)
 
     # Fit the data using LMFIT
@@ -324,8 +326,10 @@ def GaussianFit(nxs_filename, recording_dir,
     ax.legend(fontsize=16)
     ax.set_xlabel(xLabel, fontsize=16)
     ax.set_ylabel(yLabel, fontsize=16)
-    ax.text(xData.min()*1.05, yData.max()*0.75,'Center %3.4g'%( result.params['mu']), fontsize=12)
-    ax.text(xData.min()*1.05, yData.max()*0.65,'FWHM %3.4g'%(2.0*np.sqrt(2.0*np.log(2.))*result.params['sigma']), fontsize=12)
+    ax.tick_params(labelsize=16)
+    ax.yaxis.offsetText.set_fontsize(16)
+    ax.text(xData.min()*1.05, yData.max()*0.75,'Center %3.4g'%( result.params['mu']), fontsize=14)
+    ax.text(xData.min()*1.05, yData.max()*0.65,'FWHM %3.4g'%(2.0*np.sqrt(2.0*np.log(2.))*result.params['sigma']), fontsize=14)
     ax.set_title('Gaussian Fit', fontsize=14)
     
     plt.show()
@@ -419,7 +423,7 @@ def GaussianRepartitionFit(nxs_filename, recording_dir,
     
 
     # Create the graph
-    fig=plt.figure(1)
+    fig=plt.figure(1, figsize=(12,5))
     ax=fig.add_subplot(111)
     
     # Plot first guess
@@ -437,12 +441,16 @@ def GaussianRepartitionFit(nxs_filename, recording_dir,
     ax.legend(fontsize=16)
     ax.set_xlabel(xLabel, fontsize=16)
     ax.set_ylabel(yLabel, fontsize=16)
+    ax.tick_params(labelsize=16)
+    ax.yaxis.offsetText.set_fontsize(16)
+    ax2.yaxis.offsetText.set_fontsize(16)
+    ax2.tick_params(labelsize=16)
     if sens==1:
-        fig.text(0.2, 0.65,'Center %3.4g'%( result.params['mu']), fontsize=12)
-        fig.text(0.2, 0.55,'FWHM %3.4g'%(2.0*np.sqrt(2.0*np.log(2.))*result.params['sigma']), fontsize=12)
+        fig.text(0.2, 0.65,'Center %3.4g'%( result.params['mu']), fontsize=14)
+        fig.text(0.2, 0.60,'FWHM %3.4g'%(2.0*np.sqrt(2.0*np.log(2.))*result.params['sigma']), fontsize=14)
     else:
-        fig.text(0.7, 0.65,'Center %3.4g'%( result.params['mu']), fontsize=12)
-        fig.text(0.7, 0.55,'FWHM %3.4g'%(2.0*np.sqrt(2.0*np.log(2.))*result.params['sigma']), fontsize=12)
+        fig.text(0.7, 0.60,'Center %3.4g'%( result.params['mu']), fontsize=14)
+        fig.text(0.7, 0.55,'FWHM %3.4g'%(2.0*np.sqrt(2.0*np.log(2.))*result.params['sigma']), fontsize=14)
     ax.set_title('Normal Repartition Function Fit', fontsize=14)
     
     plt.show()

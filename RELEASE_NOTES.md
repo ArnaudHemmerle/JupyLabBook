@@ -1,5 +1,13 @@
 # Release notes
 
+### 18/12/2020  
+  
+Major update to 2.0:  
+- Now versioning only the main JupyLabBook.ipynb file  
+- Re-organize the architecture of the code. Now all the libraries are in the lib folder.  
+- Creation of real libraries, which can be used in other projects.  
+- Resize the plots for having smaller figures in the pdf.  
+
 ### 07/12/2020
 
 FrontendFunctions.py: 1.1.0  
