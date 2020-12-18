@@ -1,5 +1,6 @@
 from . import Utils
 from lib.extraction.common import PyNexus as PN
+from lib.extraction import XRF as XRF
 
 import ipywidgets as widgets
 import ipysheet
@@ -617,27 +618,28 @@ def Choose(expt):
                 
                 
                 for scan in expt.scans:                                                              
-                
+
                     print("Peaks on scan %s"%scan.nxs)
                     # Extract and plot the XRF with the peaks when validate is clicked
-                    CF.Extract_XRF(nxs_filename=scan.nxs,
-                                   working_dir=expt.working_dir,
-                                   recording_dir=expt.recording_dir,
-                                   logz=w_XRF_logz.value,
-                                   list_elems=list_elems,
-                                   first_channel=w_first_channel.value,
-                                   last_channel=w_last_channel.value,
-                                   use_eV=w_use_eV.value,
-                                   gain=w_gain.value,
-                                   eV0=w_eV0.value,
-                                   arr_peaks=expt.arr_peaks,
-                                   show_data_stamps=False,
-                                   verbose=False,
-                                   absorbers='',
-                                   fast=w_fastextract.value,
-                                   plot_spectrogram=False,
-                                   plot_first_last=False,
-                                   plot_sum=True)
+                    XRF.Treat(nxs_filename=scan.nxs,
+                              recording_dir=expt.recording_dir,
+                              list_elems=list_elems, 
+                              absorbers='',
+                              logz=w_XRF_logz.value,
+                              first_channel=w_first_channel.value,
+                              last_channel=w_last_channel.value,
+                              use_eV=w_use_eV.value,
+                              gain=w_gain.value,
+                              eV0=w_eV0.value,
+                              arr_peaks=expt.arr_peaks, 
+                              working_dir=expt.working_dir,
+                              fast=w_fastextract.value,
+                              show_data_stamps=False,
+                              plot_spectrogram=False,
+                              plot_sum=True,
+                              plot_first_last=False,
+                              save=False,
+                              verbose=False)
                           
                 
             button_validate = widgets.Button(description="Validate peaks")
@@ -676,26 +678,28 @@ def Choose(expt):
                     absorbers = Find_absorbers_in_logs(scan, expt)
                 else:
                     absorbers = ''
-                                            
-                Utils.Create_cell(code='CF.Extract_XRF('+
-                           'nxs_filename=\''+scan.nxs+'\','+ 
-                           'working_dir=expt.working_dir,recording_dir=expt.recording_dir,'+
-                           'logz='+str(expt.XRF_logz)+','+
-                           'list_elems='+str(list_elems)+','+
-                           'first_channel='+str(expt.first_channel)+','+
-                           'last_channel='+str(expt.last_channel)+','+
-                           'use_eV='+str(expt.use_eV)+','+
-                           'gain='+str(expt.gain)+','+
-                           'eV0='+str(expt.eV0)+','+
-                           'arr_peaks='+str(expt.arr_peaks)+','+
-                           'show_data_stamps='+str(expt.show_data_stamps)+','+
-                           'verbose='+str(expt.verbose)+','+
-                           'absorbers='+'\''+str(absorbers)+'\''+','+
-                           'fast='+str(expt.fastextract)+','+
-                           'plot_spectrogram='+str(expt.plot_spectrogram)+','+
-                           'plot_first_last='+str(expt.plot_first_last)+','+
-                           'plot_sum='+str(expt.plot_sum)+
-                           ')',
+                             
+
+                Utils.Create_cell(code='channels, eVs, spectrums ='+
+                           'XRF.Treat('+
+                           'nxs_filename=\''+scan.nxs+'\', '+ 
+                           'recording_dir=expt.recording_dir, '+
+                           'list_elems='+str(list_elems)+', '+
+                           'absorbers='+'\''+str(absorbers)+'\''+', '+
+                           'logz='+str(expt.XRF_logz)+', '+
+                           'first_channel='+str(expt.first_channel)+', '+
+                           'last_channel='+str(expt.last_channel)+', '+
+                           'use_eV='+str(expt.use_eV)+', '+
+                           'gain='+str(expt.gain)+', '+
+                           'eV0='+str(expt.eV0)+', '+
+                           'arr_peaks='+str(expt.arr_peaks)+', '+
+                           'working_dir=expt.working_dir, '+
+                           'fast='+str(expt.fastextract)+', '+
+                           'show_data_stamps='+str(expt.show_data_stamps)+', '+
+                           'plot_spectrogram='+str(expt.plot_spectrogram)+', '+
+                           'plot_sum='+str(expt.plot_sum)+', '+
+                           'plot_first_last='+str(expt.plot_first_last)+', '+
+                           'verbose='+str(expt.verbose)+')',
                            position='below', celltype='code', is_print = True)  
 
                 if len(expt.scans)>1:

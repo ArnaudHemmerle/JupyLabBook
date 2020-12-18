@@ -18,7 +18,7 @@ def Treat(nxs_filename, recording_dir,
           show_data_stamps=False, plot=False, save=False, verbose=False):
     
     '''
-    Call functions for extracting, plotting, and saving the data.
+    Call functions for extracting, plotting, and saving a GIXD scan.
 
     Parameters
     ----------
